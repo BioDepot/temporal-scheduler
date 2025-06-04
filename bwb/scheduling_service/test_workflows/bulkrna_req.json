@@ -1,0 +1,2990 @@
+{
+"workflow_def": {
+    "run_id": "bulkrna",
+    "use_local_storage": true,
+    "nodes": [
+        {
+            "id": 0,
+            "greedily_scheduled": false,
+            "async": false,
+            "end_async": false,
+            "barrier_for": null,
+            "mem_mb": 50,
+            "cores": 1,
+            "gpus": 0,
+            "slots": 1,
+            "title": "Download release-110 GRCh38 files",
+            "description": "downloadURL",
+            "parameters": {
+                "URL": null,
+                "concatenateFile": "",
+                "controlAreaVisible": true,
+                "decompress": true,
+                "directory": "",
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "is_async": false,
+                "iterate": true,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "URL"
+                    ],
+                    "nWorkers": 2,
+                    "data": {
+                        "URL": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        }
+                    },
+                    "iteratedAttrs": [
+                        "URL"
+                    ]
+                },
+                "nWorkers": 2,
+                "noClobberFiles": false,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "decompress": false,
+                    "concatenateFile": false,
+                    "saveLog": false
+                },
+                "repeat": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "directory",
+                    "URL"
+                ],
+                "triggerReady": {
+                    "trigger": false,
+                    "directory": false,
+                    "URL": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "URL": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "URL(s)",
+                    "type": "text list"
+                },
+                "decompress": {
+                    "default": true,
+                    "flag": "--decompress",
+                    "label": "Decompress files",
+                    "type": "bool"
+                },
+                "directory": {
+                    "flag": "--directory",
+                    "label": "Download directory",
+                    "type": "directory"
+                },
+                "concatenateFile": {
+                    "flag": "--concatenateFile",
+                    "label": "Download and join into one file",
+                    "type": "file"
+                },
+                "noClobberFiles": {
+                    "flag": null,
+                    "label": "Overwrite existing files",
+                    "type": "bool",
+                    "env": "clobber"
+                }
+            },
+            "input_files": [],
+            "output_files": ["directory"],
+            "image_name": "patrickmckeever/downloadurl:0.1",
+            "command": [
+                "download.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": true,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "URL"
+                ],
+                "nWorkers": 2,
+                "data": {
+                    "URL": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    }
+                },
+                "iteratedAttrs": [
+                    "URL"
+                ]
+            },
+            "required_parameters": [
+                "URL",
+                "directory",
+                "noClobberFiles"
+            ],
+            "options_checked": {
+                "decompress": false,
+                "concatenateFile": false,
+                "saveLog": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 1,
+            "greedily_scheduled": false,
+            "async": false,
+            "end_async": false,
+            "barrier_for": null,
+            "mem_mb": 32000,
+            "cores": 16,
+            "gpus": 0,
+            "slots": 1,
+            "title": "Make STAR indices",
+            "description": "starIndex",
+            "parameters": {
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "genomeChrBinNbits": "18",
+                "genomeDir": "",
+                "genomeFastaFile": "",
+                "genomeSAindexNbases": 14,
+                "genomeSAsparseD": 1,
+                "genomeSuffixLengthMax": -1,
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "sjdbFileChrStartEnd "
+                    ],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "genomeChrBinNbits": false,
+                    "genomeSAindexNbases": false,
+                    "genomeSAsparseD": false,
+                    "genomeSuffixLengthMax": false,
+                    "runThreadN": true,
+                    "sjdbGTFfile": true,
+                    "sjdbFileChrStartEnd ": false,
+                    "sjdbGTFchrPrefix ": false,
+                    "sjdbGTFfeatureExon": false,
+                    "sjdbGTFtagExonParentTranscript": false,
+                    "sjdbGTFtagExonParentGene": false,
+                    "sjdbOverhang": false,
+                    "sjdbScore": false,
+                    "sjdbInsertSave ": false,
+                    "saveLog": false,
+                    "skipIndex": false
+                },
+                "overwrite": false,
+                "repeat": false,
+                "rmode": "genomeGenerate",
+                "runMode": 2,
+                "runThreadN": 16,
+                "runTriggers": [
+                    "Trigger",
+                    "sjdbGTFfile"
+                ],
+                "sjdbFileChrStartEnd": [],
+                "sjdbGTFchrPrefix": "chr",
+                "sjdbGTFfeatureExon": "exon",
+                "sjdbGTFfile": "",
+                "sjdbGTFtagExonParentGene": "gene_id",
+                "sjdbGTFtagExonParentTranscript": "transcript_id",
+                "sjdbInsertSave": "Basic",
+                "sjdbOverhang": 100,
+                "sjdbScore": 2,
+                "starversion": "",
+                "triggerReady": {
+                    "Trigger": false,
+                    "genomedir": false,
+                    "sjdbGTFfile": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "rmode": {
+                    "default": "genomeGenerate",
+                    "flag": "--runMode",
+                    "label": "runMode",
+                    "type": "str"
+                },
+                "genomeDir": {
+                    "flag": "--genomeDir",
+                    "label": "genomeDir",
+                    "type": "directory",
+                    "env": "genomeDir"
+                },
+                "genomeFastaFile": {
+                    "flag": "--genomeFastaFiles",
+                    "label": "genomeFastaFiles",
+                    "type": "file"
+                },
+                "genomeChrBinNbits": {
+                    "default": "18",
+                    "flag": "--genomeChrBinNbits",
+                    "label": "genomeChrBinNbits",
+                    "type": "str"
+                },
+                "genomeSAindexNbases": {
+                    "default": 14,
+                    "flag": "--genomeSAindexNbases",
+                    "label": "genomeSAindexNbases",
+                    "type": "int"
+                },
+                "genomeSAsparseD": {
+                    "default": 1,
+                    "flag": "--genomeSAsparseD",
+                    "label": "genomeSAsparseD",
+                    "type": "int"
+                },
+                "genomeSuffixLengthMax": {
+                    "default": -1,
+                    "flag": "--genomeSuffixLengthMax",
+                    "label": "genomeSuffixLengthMax",
+                    "type": "int"
+                },
+                "runThreadN": {
+                    "default": 1,
+                    "flag": "--runThreadN",
+                    "label": "runThreadN",
+                    "type": "int"
+                },
+                "sjdbGTFfile": {
+                    "flag": "--sjdbGTFfile",
+                    "label": "sjdbGTFfile",
+                    "type": "file"
+                },
+                "sjdbFileChrStartEnd ": {
+                    "flag": "--sjdbFileChrStartEnd",
+                    "label": "sjdbFileChrStartEnd",
+                    "type": "file list"
+                },
+                "sjdbGTFchrPrefix ": {
+                    "default": "chr",
+                    "flag": "--sjdbGTFchrPrefix ",
+                    "label": "sjdbGTFchrPrefix ",
+                    "type": "str"
+                },
+                "sjdbGTFfeatureExon": {
+                    "default": "exon",
+                    "flag": "--sjdbGTFfeatureExon",
+                    "label": "sjdbGTFfeatureExon",
+                    "type": "str"
+                },
+                "sjdbGTFtagExonParentTranscript": {
+                    "default": "transcript_id",
+                    "flag": "--sjdbGTFtagExonParentTranscript",
+                    "label": "sjdbGTFtagExonParentTranscript",
+                    "type": "str"
+                },
+                "sjdbGTFtagExonParentGene": {
+                    "default": "gene_id",
+                    "flag": "--sjdbGTFtagExonParentGene",
+                    "label": "sjdbGTFtagExonParentGene",
+                    "type": "str"
+                },
+                "sjdbOverhang": {
+                    "default": 100,
+                    "flag": "--sjdbOverhang",
+                    "label": "sjdbOverhang",
+                    "type": "int"
+                },
+                "sjdbScore": {
+                    "default": 2,
+                    "flag": "--sjdbScore",
+                    "label": "sjdbScore",
+                    "type": "int"
+                },
+                "sjdbInsertSave ": {
+                    "default": "Basic",
+                    "flag": "--sjdbInsertSave ",
+                    "label": "sjdbInsertSave",
+                    "type": "str"
+                },
+                "starversion": {
+                    "default": "2.7.11a",
+                    "flag": null,
+                    "label": "Star version",
+                    "type": "str",
+                    "env": "VERSION"
+                },
+                "overwrite": {
+                    "flag": null,
+                    "label": "Overwrite files",
+                    "type": "bool",
+                    "env": "overwrite"
+                }
+            },
+            "input_files": ["genomeFastaFile", "sjdbGTFfile"],
+            "output_files": ["genomeDir"],
+            "image_name": "patrickmckeever/star_async:0.4",
+            "command": [
+                "[ -n \"$overwrite\" ] || [ !  -f  \"$genomeDir/SAindex\" ] ||  exit 0",
+                "/usr/local/bin/$VERSION/Linux_x86_64_static/STAR"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "sjdbFileChrStartEnd "
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "rmode",
+                "genomeDir",
+                "genomeFastaFile",
+                "starversion",
+                "overwrite"
+            ],
+            "options_checked": {
+                "genomeChrBinNbits": false,
+                "genomeSAindexNbases": false,
+                "genomeSAsparseD": false,
+                "genomeSuffixLengthMax": false,
+                "runThreadN": true,
+                "sjdbGTFfile": true,
+                "sjdbFileChrStartEnd ": false,
+                "sjdbGTFchrPrefix ": false,
+                "sjdbGTFfeatureExon": false,
+                "sjdbGTFtagExonParentTranscript": false,
+                "sjdbGTFtagExonParentGene": false,
+                "sjdbOverhang": false,
+                "sjdbScore": false,
+                "sjdbInsertSave ": false,
+                "saveLog": false,
+                "skipIndex": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 2,
+            "greedily_scheduled": false,
+            "async": false,
+            "end_async": false,
+            "barrier_for": null,
+            "mem_mb": 32000,
+            "cores": 16,
+            "gpus": 0,
+            "slots": 2,
+            "title": "Star Align",
+            "description": "starAlign",
+            "parameters": {
+                "genome_bam_files": [],
+                "transcriptome_bam_files": [],
+                "alignEndsProtrude": [
+                    "0",
+                    "ConcordantPair"
+                ],
+                "alignEndsType": "Local",
+                "alignIntronMax": 0,
+                "alignIntronMin": 21,
+                "alignMatesGapMax": 0,
+                "alignSJDBoverhangMin": 1,
+                "alignSJoverhangMin": 5,
+                "alignSJstitchMismatchNmax": 0,
+                "alignSoftClipAtReferenceEnds": "Yes",
+                "alignSplicedMateMapLmin": 0,
+                "alignSplicedMateMapLminOverLmate": 0.66,
+                "alignTranscriptsPerReadNmax": 10000,
+                "alignTranscriptsPerWindowNmax": 100,
+                "alignWindowsPerReadNmax": 10000,
+                "apelist": true,
+                "bamRemoveDuplicatesMate2basesN": 0,
+                "bamRemoveDuplicatesType": "",
+                "chimFilter": "banGenomicN",
+                "chimJunctionOverhangMin": 20,
+                "chimOutType": "SeparateSAMold",
+                "chimScoreDropMax": 20,
+                "chimScoreJunctionNonGTAG": -1,
+                "chimScoreMin": 0,
+                "chimScoreSeparation": 10,
+                "chimSegmentMin": 0,
+                "chimSegmentReadGapMax": 0,
+                "clip3pAdapterMMp": [
+                    "0.1"
+                ],
+                "clip3pAdapterSeq": [],
+                "clip3pAfterAdapterNbases": [
+                    "0"
+                ],
+                "clip3pNbases": [
+                    "0"
+                ],
+                "clip5pNbases": [
+                    "0"
+                ],
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "genomeDir": "",
+                "genomeLoad": "NoSharedMemory",
+                "is_async": true,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "readFilesIn",
+                        "clip3pNbases",
+                        "clip5pNbases",
+                        "clip3pAdapterSeq",
+                        "clip3pAdapterMMp",
+                        "clip3pAfterAdapterNbases",
+                        "alignEndsProtrude"
+                    ],
+                    "nWorkers": 1
+                },
+                "limitIObufferSize": 150000000,
+                "limitOutSAMoneReadBytes": 100000,
+                "multipleSample": true,
+                "nWorkers": 1,
+                "numSlots": "2",
+                "optionsChecked": {
+                    "parametersFiles": false,
+                    "sysShell": false,
+                    "runThreadN": true,
+                    "runRNGseed": false,
+                    "readFilesCommand": true,
+                    "readMapNumber": false,
+                    "readMatesLengthsIn": false,
+                    "readNameSeparator": false,
+                    "clip3pNbases": false,
+                    "clip5pNbases": false,
+                    "clip3pAdapterSeq": false,
+                    "clip3pAdapterMMp": false,
+                    "clip3pAfterAdapterNbases": false,
+                    "limitIObufferSize": false,
+                    "limitOutSAMoneReadBytes": false,
+                    "outTmpDir": false,
+                    "outStd": false,
+                    "outReadsUnmapped": false,
+                    "outMultimapperOrder": false,
+                    "outSAMtype": true,
+                    "outSAMmode": false,
+                    "outSAMstrandField": false,
+                    "outSAMattributes": true,
+                    "outSAMattrIHstart": false,
+                    "outSAMunmapped": false,
+                    "outSAMorder": false,
+                    "outSAMprimaryFlag": false,
+                    "outSAMreadID": false,
+                    "outSAMmapqUnique": false,
+                    "outSAMflagOR": false,
+                    "outSAMflagAND": false,
+                    "outSAMattrRGline": false,
+                    "outSAMheaderHD": false,
+                    "outSAMheaderPG": false,
+                    "outSAMheaderCommentFile": false,
+                    "outSAMfilter": false,
+                    "outSAMmultNmax": false,
+                    "outBAMcompression": false,
+                    "outBAMsortingThreadN": false,
+                    "bamRemoveDuplicatesType": false,
+                    "bamRemoveDuplicatesMate2basesN": false,
+                    "outWigType": false,
+                    "outWigStrand": false,
+                    "outWigReferencesPrefix": false,
+                    "outWigNorm": false,
+                    "outFilterType": false,
+                    "outFilterMultimapScoreRange": false,
+                    "outFilterMultimapNmax": true,
+                    "outFilterMismatchNmax": false,
+                    "outFilterMismatchNoverLmax ": false,
+                    "outFilterMismatchNoverReadLmax": false,
+                    "outFilterScoreMin": false,
+                    "outFilterScoreMinOverLread": false,
+                    "outFilterMatchNmin": false,
+                    "outFilterMatchNminOverLread": false,
+                    "outFilterIntronMotifs": false,
+                    "scoreGap": false,
+                    "scoreGapNoncan": false,
+                    "scoreGapGCAG": false,
+                    "scoreGapATAC": false,
+                    "scoreGenomicLengthLog2scale": false,
+                    "scoreDelOpen": false,
+                    "scoreDelBase": false,
+                    "scoreInsOpen": false,
+                    "scoreInsBase": false,
+                    "scoreStitchSJshift": false,
+                    "seedSearchStartLmax": false,
+                    "seedSearchStartLmaxOverLread": false,
+                    "seedSearchLmax": false,
+                    "seedMultimapNmax": false,
+                    "seedPerReadNmax": false,
+                    "seedPerWindowNmax": false,
+                    "seedNoneLociPerWindow": false,
+                    "alignIntronMin": false,
+                    "alignIntronMax": false,
+                    "alignMatesGapMax": false,
+                    "alignSJoverhangMin": false,
+                    "alignSJstitchMismatchNmax": false,
+                    "alignSJDBoverhangMin": true,
+                    "alignSplicedMateMapLmin": false,
+                    "alignSplicedMateMapLminOverLmate": false,
+                    "alignWindowsPerReadNmax": false,
+                    "alignTranscriptsPerWindowNmax": false,
+                    "alignTranscriptsPerReadNmax": false,
+                    "alignEndsType": false,
+                    "alignEndsProtrude": false,
+                    "alignSoftClipAtReferenceEnds": false,
+                    "winAnchorMultimapNmax": false,
+                    "winBinNbits": false,
+                    "winAnchorDistNbins": false,
+                    "winFlankNbins": false,
+                    "winReadCoverageRelativeMin": false,
+                    "winReadCoverageBasesMin": false,
+                    "chimOutType": false,
+                    "chimSegmentMin": false,
+                    "chimScoreMin": false,
+                    "chimScoreDropMax": false,
+                    "chimScoreSeparation": false,
+                    "chimScoreJunctionNonGTAG": false,
+                    "chimJunctionOverhangMin": false,
+                    "chimSegmentReadGapMax": false,
+                    "chimFilter": false,
+                    "quantMode": true,
+                    "quantTranscriptomeBAMcompression": false,
+                    "quantTranscriptomeBan": true,
+                    "twopassMode": true,
+                    "twopass1readsN ": false,
+                    "genomeLoad": true,
+                    "saveLog": false,
+                    "apelist": false,
+                    "spelist": false,
+                    "outputFilePrefix": false,
+                    "multipleSample": false
+                },
+                "outBAMcompression": 1,
+                "outBAMsortingThreadN": 0,
+                "outFilterIntronMotifs": "",
+                "outFilterMatchNmin": 0,
+                "outFilterMatchNminOverLread": 0.66,
+                "outFilterMismatchNmax": 2,
+                "outFilterMismatchNoverLmax": 0.3,
+                "outFilterMismatchNoverReadLmax": 1.0,
+                "outFilterMultimapNmax": 20,
+                "outFilterMultimapScoreRange": 1,
+                "outFilterScoreMin": 0,
+                "outFilterScoreMinOverLread": 0.66,
+                "outFilterType": "Normal",
+                "outMultimapperOrder": "Old_2.4",
+                "outReadsUnmapped": "",
+                "outSAMattrIHstart": 1,
+                "outSAMattrRGline": "",
+                "outSAMattributes": "NH HI AS NM MD",
+                "outSAMfilter": "",
+                "outSAMflagAND": 65535,
+                "outSAMflagOR": 0,
+                "outSAMheaderCommentFile": "",
+                "outSAMheaderHD": "",
+                "outSAMheaderPG": "",
+                "outSAMmapqUnique": 255,
+                "outSAMmode": "Full",
+                "outSAMmultNmax": -1,
+                "outSAMorder": "Paired",
+                "outSAMprimaryFlag": "OneBestScore",
+                "outSAMreadID": "Standard",
+                "outSAMstrandField": "",
+                "outSAMtype": "BAM Unsorted",
+                "outSAMunmapped": "",
+                "outStd": "Log",
+                "outTmpDir": "",
+                "outWigNorm": "RPM",
+                "outWigReferencesPrefix": "",
+                "outWigStrand": "Stranded",
+                "outWigType": "",
+                "outputDir": "",
+                "outputFilePrefix": "",
+                "parametersFiles": "",
+                "quantMode": "TranscriptomeSAM GeneCounts",
+                "quantTranscriptomeBAMcompression": 1,
+                "quantTranscriptomeBan": "Singleend",
+                "readFilesCommand": "zcat ",
+                "readFilesIn": null,
+                "readMapNumber": -1,
+                "readMatesLengthsIn": "NotEqual",
+                "readNameSeparator": "/",
+                "repeat": false,
+                "runMode": 2,
+                "runRNGseed": 777,
+                "runThreadN": 16,
+                "runTriggers": [
+                    "genomeDir",
+                    "readFilesIn"
+                ],
+                "scoreDelBase": -2,
+                "scoreDelOpen": -2,
+                "scoreGap": 0,
+                "scoreGapATAC": -8,
+                "scoreGapGCAG": -4,
+                "scoreGapNoncan": -8,
+                "scoreGenomicLengthLog2scale": -0.25,
+                "scoreInsBase": -2,
+                "scoreInsOpen": -2,
+                "scoreStitchSJshift": 1,
+                "seedMultimapNmax": 10000,
+                "seedNoneLociPerWindow": 10,
+                "seedPerReadNmax": 1000,
+                "seedPerWindowNmax": 50,
+                "seedSearchLmax": 0,
+                "seedSearchStartLmax": 50,
+                "seedSearchStartLmaxOverLread": 1.0,
+                "spelist": false,
+                "starversion": "",
+                "sysShell": "/bin/sh",
+                "triggerReady": {
+                    "trigger": false,
+                    "genomeDir": false,
+                    "readFilesIn": false,
+                    "starversion": false,
+                    "trim_trigger": false,
+                    "download_trigger": false
+                },
+                "twopass1readsN": -1,
+                "twopassMode": "Basic",
+                "useGpu": false,
+                "useScheduler": true,
+                "winAnchorDistNbins": 9,
+                "winAnchorMultimapNmax": 50,
+                "winBinNbits": 16,
+                "winFlankNbins": 4,
+                "winReadCoverageBasesMin": 0,
+                "winReadCoverageRelativeMin": 0.5,
+                "__version__": 1
+            },
+            "arg_types": {
+                "readFilesIn": {
+                    "flag": "--readFilesIn",
+                    "label": "readFilesIn",
+                    "type": "file list"
+                },
+                "genome_bam_files": {
+                    "flag": null,
+                    "label": "The `Aligned.out.bam` files produced after alignment",
+                    "type": "file list"
+                },
+                "transcriptome_bam_files": {
+                    "flag": null,
+                    "label": "The `Aligned.toTranscriptome.out.bam` files produced after alignment",
+                    "type": "file list"
+                },
+                "apelist": {
+                    "flag": null,
+                    "label": "Alternating paired-end files (a_R1 a_R2 b_R1 b_R2...) ",
+                    "type": "bool",
+                    "env": "APELIST"
+                },
+                "spelist": {
+                    "flag": null,
+                    "label": "Sequential paired-end files (a_R1 b_R1... a_R2 b_R2...)",
+                    "type": "bool",
+                    "env": "SPELIST"
+                },
+                "parametersFiles": {
+                    "flag": "--parametersFiles",
+                    "label": "Parameters file",
+                    "type": "file"
+                },
+                "sysShell": {
+                    "default": "/bin/sh",
+                    "flag": "--sysShell",
+                    "label": "System shell",
+                    "type": "str"
+                },
+                "runThreadN": {
+                    "default": 1,
+                    "flag": "--runThreadN",
+                    "label": "Number of threads",
+                    "type": "int"
+                },
+                "runRNGseed": {
+                    "default": 777,
+                    "flag": "--runRNGseed",
+                    "label": "runRNGseed",
+                    "type": "int"
+                },
+                "readFilesCommand": {
+                    "flag": "--readFilesCommand",
+                    "label": "readFilesCommand",
+                    "type": "str"
+                },
+                "readMapNumber": {
+                    "default": -1,
+                    "flag": "--readMapNumber",
+                    "label": "readMapNumber",
+                    "type": "int"
+                },
+                "readMatesLengthsIn": {
+                    "default": "NotEqual",
+                    "flag": "--readMatesLengthsIn",
+                    "label": "readMatesLengthsIn",
+                    "type": "str"
+                },
+                "readNameSeparator": {
+                    "default": "/",
+                    "flag": "--readNameSeparator",
+                    "label": "readNameSeparator",
+                    "type": "str"
+                },
+                "clip3pNbases": {
+                    "default": [
+                        "0"
+                    ],
+                    "flag": "--clip3pNbases",
+                    "label": "clip3pNbases",
+                    "type": "int list"
+                },
+                "clip5pNbases": {
+                    "default": [
+                        "0"
+                    ],
+                    "flag": "--clip5pNbases",
+                    "label": "clip5pNbases",
+                    "type": "int list"
+                },
+                "clip3pAdapterSeq": {
+                    "flag": "--clip3pAdapterSeq",
+                    "label": "clip3pAdapterSeq",
+                    "type": "text list"
+                },
+                "clip3pAdapterMMp": {
+                    "default": [
+                        "0.1"
+                    ],
+                    "flag": "--clip3pAdapterMMp",
+                    "label": "clip3pAdapterMMp",
+                    "type": "double list"
+                },
+                "clip3pAfterAdapterNbases": {
+                    "default": [
+                        "0"
+                    ],
+                    "flag": "--clip3pAfterAdapterNbases",
+                    "label": "clip3pAfterAdapterNbases",
+                    "type": "int list"
+                },
+                "limitIObufferSize": {
+                    "default": 150000000,
+                    "flag": "--limitIObufferSize",
+                    "label": "limitIObufferSize",
+                    "type": "int"
+                },
+                "limitOutSAMoneReadBytes": {
+                    "default": 100000,
+                    "flag": "--limitOutSAMoneReadBytes",
+                    "label": "limitOutSAMoneReadBytes",
+                    "type": "int"
+                },
+                "outputDir": {
+                    "default": "",
+                    "flag": null,
+                    "label": "Output directory",
+                    "type": "directory",
+                    "env": "outputDirectory"
+                },
+                "outTmpDir": {
+                    "default": "",
+                    "flag": "--outTmpDir",
+                    "label": "outTmpDir",
+                    "type": "directory"
+                },
+                "outStd": {
+                    "default": "Log",
+                    "flag": "--outStd",
+                    "label": "outStd",
+                    "type": "str"
+                },
+                "outReadsUnmapped": {
+                    "default": "",
+                    "flag": "--outReadsUnmapped",
+                    "label": "outReadsUnmapped",
+                    "type": "str"
+                },
+                "outMultimapperOrder": {
+                    "default": "Old_2.4",
+                    "flag": "--outMultimapperOrder",
+                    "label": "outMultimapperOrder",
+                    "type": "str"
+                },
+                "outSAMtype": {
+                    "default": "SAM",
+                    "flag": "--outSAMtype",
+                    "label": "outSAMtype",
+                    "type": "str"
+                },
+                "outSAMmode": {
+                    "default": "Full",
+                    "flag": "--outSAMmode",
+                    "label": "outSAMmode",
+                    "type": "str"
+                },
+                "outSAMstrandField": {
+                    "flag": "--outSAMstrandField",
+                    "label": "outSAMstrandField",
+                    "type": "str"
+                },
+                "outSAMattributes": {
+                    "default": "Standard",
+                    "flag": "--outSAMattributes",
+                    "label": "outSAMattributes",
+                    "type": "str"
+                },
+                "outSAMattrIHstart": {
+                    "default": 1,
+                    "flag": "--outSAMattrIHstart",
+                    "label": "outSAMattrIHstart",
+                    "type": "int"
+                },
+                "outSAMunmapped": {
+                    "flag": "--outSAMunmapped",
+                    "label": "outSAMunmapped",
+                    "type": "str"
+                },
+                "outSAMorder": {
+                    "default": "Paired",
+                    "flag": "--outSAMorder",
+                    "label": "outSAMorder",
+                    "type": "str"
+                },
+                "outSAMprimaryFlag": {
+                    "default": "OneBestScore",
+                    "flag": "--outSAMprimaryFlag",
+                    "label": "outSAMprimaryFlag",
+                    "type": "str"
+                },
+                "outSAMreadID": {
+                    "default": "Standard",
+                    "flag": "--outSAMreadID",
+                    "label": "outSAMreadID",
+                    "type": "str"
+                },
+                "outSAMmapqUnique": {
+                    "default": 255,
+                    "flag": "--outSAMmapqUnique",
+                    "label": "outSAMmapqUnique",
+                    "type": "int"
+                },
+                "outSAMflagOR": {
+                    "default": 0,
+                    "flag": "--outSAMflagOR",
+                    "label": "outSAMflagOR",
+                    "type": "int"
+                },
+                "outSAMflagAND": {
+                    "default": 65535,
+                    "flag": "--outSAMflagAND",
+                    "label": "outSAMflagAND",
+                    "type": "int"
+                },
+                "outSAMattrRGline": {
+                    "flag": "--outSAMattrRGline",
+                    "label": "outSAMattrRGline",
+                    "type": "str"
+                },
+                "outSAMheaderHD": {
+                    "flag": "--outSAMheaderHD",
+                    "label": "outSAMheaderHD",
+                    "type": "str"
+                },
+                "outSAMheaderPG": {
+                    "flag": "--outSAMheaderPG",
+                    "label": "outSAMheaderPG",
+                    "type": "str"
+                },
+                "outSAMheaderCommentFile": {
+                    "flag": "--outSAMheaderCommentFile",
+                    "label": "outSAMheaderCommentFile",
+                    "type": "file"
+                },
+                "outSAMfilter": {
+                    "flag": "--outSAMfilter",
+                    "label": "outSAMfilter",
+                    "type": "str"
+                },
+                "outSAMmultNmax": {
+                    "default": -1,
+                    "flag": "--outSAMmultNmax",
+                    "label": "outSAMmultNmax",
+                    "type": "int"
+                },
+                "outBAMcompression": {
+                    "default": 1,
+                    "flag": "--outBAMcompression",
+                    "label": "outBAMcompression",
+                    "type": "int"
+                },
+                "outBAMsortingThreadN": {
+                    "default": 0,
+                    "flag": "--outBAMsortingThreadN",
+                    "label": "outBAMsortingThreadN",
+                    "type": "int"
+                },
+                "bamRemoveDuplicatesType": {
+                    "flag": "--bamRemoveDuplicatesType",
+                    "label": "bamRemoveDuplicatesType",
+                    "type": "str"
+                },
+                "bamRemoveDuplicatesMate2basesN": {
+                    "default": 0,
+                    "flag": "--bamRemoveDuplicatesMate2basesN",
+                    "label": "bamRemoveDuplicatesMate2basesN",
+                    "type": "int"
+                },
+                "outWigType": {
+                    "default": "",
+                    "flag": "--outWigType",
+                    "label": "outWigType",
+                    "type": "str"
+                },
+                "outWigStrand": {
+                    "default": "Stranded",
+                    "flag": "--outWigStrand",
+                    "label": "outWigStrand",
+                    "type": "str"
+                },
+                "outWigReferencesPrefix": {
+                    "flag": "--outWigReferencesPrefix",
+                    "label": "outWigReferencesPrefix",
+                    "type": "str"
+                },
+                "outWigNorm": {
+                    "default": "RPM",
+                    "flag": "--outWigNorm",
+                    "label": "outWigNorm",
+                    "type": "str"
+                },
+                "outFilterType": {
+                    "default": "Normal",
+                    "flag": "--outFilterType",
+                    "label": "outFilterType",
+                    "type": "str"
+                },
+                "outFilterMultimapScoreRange": {
+                    "default": 1,
+                    "flag": "--outFilterMultimapScoreRange",
+                    "label": "outFilterMultimapScoreRange",
+                    "type": "int"
+                },
+                "outFilterMultimapNmax": {
+                    "default": 10,
+                    "flag": "--outFilterMultimapNmax",
+                    "label": "outFilterMultimapNmax",
+                    "type": "int"
+                },
+                "outFilterMismatchNmax": {
+                    "default": 10,
+                    "flag": "--outFilterMismatchNmax",
+                    "label": "outFilterMismatchNmax",
+                    "type": "int"
+                },
+                "outFilterMismatchNoverLmax ": {
+                    "default": 0.3,
+                    "flag": "--outFilterMismatchNoverLmax ",
+                    "label": "outFilterMismatchNoverLmax ",
+                    "type": "double"
+                },
+                "outFilterMismatchNoverReadLmax": {
+                    "default": 1.0,
+                    "flag": "--outFilterMismatchNoverReadLmax",
+                    "label": "outFilterMismatchNoverReadLmax",
+                    "type": "double"
+                },
+                "outFilterScoreMin": {
+                    "default": 0,
+                    "flag": "--outFilterScoreMin",
+                    "label": "outFilterScoreMin",
+                    "type": "int"
+                },
+                "outFilterScoreMinOverLread": {
+                    "default": 0.66,
+                    "flag": "--outFilterScoreMinOverLread",
+                    "label": "outFilterScoreMinOverLread",
+                    "type": "double"
+                },
+                "outFilterMatchNmin": {
+                    "default": 0,
+                    "flag": "--outFilterMatchNmin",
+                    "label": "outFilterMatchNmin",
+                    "type": "int"
+                },
+                "outFilterMatchNminOverLread": {
+                    "default": 0.66,
+                    "flag": "--outFilterMatchNminOverLread",
+                    "label": "outFilterMatchNminOverLread",
+                    "type": "double"
+                },
+                "outFilterIntronMotifs": {
+                    "flag": "--outFilterIntronMotifs",
+                    "label": "outFilterIntronMotifs",
+                    "type": "str"
+                },
+                "scoreGap": {
+                    "default": 0,
+                    "flag": "--scoreGap",
+                    "label": "scoreGap",
+                    "type": "int"
+                },
+                "scoreGapNoncan": {
+                    "default": -8,
+                    "flag": "--scoreGapNoncan",
+                    "label": "scoreGapNoncan",
+                    "type": "int"
+                },
+                "scoreGapGCAG": {
+                    "default": -4,
+                    "flag": "--scoreGapGCAG",
+                    "label": "scoreGapGCAG",
+                    "type": "int"
+                },
+                "scoreGapATAC": {
+                    "default": -8,
+                    "flag": "--scoreGapATAC",
+                    "label": "scoreGapATAC",
+                    "type": "int"
+                },
+                "scoreGenomicLengthLog2scale": {
+                    "default": -0.25,
+                    "flag": "--scoreGenomicLengthLog2scale",
+                    "label": "scoreGenomicLengthLog2scale",
+                    "type": "double"
+                },
+                "scoreDelOpen": {
+                    "default": -2,
+                    "flag": "--scoreDelOpen",
+                    "label": "scoreDelOpen",
+                    "type": "int"
+                },
+                "scoreDelBase": {
+                    "default": -2,
+                    "flag": "--scoreDelBase",
+                    "label": "scoreDelBase",
+                    "type": "int"
+                },
+                "scoreInsOpen": {
+                    "default": -2,
+                    "flag": "--scoreInsOpen",
+                    "label": "scoreInsOpen",
+                    "type": "int"
+                },
+                "scoreInsBase": {
+                    "default": -2,
+                    "flag": "--scoreInsBase",
+                    "label": "scoreInsBase",
+                    "type": "int"
+                },
+                "scoreStitchSJshift": {
+                    "default": 1,
+                    "flag": "--scoreStitchSJshift",
+                    "label": "scoreStitchSJshift",
+                    "type": "int"
+                },
+                "seedSearchStartLmax": {
+                    "default": 50,
+                    "flag": "--seedSearchStartLmax",
+                    "label": "seedSearchStartLmax",
+                    "type": "int"
+                },
+                "seedSearchStartLmaxOverLread": {
+                    "default": 1.0,
+                    "flag": "--seedSearchStartLmaxOverLread",
+                    "label": "seedSearchStartLmaxOverLread",
+                    "type": "double"
+                },
+                "seedSearchLmax": {
+                    "default": 0,
+                    "flag": "--seedSearchLmax",
+                    "label": "seedSearchLmax",
+                    "type": "int"
+                },
+                "seedMultimapNmax": {
+                    "default": 10000,
+                    "flag": "--seedMultimapNmax",
+                    "label": "seedMultimapNmax",
+                    "type": "int"
+                },
+                "seedPerReadNmax": {
+                    "default": 1000,
+                    "flag": "--seedPerReadNmax",
+                    "label": "seedPerReadNmax",
+                    "type": "int"
+                },
+                "seedPerWindowNmax": {
+                    "default": 50,
+                    "flag": "--seedPerWindowNmax",
+                    "label": "seedPerWindowNmax",
+                    "type": "int"
+                },
+                "seedNoneLociPerWindow": {
+                    "default": 10,
+                    "flag": "--seedNoneLociPerWindow",
+                    "label": "seedNoneLociPerWindow",
+                    "type": "int"
+                },
+                "alignIntronMin": {
+                    "default": 21,
+                    "flag": "--alignIntronMin",
+                    "label": "alignIntronMin",
+                    "type": "int"
+                },
+                "alignIntronMax": {
+                    "default": 0,
+                    "flag": "--alignIntronMax",
+                    "label": "alignIntronMax",
+                    "type": "int"
+                },
+                "alignMatesGapMax": {
+                    "default": 0,
+                    "flag": "--alignMatesGapMax",
+                    "label": "alignMatesGapMax",
+                    "type": "int"
+                },
+                "alignSJoverhangMin": {
+                    "default": 5,
+                    "flag": "--alignSJoverhangMin",
+                    "label": "alignSJoverhangMin",
+                    "type": "int"
+                },
+                "alignSJstitchMismatchNmax": {
+                    "flag": "--alignSJstitchMismatchNmax ",
+                    "label": "alignSJstitchMismatchNmax ",
+                    "type": "int"
+                },
+                "alignSJDBoverhangMin": {
+                    "default": 3,
+                    "flag": "--alignSJDBoverhangMin",
+                    "label": "alignSJDBoverhangMin",
+                    "type": "int"
+                },
+                "alignSplicedMateMapLmin": {
+                    "default": 0,
+                    "flag": "--alignSplicedMateMapLmin",
+                    "label": "alignSplicedMateMapLmin",
+                    "type": "int"
+                },
+                "alignSplicedMateMapLminOverLmate": {
+                    "default": 0.66,
+                    "flag": "--alignSplicedMateMapLminOverLmate",
+                    "label": "alignSplicedMateMapLminOverLmate",
+                    "type": "double"
+                },
+                "alignWindowsPerReadNmax": {
+                    "default": 10000,
+                    "flag": "--alignWindowsPerReadNmax",
+                    "label": "alignWindowsPerReadNmax",
+                    "type": "int"
+                },
+                "alignTranscriptsPerWindowNmax": {
+                    "default": 100,
+                    "flag": "--alignTranscriptsPerWindowNmax",
+                    "label": "alignTranscriptsPerWindowNmax",
+                    "type": "int"
+                },
+                "alignTranscriptsPerReadNmax": {
+                    "default": 10000,
+                    "flag": "--alignTranscriptsPerReadNmax",
+                    "label": "alignTranscriptsPerReadNmax",
+                    "type": "int"
+                },
+                "alignEndsType": {
+                    "default": "Local",
+                    "flag": "--alignEndsType",
+                    "label": "alignEndsType",
+                    "type": "str"
+                },
+                "alignEndsProtrude": {
+                    "default": [
+                        "0",
+                        "ConcordantPair"
+                    ],
+                    "flag": "--alignEndsProtrude",
+                    "label": "alignEndsProtrude",
+                    "type": "text list"
+                },
+                "alignSoftClipAtReferenceEnds": {
+                    "default": "Yes",
+                    "flag": "--alignSoftClipAtReferenceEnds",
+                    "label": "alignSoftClipAtReferenceEnds",
+                    "type": "str"
+                },
+                "winAnchorMultimapNmax": {
+                    "default": 50,
+                    "flag": "--winAnchorMultimapNmax",
+                    "label": "winAnchorMultimapNmax",
+                    "type": "int"
+                },
+                "winBinNbits": {
+                    "default": 16,
+                    "flag": "--winBinNbits",
+                    "label": "winBinNbits",
+                    "type": "int"
+                },
+                "winAnchorDistNbins": {
+                    "default": 9,
+                    "flag": "--winAnchorDistNbins",
+                    "label": "winAnchorDistNbins",
+                    "type": "int"
+                },
+                "winFlankNbins": {
+                    "default": 4,
+                    "flag": "--winFlankNbins",
+                    "label": "winFlankNbins",
+                    "type": "int"
+                },
+                "winReadCoverageRelativeMin": {
+                    "default": 0.5,
+                    "flag": "--winReadCoverageRelativeMin",
+                    "label": "winReadCoverageRelativeMin",
+                    "type": "double"
+                },
+                "winReadCoverageBasesMin": {
+                    "default": 0,
+                    "flag": "--winReadCoverageBasesMin",
+                    "label": "winReadCoverageBasesMin",
+                    "type": "int"
+                },
+                "chimOutType": {
+                    "default": "SeparateSAMold",
+                    "flag": "--chimOutType",
+                    "label": "chimOutType",
+                    "type": "str"
+                },
+                "chimSegmentMin": {
+                    "default": 0,
+                    "flag": "--chimSegmentMin",
+                    "label": "chimSegmentMin",
+                    "type": "int"
+                },
+                "chimScoreMin": {
+                    "default": 0,
+                    "flag": "--chimScoreMin",
+                    "label": "chimScoreMin",
+                    "type": "int"
+                },
+                "chimScoreDropMax": {
+                    "default": 20,
+                    "flag": "--chimScoreDropMax",
+                    "label": "chimScoreDropMax",
+                    "type": "int"
+                },
+                "chimScoreSeparation": {
+                    "default": 10,
+                    "flag": "--chimScoreSeparation",
+                    "label": "chimScoreSeparation",
+                    "type": "int"
+                },
+                "chimScoreJunctionNonGTAG": {
+                    "default": -1,
+                    "flag": "--chimScoreJunctionNonGTAG",
+                    "label": "chimScoreJunctionNonGTAG",
+                    "type": "int"
+                },
+                "chimJunctionOverhangMin": {
+                    "default": 20,
+                    "flag": "--chimJunctionOverhangMin",
+                    "label": "chimJunctionOverhangMin",
+                    "type": "int"
+                },
+                "chimSegmentReadGapMax": {
+                    "default": 0,
+                    "flag": "--chimSegmentReadGapMax",
+                    "label": "chimSegmentReadGapMax",
+                    "type": "int"
+                },
+                "chimFilter": {
+                    "default": "banGenomicN",
+                    "flag": "--chimFilter",
+                    "label": "chimFilter",
+                    "type": "str"
+                },
+                "quantMode": {
+                    "flag": "--quantMode",
+                    "label": "quantMode",
+                    "type": "str"
+                },
+                "quantTranscriptomeBAMcompression": {
+                    "default": 1,
+                    "flag": "--quantTranscriptomeBAMcompression",
+                    "label": "quantTranscriptomeBAMcompression",
+                    "type": "int"
+                },
+                "quantTranscriptomeBan": {
+                    "default": "IndelSoftclipSingleend",
+                    "flag": "--quantTranscriptomeBan",
+                    "label": "quantTranscriptomeBan",
+                    "type": "str"
+                },
+                "twopassMode": {
+                    "default": "",
+                    "flag": "--twopassMode",
+                    "label": "twopassMode",
+                    "type": "str"
+                },
+                "twopass1readsN ": {
+                    "default": -1,
+                    "flag": "--twopass1readsN ",
+                    "label": "twopass1readsN ",
+                    "type": "int"
+                },
+                "genomeDir": {
+                    "default": "/data/GenomeDir",
+                    "flag": "--genomeDir",
+                    "label": "genomeDir",
+                    "type": "directory"
+                },
+                "genomeLoad": {
+                    "default": "NoSharedMemory",
+                    "flag": "--genomeLoad",
+                    "label": "genomeLoad",
+                    "type": "str"
+                },
+                "outputFilePrefix": {
+                    "flag": null,
+                    "label": "outputFilePrefix",
+                    "type": "str",
+                    "env": "outputPrefix"
+                },
+                "multipleSample": {
+                    "flag": null,
+                    "label": "Multiple samples",
+                    "type": "bool",
+                    "env": "MULTISAMPLE"
+                },
+                "starversion": {
+                    "default": "2.7.11a",
+                    "flag": null,
+                    "label": "Star version",
+                    "type": "str",
+                    "env": "VERSION"
+                }
+            },
+            "input_files": ["readFilesIn", "parametersFiles", "genomeDir"],
+            "output_files": ["genome_bam_files", "transcriptome_bam_files"],
+            "image_name": "patrickmckeever/star_async:0.4",
+            "command": [
+                "runstar.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "readFilesIn",
+                    "clip3pNbases",
+                    "clip5pNbases",
+                    "clip3pAdapterSeq",
+                    "clip3pAdapterMMp",
+                    "clip3pAfterAdapterNbases",
+                    "alignEndsProtrude"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "readFilesIn",
+                "outputDir",
+                "genomeDir",
+                "starversion"
+            ],
+            "options_checked": {
+                "parametersFiles": false,
+                "sysShell": false,
+                "runThreadN": true,
+                "runRNGseed": false,
+                "readFilesCommand": true,
+                "readMapNumber": false,
+                "readMatesLengthsIn": false,
+                "readNameSeparator": false,
+                "clip3pNbases": false,
+                "clip5pNbases": false,
+                "clip3pAdapterSeq": false,
+                "clip3pAdapterMMp": false,
+                "clip3pAfterAdapterNbases": false,
+                "limitIObufferSize": false,
+                "limitOutSAMoneReadBytes": false,
+                "outTmpDir": false,
+                "outStd": false,
+                "outReadsUnmapped": false,
+                "outMultimapperOrder": false,
+                "outSAMtype": true,
+                "outSAMmode": false,
+                "outSAMstrandField": false,
+                "outSAMattributes": true,
+                "outSAMattrIHstart": false,
+                "outSAMunmapped": false,
+                "outSAMorder": false,
+                "outSAMprimaryFlag": false,
+                "outSAMreadID": false,
+                "outSAMmapqUnique": false,
+                "outSAMflagOR": false,
+                "outSAMflagAND": false,
+                "outSAMattrRGline": false,
+                "outSAMheaderHD": false,
+                "outSAMheaderPG": false,
+                "outSAMheaderCommentFile": false,
+                "outSAMfilter": false,
+                "outSAMmultNmax": false,
+                "outBAMcompression": false,
+                "outBAMsortingThreadN": false,
+                "bamRemoveDuplicatesType": false,
+                "bamRemoveDuplicatesMate2basesN": false,
+                "outWigType": false,
+                "outWigStrand": false,
+                "outWigReferencesPrefix": false,
+                "outWigNorm": false,
+                "outFilterType": false,
+                "outFilterMultimapScoreRange": false,
+                "outFilterMultimapNmax": true,
+                "outFilterMismatchNmax": false,
+                "outFilterMismatchNoverLmax ": false,
+                "outFilterMismatchNoverReadLmax": false,
+                "outFilterScoreMin": false,
+                "outFilterScoreMinOverLread": false,
+                "outFilterMatchNmin": false,
+                "outFilterMatchNminOverLread": false,
+                "outFilterIntronMotifs": false,
+                "scoreGap": false,
+                "scoreGapNoncan": false,
+                "scoreGapGCAG": false,
+                "scoreGapATAC": false,
+                "scoreGenomicLengthLog2scale": false,
+                "scoreDelOpen": false,
+                "scoreDelBase": false,
+                "scoreInsOpen": false,
+                "scoreInsBase": false,
+                "scoreStitchSJshift": false,
+                "seedSearchStartLmax": false,
+                "seedSearchStartLmaxOverLread": false,
+                "seedSearchLmax": false,
+                "seedMultimapNmax": false,
+                "seedPerReadNmax": false,
+                "seedPerWindowNmax": false,
+                "seedNoneLociPerWindow": false,
+                "alignIntronMin": false,
+                "alignIntronMax": false,
+                "alignMatesGapMax": false,
+                "alignSJoverhangMin": false,
+                "alignSJstitchMismatchNmax": false,
+                "alignSJDBoverhangMin": true,
+                "alignSplicedMateMapLmin": false,
+                "alignSplicedMateMapLminOverLmate": false,
+                "alignWindowsPerReadNmax": false,
+                "alignTranscriptsPerWindowNmax": false,
+                "alignTranscriptsPerReadNmax": false,
+                "alignEndsType": false,
+                "alignEndsProtrude": false,
+                "alignSoftClipAtReferenceEnds": false,
+                "winAnchorMultimapNmax": false,
+                "winBinNbits": false,
+                "winAnchorDistNbins": false,
+                "winFlankNbins": false,
+                "winReadCoverageRelativeMin": false,
+                "winReadCoverageBasesMin": false,
+                "chimOutType": false,
+                "chimSegmentMin": false,
+                "chimScoreMin": false,
+                "chimScoreDropMax": false,
+                "chimScoreSeparation": false,
+                "chimScoreJunctionNonGTAG": false,
+                "chimJunctionOverhangMin": false,
+                "chimSegmentReadGapMax": false,
+                "chimFilter": false,
+                "quantMode": true,
+                "quantTranscriptomeBAMcompression": false,
+                "quantTranscriptomeBan": true,
+                "twopassMode": true,
+                "twopass1readsN ": false,
+                "genomeLoad": true,
+                "saveLog": false,
+                "apelist": false,
+                "spelist": false,
+                "outputFilePrefix": false,
+                "multipleSample": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 3,
+            "greedily_scheduled": false,
+            "async": false,
+            "end_async": false,
+            "barrier_for": null,
+            "mem_mb": 4000,
+            "cores": 1,
+            "gpus": 0,
+            "slots": 1,
+            "title": "Create transcriptome",
+            "description": "gffread",
+            "parameters": {
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "genomefile": "",
+                "gtffile": "",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "File": false,
+                    "skipGFF": false
+                },
+                "outputfile": "",
+                "overwritefiles": false,
+                "repeat": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "gtffile",
+                    "genomefile",
+                    "outputfile",
+                    "trigger"
+                ],
+                "triggerReady": {
+                    "gtffile": false,
+                    "genomefile": false,
+                    "outputfile": false,
+                    "trigger": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "genomefile": {
+                    "flag": null,
+                    "label": "Genome file",
+                    "type": "file",
+                    "env": "genomefile"
+                },
+                "gtffile": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "GTF file",
+                    "type": "file"
+                },
+                "outputfile": {
+                    "flag": "-w ",
+                    "label": "Transcriptome file",
+                    "type": "file",
+                    "env": "outputfile"
+                },
+                "overwritefiles": {
+                    "flag": null,
+                    "label": "Overwite files",
+                    "type": "bool",
+                    "env": "overwrite"
+                }
+            },
+            "input_files": ["genomefile", "gtffile"],
+            "output_files": ["outputfile"],
+            "image_name": "biodepot/gffread:latest",
+            "command": [
+                "[ -n \"$overwrite\" ] || [ !  -f \"$outputfile\" ] ||  exit 0",
+                "samtools faidx _bwb{genomefile}",
+                "gffread -g  _bwb{genomefile}"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "genomefile",
+                "gtffile",
+                "outputfile",
+                "overwritefiles"
+            ],
+            "options_checked": {
+                "File": false,
+                "skipGFF": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 4,
+            "greedily_scheduled": false,
+            "async": false,
+            "end_async": false,
+            "barrier_for": null,
+            "mem_mb": 500,
+            "cores": 1,
+            "gpus": 0,
+            "slots": 1,
+            "title": "Start",
+            "description": "Start",
+            "parameters": {
+                "aligneddir": "/data/processing/morphic-jax/JAX_RNAseq_ExtraEmbryonic/alignedfiles",
+                "alignedfiles": {
+                    "root": "/data/processing/morphic-jax/JAX_RNAseq_ExtraEmbryonic/alignedfiles",
+                    "pattern": "**/*ome.out.bam",
+                    "findFile": true,
+                    "findDir": false,
+                    "value": null
+                },
+                "annotation_file": "/data/processing/genome/genome.gtf",
+                "awscredentialsdir": "/data/.aws",
+                "bypass_star_index": false,
+                "controlAreaVisible": true,
+                "download_dir": "/data/processing/morphic-jax/JAX_RNAseq_ExtraEmbryonic/downloads",
+                "downloadindexlink": false,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "fastqfiles": [],
+                "genome_dir": "/data/processing/genome",
+                "genome_file": "/data/processing/genome/genome.fa",
+                "genomegtfURLs": [
+                    "https://ftp.ensembl.org/pub/release-98/fasta/homo_sapiens/dna/Homo_sapiens.GRCh38.dna.primary_assembly.fa.gz",
+                    "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_32/gencode.v32.primary_assembly.annotation.gtf.gz"
+                ],
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "genomegtfURLs",
+                        "fastqfiles",
+                        "trimmedfastqfiles",
+                        "alignedfiles"
+                    ],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "bypass_star_index": false,
+                    "downloadindexlink": false,
+                    "trimmedfasqfiles": false,
+                    "trimmedfastqfiles": false,
+                    "fastqfiles": true,
+                    "awscredentialsdir": true
+                },
+                "raw_annotation_file": "/data/processing/morphic-jax/JAX_RNAseq_ExtraEmbryonic/downloads/gencode.v32.primary_assembly.annotation.gtf",
+                "raw_genome_file": "/data/processing/morphic-jax/JAX_RNAseq_ExtraEmbryonic/downloads/Homo_sapiens.GRCh38.dna.primary_assembly.fa",
+                "repeat": false,
+                "runMode": 0,
+                "runTriggers": [],
+                "s3bucket": "morphic-bio-processing",
+                "s3destdirectory": "processed/morphic-jax/JAX_RNAseq_ExtraEmbryonic",
+                "s3downloaddir_FULL": "/data/ISL1",
+                "s3downloaddir_ONEFILE": "/data/JAX_onefile",
+                "s3downloaddir": "/data/JAX_sixfile",
+                "s3downloaddir_FULL": "/data/JAX_RNAseq5_ExE_CBO-short",
+                "s3sourcedirectory": "morphic-jax/JAX_RNAseq_ExtraEmbryonic",
+                "starversion": "2.7.11a",
+                "transcriptomefile": "/data/processing/genome/transcriptome.fa",
+                "triggerReady": {},
+                "trimmeddir": "/data/processing/morphic-jax/JAX_RNAseq_ExtraEmbryonic/trimmed",
+                "trimmedfastqfiles": null,
+                "useGpu": false,
+                "useScheduler": true,
+                "work_dir": "/data/processing/morphic-jax/JAX_RNAseq_ExtraEmbryonic",
+                "__version__": 1,
+                "yReadsDir": "/data/processing/morphic-jax/JAX_RNAseq_ExtraEmbryonic/filtered"
+            },
+            "arg_types": {
+                "work_dir": {
+                    "flag": null,
+                    "label": "Work directory",
+                    "type": "directory",
+                    "env": "work_dir"
+                },
+                "genome_dir": {
+                    "flag": null,
+                    "label": "Genome directory",
+                    "type": "directory",
+                    "env": "genome_dir"
+                },
+                "genome_file": {
+                    "flag": null,
+                    "label": "Genome reference file",
+                    "type": "file",
+                    "env": "genome_file"
+                },
+                "annotation_file": {
+                    "flag": null,
+                    "label": "Annotation file (gtf)",
+                    "type": "file",
+                    "env": "annotation_file"
+                },
+                "bypass_star_index": {
+                    "default": true,
+                    "flag": null,
+                    "label": "Bypass STAR generate index",
+                    "type": "bool",
+                    "env": "BYPASSSTARINDEX"
+                },
+                "downloadindexlink": {
+                    "flag": null,
+                    "label": "Download index link",
+                    "type": "bool",
+                    "env": "DOWNLOADINDEXLINK"
+                },
+                "transcriptomefile": {
+                    "flag": null,
+                    "label": "Transcriptome file",
+                    "type": "file",
+                    "env": "transcriptomefile"
+                },
+                "download_dir": {
+                    "flag": null,
+                    "label": "Download directory",
+                    "type": "directory",
+                    "env": "download_dir"
+                },
+                "genomegtfURLs": {
+                    "flag": null,
+                    "label": "Download URLs for genome and gtf",
+                    "type": "text list",
+                    "env": "genomegtfURLs"
+                },
+                "starversion": {
+                    "default": "2.7.11a",
+                    "flag": null,
+                    "label": "STAR version",
+                    "type": "str",
+                    "env": "starversion"
+                },
+                "raw_genome_file": {
+                    "flag": null,
+                    "label": "Raw genome file",
+                    "type": "file",
+                    "env": "raw_genome_file"
+                },
+                "raw_annotation_file": {
+                    "flag": null,
+                    "label": "Raw annotation file (gtf)",
+                    "type": "file",
+                    "env": "raw_annotation_file"
+                },
+                "fastqfiles": {
+                    "flag": null,
+                    "label": "Fastq files (R1/R2)",
+                    "type": "file list",
+                    "env": "fastqfiles"
+                },
+                "s3sourcedirectory": {
+                    "flag": null,
+                    "label": "S3 source directory ",
+                    "type": "str"
+                },
+                "s3bucket": {
+                    "flag": null,
+                    "label": "s3 bucket",
+                    "type": "str"
+                },
+                "s3downloaddir": {
+                    "flag": null,
+                    "label": "Directory to store s3 downloads",
+                    "type": "directory",
+                    "env": "s3downloaddir"
+                },
+                "trimmedfastqfiles": {
+                    "flag": null,
+                    "type": "file list"
+                },
+                "trimmeddir": {
+                    "flag": null,
+                    "label": "Trimmed fastq directory",
+                    "type": "directory",
+                    "env": "trimmeddir"
+                },
+                "alignedfiles": {
+                    "flag": null,
+                    "label": "Aligned files",
+                    "type": "patternQuery"
+                },
+                "aligneddir": {
+                    "flag": null,
+                    "label": "Aligned directory",
+                    "type": "directory",
+                    "env": "aligneddir"
+                },
+                "s3destdirectory": {
+                    "flag": null,
+                    "label": "S3 destination directory ",
+                    "type": "str"
+                },
+                "awscredentialsdir": {
+                    "flag": null,
+                    "label": "AWS credentials directory",
+                    "type": "directory"
+                }
+            },
+            "input_files": [],
+            "output_files": [],
+            "image_name": "biodepot/star-salmon-aws-start:latest",
+            "command": [
+                "start.sh "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "genomegtfURLs",
+                    "fastqfiles",
+                    "trimmedfastqfiles",
+                    "alignedfiles"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "work_dir",
+                "genome_dir",
+                "genome_file",
+                "annotation_file",
+                "transcriptomefile",
+                "download_dir",
+                "genomegtfURLs",
+                "starversion",
+                "raw_genome_file",
+                "raw_annotation_file",
+                "s3sourcedirectory",
+                "s3bucket",
+                "s3downloaddir",
+                "trimmeddir",
+                "alignedfiles",
+                "aligneddir",
+                "s3destdirectory"
+            ],
+            "options_checked": {
+                "bypass_star_index": false,
+                "downloadindexlink": false,
+                "trimmedfasqfiles": false,
+                "trimmedfastqfiles": false,
+                "fastqfiles": true,
+                "awscredentialsdir": true
+            },
+            "static_env": {}
+        },
+        {
+            "id": 5,
+            "greedily_scheduled": false,
+            "async": false,
+            "end_async": false,
+            "barrier_for": null,
+            "mem_mb": 1000,
+            "cores": 1,
+            "gpus": 0,
+            "slots": 1,
+            "title": "10x-format-fa-gtf",
+            "description": "10x_format_fa_gtf",
+            "parameters": {
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "inputfa": "",
+                "inputgtf": "",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "skipFormat": false
+                },
+                "outputfa": "",
+                "outputgtf": "",
+                "overwritefiles": false,
+                "repeat": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "inputgtf",
+                    "inputfa",
+                    "trigger"
+                ],
+                "triggerReady": {
+                    "inputgtf": false,
+                    "inputfa": false,
+                    "trigger": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "inputfa": {
+                    "flag": null,
+                    "label": "Input fa file",
+                    "type": "file",
+                    "env": "INPUTFA"
+                },
+                "outputfa": {
+                    "flag": null,
+                    "label": "Output fa file",
+                    "type": "file",
+                    "env": "OUTPUTFA"
+                },
+                "inputgtf": {
+                    "flag": null,
+                    "label": "Input GTF file",
+                    "type": "file",
+                    "env": "INPUTGTF"
+                },
+                "outputgtf": {
+                    "flag": null,
+                    "label": "Output GTF file",
+                    "type": "file",
+                    "env": "OUTPUTGTF"
+                },
+                "overwritefiles": {
+                    "flag": null,
+                    "label": "Overwrite existing files",
+                    "type": "bool",
+                    "env": "overwrite"
+                }
+            },
+            "input_files": ["inputgtf", "inputfa"],
+            "output_files": ["outputgtf", "outputfa"],
+            "image_name": "biodepot/format-fa-gtf-10x:e59dda73__46262d38__80368c82",
+            "command": [
+                "format-fa-gtf.pl"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "inputfa",
+                "outputfa",
+                "inputgtf",
+                "outputgtf",
+                "overwritefiles"
+            ],
+            "options_checked": {
+                "skipFormat": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 6,
+            "greedily_scheduled": false,
+            "async": false,
+            "end_async": false,
+            "barrier_for": null,
+            "mem_mb": 8000,
+            "cores": 4,
+            "gpus": 0,
+            "slots": 2,
+            "title": "salmon",
+            "description": "salmon",
+            "parameters": {
+                "sample_counts_dir": "",
+                "alignmentfiles": "",
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": "",
+                "exportGraphics": false,
+                "gtffile": "",
+                "is_async": true,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": []
+                },
+                "libtype": "A ",
+                "nWorkers": 1,
+                "numSlots": "2",
+                "optionsChecked": {},
+                "outputdir": "/data/processing/morphic-jax/JAX_RNAseq_ExtraEmbryonic/Counts",
+                "repeat": false,
+                "runMode": 0,
+                "runTriggers": [],
+                "transcriptome": "",
+                "triggerReady": {},
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "sample_counts_dir": {
+                    "flag": null,
+                    "type": "directory",
+                    "label": "The directory storing the counts specific to `alignmentfiles`"
+                },
+                "transcriptome": {
+                    "flag": "-t ",
+                    "label": "Transcriptome",
+                    "type": "file"
+                },
+                "outputdir": {
+                    "default": "salmon-quant",
+                    "flag": null,
+                    "label": "Output directory",
+                    "type": "directory",
+                    "env": "prefix"
+                },
+                "alignmentfiles": {
+                    "flag": null,
+                    "label": "Alignment files ",
+                    "type": "file",
+                    "env": "inputfile",
+                    "deletable": true
+                },
+                "gtffile": {
+                    "flag": "-g ",
+                    "label": "gtf file",
+                    "type": "file"
+                },
+                "libtype": {
+                    "default": "A ",
+                    "flag": "-l ",
+                    "label": "Libtype ",
+                    "type": "str"
+                }
+            },
+            "input_files": ["transcriptome", "gtffile", "alignmentfiles"],
+            "output_files": ["sample_counts_dir"],
+            "image_name": "patrickmckeever/salmon_async:0.1",
+            "command": [
+                "runSalmon.sh quant "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": []
+            },
+            "required_parameters": [
+                "transcriptome",
+                "outputdir",
+                "alignmentfiles",
+                "gtffile",
+                "libtype"
+            ],
+            "options_checked": {},
+            "static_env": {}
+        },
+        {
+            "id": 7,
+            "greedily_scheduled": false,
+            "async": true,
+            "end_async": false,
+            "barrier_for": null,
+            "mem_mb": 4000,
+            "cores": 4,
+            "gpus": 0,
+            "slots": 2,
+            "title": "Trimgalore",
+            "description": "Trimgalore",
+            "parameters": {
+                "trimmed_files": [],
+                "basenames": [],
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "fastqc": true,
+                "gzipped": true,
+                "workflowDir": "",
+                "inputFiles": {
+                    "root": "_bwb{workflowDir}",
+                    "pattern": "*.fastq.gz",
+                    "findFile": true,
+                    "findDir": false,
+                    "sorted": true,
+                    "value": null
+                },
+                "is_async": true,
+                "iterate": true,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "inputFiles",
+                        "basenames"
+                    ],
+                    "nWorkers": 8,
+                    "data": {
+                        "inputFiles": {
+                            "groupSize": "2",
+                            "threads": "1",
+                            "ram": "0"
+                        },
+                        "basenames": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        }
+                    },
+                    "iteratedAttrs": [
+                        "inputFiles"
+                    ]
+                },
+                "nWorkers": 8,
+                "ncores": 4,
+                "numSlots": "2",
+                "optionsChecked": {
+                    "outputDir": true,
+                    "inputDir": false,
+                    "basenames": false
+                },
+                "outputDir": "",
+                "paired": true,
+                "repeat": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "outputDir",
+                    "inputFiles",
+                    "trigger"
+                ],
+                "triggerReady": {
+                    "inputFiles": false,
+                    "trigger": false,
+                    "outputDir": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "workflowDir": {
+                    "flag": null,
+                    "label": "Dir in which we will search for fastq files to trim",
+                    "type": "directory"
+                },
+                "inputFiles": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "Fastq files",
+                    "type": "patternQuery",
+                    "env": "INPUT_FILES"
+                },
+                "trimmed_files": {
+                    "flag": null,
+                    "label": "Output parameter for list of trimmed files generated",
+                    "type": "file list"
+                },
+                "outputDir": {
+                    "flag": null,
+                    "label": "Output directory",
+                    "type": "directory",
+                    "env": "TRIMMED_DIR"
+                },
+                "paired": {
+                    "default": false,
+                    "flag": "--paired ",
+                    "label": "Paired ",
+                    "type": "bool"
+                },
+                "fastqc": {
+                    "default": true,
+                    "flag": "--fastqc ",
+                    "label": "fastqc ",
+                    "type": "bool"
+                },
+                "gzipped": {
+                    "default": true,
+                    "flag": "--gzip ",
+                    "label": "gzip  ",
+                    "type": "bool"
+                },
+                "ncores": {
+                    "default": 1,
+                    "flag": "--cores ",
+                    "label": "Cores ",
+                    "type": "int"
+                },
+                "basenames": {
+                    "flag": "--basename",
+                    "label": "basenames",
+                    "type": "text list"
+                }
+            },
+            "input_files": ["inputFiles"],
+            "output_files": ["outputDir"],
+            "image_name": "patrickmckeever/trimgalore_async:0.2",
+            "command": [
+                "run_trimgalore.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": true,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "inputFiles",
+                    "basenames"
+                ],
+                "nWorkers": 8,
+                "data": {
+                    "inputFiles": {
+                        "groupSize": "2",
+                        "threads": "1",
+                        "ram": "0"
+                    },
+                    "basenames": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    }
+                },
+                "iteratedAttrs": [
+                    "inputFiles"
+                ]
+            },
+            "required_parameters": [
+                "inputFiles",
+                "paired",
+                "fastqc",
+                "gzipped",
+                "ncores"
+            ],
+            "options_checked": {
+                "outputDir": true,
+                "inputDir": false,
+                "basenames": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 8,
+            "greedily_scheduled": false,
+            "async": false,
+            "end_async": false,
+            "barrier_for": null,
+            "mem_mb": 1000,
+            "cores": 10,
+            "gpus": 0,
+            "slots": 1,
+            "title": "S3_download",
+            "description": "S3_download",
+            "parameters": {
+                "awsdir": "",
+                "bucket": "",
+                "controlAreaVisible": true,
+                "dirs": null,
+                "downloadDir": "",
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "dirs"
+                    ],
+                    "nWorkers": 1
+                },
+                "key": "",
+                "nWorkers": 1,
+                "nthreads": 0,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "nthreads": false,
+                    "key": false,
+                    "secret": false,
+                    "region": false,
+                    "profile": false
+                },
+                "overwrite": false,
+                "profile": "",
+                "region": "us-east-2",
+                "repeat": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "bucket"
+                ],
+                "secret": "",
+                "triggerReady": {
+                    "bucket": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "awsdir": {
+                    "default": "/data/.aws",
+                    "flag": null,
+                    "argument": true,
+                    "label": "AWS directory",
+                    "type": "directory"
+                },
+                "bucket": {
+                    "default": "myBucket",
+                    "flag": null,
+                    "argument": true,
+                    "label": "S3 bucket",
+                    "type": "str"
+                },
+                "downloadDir": {
+                    "default": "/data",
+                    "flag": null,
+                    "argument": true,
+                    "label": "Directory to download to",
+                    "type": "directory"
+                },
+                "dirs": {
+                    "flag": null,
+                    "label": "S3 objects to download",
+                    "type": "text list",
+                    "env": "DIRS"
+                },
+                "nthreads": {
+                    "flag": null,
+                    "label": "Number of Threads",
+                    "type": "int",
+                    "env": "nThreads"
+                },
+                "key": {
+                    "flag": null,
+                    "label": "AWS Access key",
+                    "type": "str",
+                    "env": "AWS_ACCESS_KEY_ID"
+                },
+                "secret": {
+                    "flag": null,
+                    "label": "AWS Secret",
+                    "type": "str",
+                    "env": "AWS_SECRET_ACCESS_KEY"
+                },
+                "region": {
+                    "default": "us-east-2",
+                    "flag": null,
+                    "label": "Region",
+                    "type": "str",
+                    "env": "AWS_DEFAULT_REGION"
+                },
+                "overwrite": {
+                    "flag": null,
+                    "label": "Overwrite existing files",
+                    "type": "bool",
+                    "env": "overwrite"
+                },
+                "profile": {
+                    "flag": "--profile ",
+                    "label": "Profile ",
+                    "type": "str"
+                }
+            },
+            "input_files": [],
+	    "output_files": [],
+            "output_files_OLD": ["downloadDir"],
+            "image_name": "biodepot/s3transfer:latest",
+            "command": [
+                "download.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "dirs"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "awsdir",
+                "bucket",
+                "downloadDir",
+                "dirs",
+                "overwrite"
+            ],
+            "options_checked": {
+                "nthreads": false,
+                "key": false,
+                "secret": false,
+                "region": false,
+                "profile": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 9,
+            "greedily_scheduled": false,
+            "async": false,
+            "end_async": true,
+            "barrier_for": 7,
+            "mem_mb": 1000,
+            "cores": 1,
+            "gpus": 0,
+            "slots": 1,
+            "title": "Make counts tables",
+            "description": "gatherCounts",
+            "parameters": {
+                "alignsDir": "",
+                "controlAreaVisible": true,
+                "countsDir": "",
+                "end_async": true,
+                "end_async_title": "Trimgalore",
+                "exportGraphics": false,
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "tablesDir": false
+                },
+                "repeat": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "countsDir"
+                ],
+                "tablesDir": "",
+                "triggerReady": {
+                    "countsDir": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "countsDir": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "Counts directory",
+                    "type": "directory"
+                },
+                "alignsDir": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "Alignments directory",
+                    "type": "directory"
+                },
+                "tablesDir": {
+                    "flag": null,
+                    "label": "Output directory",
+                    "type": "directory",
+                    "env": "outputDir"
+                }
+            },
+            "input_files": ["countsDir", "alignsDir"],
+            "output_files": ["tablesDir"],
+            "image_name": "biodepot/gathercounts:cbbd690a__21b9851b__e5512470",
+            "command": [
+                "makeCountsMatrix.sh _bwb{countsDir} _bwb{alignedDir}"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "countsDir",
+                "alignsDir"
+            ],
+            "options_checked": {
+                "tablesDir": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 10,
+            "greedily_scheduled": false,
+            "async": false,
+            "end_async": false,
+            "barrier_for": null,
+            "mem_mb": 500,
+            "cores": 1,
+            "gpus": 0,
+            "slots": 1,
+            "title": "Filter fastq files",
+            "description": "filter_files",
+            "parameters": {
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "fastqfiles": null,
+                "inputdir": "",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "fastqfiles"
+                    ],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "fastqfiles": false
+                },
+                "pattern": "*.fastq.gz",
+                "repeat": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "inputdir"
+                ],
+                "triggerReady": {
+                    "inputdir": false
+                },
+                "useGpu": false,
+                "useScheduler": false,
+                "__version__": 1
+            },
+            "arg_types": {
+                "inputdir": {
+                    "flag": null,
+                    "label": "Fastq directory",
+                    "type": "directory",
+                    "env": "inputdir"
+                },
+                "fastqfiles": {
+                    "flag": null,
+                    "type": "file list",
+                    "env": "fastqfiles"
+                },
+                "pattern": {
+                    "flag": null,
+                    "label": "File search pattern",
+                    "type": "str",
+                    "env": "pattern"
+                }
+            },
+	    "input_files": ["inputdir"],
+	    "output_files": [],
+            "image_name": "biodepot/bash_utilities:alpine-3.17.1__24884064__91e2e7b9__1a66801e",
+            "command": [
+                "mkdir -p /tmp/output",
+                "find _bwb{inputdir} -type f -name _bwb{pattern} | sort > /tmp/output/fastqfiles"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "fastqfiles"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "inputdir",
+                "pattern"
+            ],
+            "options_checked": {
+                "fastqfiles": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 11,
+            "greedily_scheduled": false,
+            "async": false,
+            "end_async": false,
+            "barrier_for": null,
+            "mem_mb": 500,
+            "cores": 10,
+            "gpus": 0,
+            "slots": 1,
+            "title": "S3_upload",
+            "description": "S3_upload",
+            "parameters": {
+                "bucket": "",
+                "controlAreaVisible": true,
+                "credentials_dir": "",
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "key": "",
+                "nWorkers": 1,
+                "nthreads": 0,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "nthreads": false,
+                    "key": false,
+                    "secret": false,
+                    "region": false,
+                    "profile": false
+                },
+                "profile": "",
+                "region": "us-east-2",
+                "repeat": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "uploadDir",
+                    "Trigger"
+                ],
+                "s3Dir": "",
+                "secret": "",
+                "triggerReady": {
+                    "uploadDir": false,
+                    "Trigger": false
+                },
+                "uploadDir": "",
+                "useGpu": false,
+                "useScheduler": false,
+                "__version__": 1
+            },
+            "arg_types": {
+                "credentials_dir": {
+                    "default": "/data/.aws",
+                    "flag": null,
+                    "argument": true,
+                    "label": "AWS directory",
+                    "type": "directory"
+                },
+                "uploadDir": {
+                    "default": "/data/source",
+                    "flag": null,
+                    "argument": true,
+                    "label": "Directory to upload",
+                    "type": "directory"
+                },
+                "bucket": {
+                    "default": "myBucket",
+                    "flag": null,
+                    "argument": true,
+                    "label": "S3 bucket",
+                    "type": "str"
+                },
+                "s3Dir": {
+                    "default": "destination",
+                    "flag": null,
+                    "argument": true,
+                    "label": "S3 destination",
+                    "type": "str"
+                },
+                "nthreads": {
+                    "flag": null,
+                    "label": "Use multiple threads:",
+                    "type": "int",
+                    "env": "NTHREADS"
+                },
+                "key": {
+                    "flag": null,
+                    "label": "AWS key",
+                    "type": "str",
+                    "env": "AWS_ACCESS_KEY_ID"
+                },
+                "secret": {
+                    "flag": null,
+                    "label": "AWS Secret",
+                    "type": "str",
+                    "env": "AWS_SECRET_ACCESS_KEY"
+                },
+                "region": {
+                    "default": "us-east-2",
+                    "flag": null,
+                    "label": "Region",
+                    "type": "str",
+                    "env": "AWS_DEFAULT_REGION"
+                },
+                "profile": {
+                    "flag": "--profile ",
+                    "label": "Profile",
+                    "type": "str",
+                    "env": "profile"
+                }
+            },
+            "image_name": "biodepot/s3transfer:latest",
+            "command": [
+                "upload.sh "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "credentials_dir",
+                "uploadDir",
+                "bucket",
+                "s3Dir"
+            ],
+            "options_checked": {
+                "nthreads": false,
+                "key": false,
+                "secret": false,
+                "region": false,
+                "profile": false
+            },
+            "static_env": {}
+        }
+    ],
+    "links": [
+        {
+            "source": 4,
+            "sink": 0,
+            "source_channel": "genomegtfURLs",
+            "sink_channel": "URL"
+        },
+        {
+            "source": 0,
+            "sink": 5,
+            "source_channel": "directory",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 4,
+            "sink": 3,
+            "source_channel": "transcriptomefile",
+            "sink_channel": "outputfile"
+        },
+        {
+            "source": 5,
+            "sink": 3,
+            "source_channel": "outputfa",
+            "sink_channel": "genomefile"
+        },
+        {
+            "source": 5,
+            "sink": 3,
+            "source_channel": "outputgtf",
+            "sink_channel": "gtffile"
+        },
+        {
+            "source": 4,
+            "sink": 1,
+            "source_channel": "genome_dir",
+            "sink_channel": "genomeDir"
+        },
+        {
+            "source": 4,
+            "sink": 1,
+            "source_channel": "starversion",
+            "sink_channel": "starversion"
+        },
+        {
+            "source": 5,
+            "sink": 1,
+            "source_channel": "outputfa",
+            "sink_channel": "genomeFastaFile"
+        },
+        {
+            "source": 5,
+            "sink": 1,
+            "source_channel": "outputgtf",
+            "sink_channel": "sjdbGTFfile"
+        },
+        {
+            "source": 4,
+            "sink": 0,
+            "source_channel": "download_dir",
+            "sink_channel": "directory"
+        },
+        {
+            "source": 4,
+            "sink": 5,
+            "source_channel": "genome_file",
+            "sink_channel": "outputfa"
+        },
+        {
+            "source": 4,
+            "sink": 5,
+            "source_channel": "raw_annotation_file",
+            "sink_channel": "inputgtf"
+        },
+        {
+            "source": 4,
+            "sink": 5,
+            "source_channel": "annotation_file",
+            "sink_channel": "outputgtf"
+        },
+        {
+            "source": 4,
+            "sink": 5,
+            "source_channel": "raw_genome_file",
+            "sink_channel": "inputfa"
+        },
+        {
+            "source": 4,
+            "sink": 0,
+            "source_channel": "bypass_star_index",
+            "sink_channel": "skipDownload"
+        },
+        {
+            "source": 4,
+            "sink": 5,
+            "source_channel": "bypass_star_index",
+            "sink_channel": "skipFormat"
+        },
+        {
+            "source": 4,
+            "sink": 3,
+            "source_channel": "bypass_star_index",
+            "sink_channel": "skipGFF"
+        },
+        {
+            "source": 4,
+            "sink": 1,
+            "source_channel": "bypass_star_index",
+            "sink_channel": "skipIndex"
+        },
+        {
+            "source": 4,
+            "sink": 2,
+            "source_channel": "starversion",
+            "sink_channel": "starversion"
+        },
+        {
+            "source": 1,
+            "sink": 2,
+            "source_channel": "genomeDir",
+            "sink_channel": "genomeDir"
+        },
+        {
+            "source": 2,
+            "sink": 6,
+            "source_channel": "outputDir",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 4,
+            "sink": 8,
+            "source_channel": "s3downloaddir",
+            "sink_channel": "downloadDir"
+        },
+        {
+            "source": 4,
+            "sink": 8,
+            "source_channel": "s3bucket",
+            "sink_channel": "bucket"
+        },
+        {
+            "source": 0,
+            "sink": 1,
+            "source_channel": "directory",
+            "sink_channel": "Trigger"
+        },
+        {
+            "source": 0,
+            "sink": 3,
+            "source_channel": "directory",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 4,
+            "sink": 7,
+            "source_channel": "trimmeddir",
+            "sink_channel": "outputDir"
+        },
+        {
+            "source": 4,
+            "sink": 7,
+            "source_channel": "trimmeddir",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 4,
+            "sink": 2,
+            "source_channel": "aligneddir",
+            "sink_channel": "outputDir"
+        },
+        {
+            "source": 5,
+            "sink": 6,
+            "source_channel": "outputgtf",
+            "sink_channel": "gtffile"
+        },
+        {
+            "source": 3,
+            "sink": 6,
+            "source_channel": "outputfile",
+            "sink_channel": "transcriptome"
+        },
+        {
+            "source": 2,
+            "sink": 9,
+            "source_channel": "outputDir",
+            "sink_channel": "alignsDir"
+        },
+        {
+            "source": 8,
+            "sink": 7,
+            "source_channel": "downloadDir",
+            "sink_channel": "workflowDir"
+        },
+        {
+            "source": 9,
+            "sink": 11,
+            "source_channel": "tablesDir",
+            "sink_channel": "Trigger"
+        },
+        {
+            "source": 4,
+            "sink": 11,
+            "source_channel": "s3bucket",
+            "sink_channel": "bucket"
+        },
+        {
+            "source": 4,
+            "sink": 11,
+            "source_channel": "work_dir",
+            "sink_channel": "uploadDir"
+        },
+        {
+            "source": 4,
+            "sink": 11,
+            "source_channel": "s3destdirectory",
+            "sink_channel": "s3Dir"
+        },
+        {
+            "source": 4,
+            "sink": 8,
+            "source_channel": "s3sourcedirectory",
+            "sink_channel": "dirs"
+        },
+        {
+            "source": 4,
+            "sink": 8,
+            "source_channel": "awscredentialsdir",
+            "sink_channel": "awsdir"
+        },
+        {
+            "source": 4,
+            "sink": 11,
+            "source_channel": "awscredentialsdir",
+            "sink_channel": "credentials_dir"
+        },
+        {
+            "source": 7,
+            "sink": 2,
+            "source_channel": "trimmed_files",
+            "sink_channel": "readFilesIn"
+        },
+        {
+            "source": 2,
+            "sink": 6,
+            "source_channel": "transcriptome_bam_files",
+            "sink_channel": "alignmentfiles"
+        },
+        {
+            "source": 6,
+            "sink": 9,
+            "source_channel": "outputdir",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 6,
+            "sink": 9,
+            "source_channel": "outputdir",
+            "sink_channel": "countsDir"
+        }
+    ]
+}
+}

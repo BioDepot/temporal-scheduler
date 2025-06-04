@@ -1,0 +1,2096 @@
+{
+    "run_id": "nanopore_bff",
+    "use_local_storage": true,
+    "nodes": [
+        {
+            "id": 0,
+            "async": false,
+            "end_async": false,
+            "mem_mb": 4000,
+            "cores": 4,
+            "gpus": 0,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Start",
+            "description": "Start",
+            "parameters": {
+                "bam_dir": "/data/nanopore-test/bam/20190910_NB4_smalltest",
+                "bff_breakpoints_file": "/data/nanopore-test/genome/PML_RARA_fusion.txt",
+                "bff_guides_file": "/data/nanopore-test/genome/PML1345_RARA12_guide.txt",
+                "controlAreaVisible": true,
+                "data_dir": "/data/nanopore-test/data/20190910_NB4_smalltest",
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "fast5_dir": "/data/nanopore-test/data/20190910_NB4_smalltest",
+                "fastq_dir": "/data/nanopore-test/fastq/20190910_NB4_smalltest",
+                "fastq_files": {
+                    "root": "/data/nanopore-test/fastq/20190910_NB4_smalltest",
+                    "pattern": "**/*.fastq",
+                    "findFile": true,
+                    "findDir": false,
+                    "value": null
+                },
+                "fusion_dir": "/data/breakpoint_files",
+                "genome_dir": "/data/nanopore-test/genome",
+                "genome_file": "/data/nanopore-test/genome/GRCh38.primary_assembly.genome.fa",
+                "gtf_file": "/data/nanopore-test/genome/gencode.v45.chr_patch_hapl_scaff.annotation.gtf",
+                "indexfile": "/data/nanopore-test/genome/GRCh38.primary_assembly.genome.mmi",
+                "inputConnectionsStore": {},
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "fastq_files"
+                    ],
+                    "nWorkers": 1
+                },
+                "minimap_bam_dir": "/data/nanopore-test/minimap_bam/20190910_NB4_smalltest",
+                "model": "/data/nanopore-models/dna_r9.4.1_e8_fast@v3.4",
+                "model_dir": "/data/nanopore-models",
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "gdc_credentials": false,
+                    "gdc_token": false,
+                    "clean_files": false,
+                    "fastq1_files": false,
+                    "fastq2_files": false,
+                    "fastqo1_files": false,
+                    "fastqo2_files": false,
+                    "fastqs_files": false,
+                    "fastqc_files": false,
+                    "paired_end": false,
+                    "realigned_files": false,
+                    "recalibrate_files": false,
+                    "realigned_indels_files": false,
+                    "pindel_filter_files": false,
+                    "genome_dict_file": false,
+                    "biobambam_files": false,
+                    "mutect2_normal_files": false,
+                    "mutect2_tumor_files": false,
+                    "mutect2_variants_files": false,
+                    "variant_annotation_files": false,
+                    "maf_files": false,
+                    "mark_dupes_outputs": false,
+                    "mark_dupes_metrics": false,
+                    "coclean_intervals": false,
+                    "somatic_sniper_files": false,
+                    "prepend_date": false,
+                    "varscan_pileup_files": false,
+                    "varscan_snp_files": false,
+                    "varscan_indel_files": false,
+                    "muse_call_files": false,
+                    "muse_sump_input_files": false,
+                    "muse_sump_output_files": false,
+                    "pindel_config_files": false,
+                    "pindel_variants_files": false,
+                    "pindel_variants_sorted_files": false,
+                    "pindel_variants_filtered_files": false,
+                    "pindel_prefix_files": false,
+                    "cpu_url": false,
+                    "gpu_url": true,
+                    "models_dir": true
+                },
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 0,
+                "runTriggers": [],
+                "triggerReady": {},
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "data_dir": {
+                    "flag": null,
+                    "label": "Data directory",
+                    "type": "directory",
+                    "env": "data_dir"
+                },
+                "fast5_dir": {
+                    "flag": null,
+                    "label": "Fast5/Pod5 files directory",
+                    "type": "directory",
+                    "env": "fast5_dir"
+                },
+                "genome_dir": {
+                    "flag": null,
+                    "label": "Genome directory",
+                    "type": "directory",
+                    "env": "genome_dir"
+                },
+                "genome_file": {
+                    "flag": null,
+                    "label": "Genome file",
+                    "type": "file",
+                    "env": "genome_file"
+                },
+                "indexfile": {
+                    "flag": null,
+                    "label": "Index file",
+                    "type": "file"
+                },
+                "bam_dir": {
+                    "flag": null,
+                    "label": "Aligned files directory",
+                    "type": "directory",
+                    "env": "bam_dir"
+                },
+                "gtf_file": {
+                    "flag": null,
+                    "label": "GTF file",
+                    "type": "file",
+                    "env": "gtf_file"
+                },
+                "bff_guides_file": {
+                    "flag": null,
+                    "label": "BFF guides file",
+                    "type": "file",
+                    "env": "bff_guides_file"
+                },
+                "bff_breakpoints_file": {
+                    "flag": null,
+                    "label": "BFF breakpoints file",
+                    "type": "file",
+                    "env": "bff_breakpoints_file"
+                },
+                "fusion_dir": {
+                    "flag": null,
+                    "label": "Output fusion call directory",
+                    "type": "directory",
+                    "env": "fusion_dir"
+                },
+                "model_dir": {
+                    "flag": null,
+                    "label": "Dorado model directory",
+                    "type": "directory",
+                    "env": "models_dir"
+                },
+                "model": {
+                    "flag": null,
+                    "label": "Dorado model for basecalling",
+                    "type": "directory"
+                },
+                "minimap_bam_dir": {
+                    "flag": null,
+                    "label": "Aligned MiniMap2 files directory",
+                    "type": "directory"
+                },
+                "fastq_dir": {
+                    "flag": null,
+                    "label": "Fastq files directory",
+                    "type": "directory"
+                },
+                "fastq_files": {
+                    "flag": null,
+                    "label": "Fastq files",
+                    "type": "patternQuery"
+                }
+            },
+            "image_name": "biodepot/dorado-start:alpine_3.12",
+            "command": [
+                "start.sh "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "fastq_files"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "data_dir",
+                "fast5_dir",
+                "genome_dir",
+                "genome_file",
+                "indexfile",
+                "bam_dir",
+                "gtf_file",
+                "bff_guides_file",
+                "bff_breakpoints_file",
+                "fusion_dir",
+                "model_dir",
+                "model",
+                "minimap_bam_dir",
+                "fastq_dir",
+                "fastq_files"
+            ],
+            "options_checked": {
+                "gdc_credentials": false,
+                "gdc_token": false,
+                "clean_files": false,
+                "fastq1_files": false,
+                "fastq2_files": false,
+                "fastqo1_files": false,
+                "fastqo2_files": false,
+                "fastqs_files": false,
+                "fastqc_files": false,
+                "paired_end": false,
+                "realigned_files": false,
+                "recalibrate_files": false,
+                "realigned_indels_files": false,
+                "pindel_filter_files": false,
+                "genome_dict_file": false,
+                "biobambam_files": false,
+                "mutect2_normal_files": false,
+                "mutect2_tumor_files": false,
+                "mutect2_variants_files": false,
+                "variant_annotation_files": false,
+                "maf_files": false,
+                "mark_dupes_outputs": false,
+                "mark_dupes_metrics": false,
+                "coclean_intervals": false,
+                "somatic_sniper_files": false,
+                "prepend_date": false,
+                "varscan_pileup_files": false,
+                "varscan_snp_files": false,
+                "varscan_indel_files": false,
+                "muse_call_files": false,
+                "muse_sump_input_files": false,
+                "muse_sump_output_files": false,
+                "pindel_config_files": false,
+                "pindel_variants_files": false,
+                "pindel_variants_sorted_files": false,
+                "pindel_variants_filtered_files": false,
+                "pindel_prefix_files": false,
+                "cpu_url": false,
+                "gpu_url": true,
+                "models_dir": true
+            },
+            "static_env": {}
+        },
+        {
+            "id": 1,
+            "mem_mb": 4000,
+            "cores": 4,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "View alignments",
+            "description": "igv",
+            "parameters": {
+                "autoDetermineRegions": true,
+                "batch": "",
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": true,
+                "genome": "hg38",
+                "inputConnectionsStore": {
+                    "trigger": [
+                        7
+                    ]
+                },
+                "inputFile": {
+                    "root": "/data/nanopore-test/bam/20190910_NB4_smalltest",
+                    "pattern": "**/*calls-sorted.bam",
+                    "findFile": true,
+                    "findDir": false,
+                    "value": [
+                        "/data/nanopore-test/bam/20190910_NB4_smalltest/calls-sorted.bam"
+                    ]
+                },
+                "is_async": false,
+                "iterate": true,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "inputFile"
+                    ],
+                    "data": {
+                        "inputFile": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        }
+                    },
+                    "iteratedAttrs": [
+                        "inputFile"
+                    ],
+                    "nWorkers": 2
+                },
+                "nWorkers": 2,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "genome": false,
+                    "batch": false,
+                    "autoDetermineRegions": false
+                },
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "trigger"
+                ],
+                "triggerReady": {
+                    "trigger": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "inputFile": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "Input file",
+                    "type": "patternQuery"
+                },
+                "genome": {
+                    "default": "hg38",
+                    "flag": "-g ",
+                    "label": "Genome ID",
+                    "type": "str"
+                },
+                "batch": {
+                    "flag": "--batch ",
+                    "label": "Path to batch command file",
+                    "type": "file"
+                },
+                "autoDetermineRegions": {
+                    "default": true,
+                    "flag": null,
+                    "label": "Auto-determine regions of interest (.maf or .vcf only)",
+                    "type": "bool",
+                    "env": "autoDetermineRegions"
+                }
+            },
+            "image_name": "biodepot/igv:2.9.2__ubuntu_20.04__4b93171f",
+            "command": [
+                " igv.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": true,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "inputFile"
+                ],
+                "data": {
+                    "inputFile": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    }
+                },
+                "iteratedAttrs": [
+                    "inputFile"
+                ],
+                "nWorkers": 2
+            },
+            "required_parameters": [
+                "inputFile"
+            ],
+            "options_checked": {
+                "genome": false,
+                "batch": false,
+                "autoDetermineRegions": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 2,
+            "mem_mb": 4000,
+            "cores": 4,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Download Helper Files",
+            "description": "downloadURL",
+            "parameters": {
+                "URL": [
+                    "https://drive.google.com/file/d/17lCL9VEY0lhpc92Q3Fe1BruvVC4ozTj4/view?usp=share_link",
+                    "https://drive.google.com/file/d/1LB_sCpggYoh5kl8e_XYFyjm6WNSn8y8J/view?usp=share_link",
+                    "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_45/gencode.v45.chr_patch_hapl_scaff.annotation.gtf.gz",
+                    "https://ftp.ebi.ac.uk/pub/databases/gencode/Gencode_human/release_45/GRCh38.primary_assembly.genome.fa.gz"
+                ],
+                "concatenateFile": "",
+                "controlAreaVisible": true,
+                "decompress": true,
+                "directory": "",
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "inputConnectionsStore": {
+                    "directory": [
+                        1
+                    ]
+                },
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "URL"
+                    ],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "noClobber": false,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "decompress": false,
+                    "concatenateFile": false,
+                    "noClobber": false
+                },
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "directory"
+                ],
+                "triggerReady": {
+                    "directory": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "URL": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "URL(s)",
+                    "type": "text list"
+                },
+                "decompress": {
+                    "default": true,
+                    "flag": "--decompress",
+                    "label": "Decompress files",
+                    "type": "bool"
+                },
+                "directory": {
+                    "flag": "--directory",
+                    "label": "Download directory",
+                    "type": "directory"
+                },
+                "concatenateFile": {
+                    "flag": "--concatenateFile",
+                    "label": "Download and join into one file",
+                    "type": "file"
+                },
+                "noClobber": {
+                    "flag": "--noClobber",
+                    "label": "Do not overwrite existing files at the destination",
+                    "type": "bool"
+                }
+            },
+            "image_name": "biodepot/downloadurl:latest",
+            "command": [
+                "/root/download.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "URL"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "URL",
+                "directory"
+            ],
+            "options_checked": {
+                "decompress": false,
+                "concatenateFile": false,
+                "noClobber": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 3,
+            "mem_mb": 4000,
+            "cores": 4,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Download pod5 files",
+            "description": "downloadURL",
+            "parameters": {
+                "URL": [
+                    "https://drive.google.com/file/d/1dduA5qz7Ht77HzOYVa6e705U38coQprP/view?usp=drive_link",
+                    "https://drive.google.com/file/d/1Fp8ccRLpjjDqkBsZ4StFkgws2oLpr9fm/view?usp=drive_link"
+                ],
+                "concatenateFile": "",
+                "controlAreaVisible": true,
+                "decompress": true,
+                "directory": "",
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "inputConnectionsStore": {
+                    "directory": [
+                        1
+                    ]
+                },
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "URL"
+                    ],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "noClobber": false,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "decompress": false,
+                    "concatenateFile": false,
+                    "noClobber": false
+                },
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "directory"
+                ],
+                "triggerReady": {
+                    "trigger": false,
+                    "directory": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "URL": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "URL(s)",
+                    "type": "text list"
+                },
+                "decompress": {
+                    "default": true,
+                    "flag": "--decompress",
+                    "label": "Decompress files",
+                    "type": "bool"
+                },
+                "directory": {
+                    "flag": "--directory",
+                    "label": "Download directory",
+                    "type": "directory"
+                },
+                "concatenateFile": {
+                    "flag": "--concatenateFile",
+                    "label": "Download and join into one file",
+                    "type": "file"
+                },
+                "noClobber": {
+                    "flag": "--noClobber",
+                    "label": "Do not overwrite existing files at the destination",
+                    "type": "bool"
+                }
+            },
+            "image_name": "biodepot/downloadurl:latest",
+            "command": [
+                "/root/download.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "URL"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "URL",
+                "directory"
+            ],
+            "options_checked": {
+                "decompress": false,
+                "concatenateFile": false,
+                "noClobber": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 4,
+            "mem_mb": 4000,
+            "cores": 4,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "LongGF",
+            "description": "LongGF",
+            "parameters": {
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "inputBam": "/data/nanopore-test/bam/20190910_NB4_smalltest/calls-sorted.bam.nameSorted.bam",
+                "inputConnectionsStore": {
+                    "inputGtf": [
+                        1
+                    ],
+                    "outputDir": [
+                        1
+                    ],
+                    "trigger": [
+                        7
+                    ]
+                },
+                "inputGtf": "",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {},
+                "outputDir": "",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "inputGtf",
+                    "trigger",
+                    "outputDir"
+                ],
+                "triggerReady": {
+                    "inputBam": false,
+                    "inputGtf": false,
+                    "trigger": false,
+                    "outputDir": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "inputBam": {
+                    "flag": null,
+                    "label": "Input BAM File",
+                    "type": "file",
+                    "env": "inputBam"
+                },
+                "inputGtf": {
+                    "flag": null,
+                    "label": "Input GTF File",
+                    "type": "file",
+                    "env": "inputGtf"
+                },
+                "outputDir": {
+                    "flag": null,
+                    "label": "Output Directory",
+                    "type": "file",
+                    "env": "outputDir"
+                }
+            },
+            "image_name": "quay.io/biocontainers/longgf:0.1.2--h1cd46f9_3",
+            "command": [
+                "LongGF _bwb{inputBam} _bwb{inputGtf} 100 50 100 > _bwb{outputDir}/LongGF.txt"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "inputBam",
+                "inputGtf",
+                "outputDir"
+            ],
+            "options_checked": {},
+            "static_env": {}
+        },
+        {
+            "id": 5,
+            "mem_mb": 4000,
+            "cores": 4,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "View fusions",
+            "description": "gnumeric",
+            "parameters": {
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": true,
+                "inputConnectionsStore": {
+                    "Trigger": [
+                        4
+                    ],
+                    "inputFile": [
+                        7
+                    ],
+                    "inputDirectory": [
+                        5
+                    ]
+                },
+                "inputDirectory": "",
+                "inputFile": "summary",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "inputDirectory": true
+                },
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "inputDirectory"
+                ],
+                "triggerReady": {
+                    "inputFile": false,
+                    "inputDirectory": false,
+                    "Trigger": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "inputDirectory": {
+                    "default": "",
+                    "flag": null,
+                    "label": "Input directory",
+                    "type": "directory",
+                    "env": "inputDirectory"
+                },
+                "inputFile": {
+                    "default": "summary",
+                    "flag": null,
+                    "label": "Input file",
+                    "type": "file",
+                    "env": "inputFile"
+                }
+            },
+            "image_name": "biodepot/gnumeric:latest",
+            "command": [
+                "gnumeric _bwb{inputDirectory}/_bwb{inputFile}"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "inputFile"
+            ],
+            "options_checked": {
+                "inputDirectory": true
+            },
+            "static_env": {}
+        },
+        {
+            "id": 6,
+            "mem_mb": 4000,
+            "cores": 4,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "BiodepotFusionFinder",
+            "description": "BiodepotFusionFinder",
+            "parameters": {
+                "bamfile": true,
+                "breakpointfile": "",
+                "breakpoints": [],
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "enrichment": true,
+                "exportGraphics": false,
+                "filterconsensus": 100,
+                "guidefile": "",
+                "guiderange": 50,
+                "inputConnectionsStore": {
+                    "outputdir": [
+                        1
+                    ],
+                    "breakpointfile": [
+                        1
+                    ],
+                    "guidefile": [
+                        1
+                    ],
+                    "Trigger": [
+                        10
+                    ]
+                },
+                "inputfile": "/data/nanopore-test/minimap_bam/20190910_NB4_smalltest/calls-sorted-sorted.bam",
+                "is_async": false,
+                "isunsorted": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "breakpoints"
+                    ],
+                    "nWorkers": 1
+                },
+                "maxgap": 80,
+                "maxoverlap": 20,
+                "minalignqual": 50,
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "breakpointfile": true,
+                    "breakpoints": false,
+                    "minalignqual": false,
+                    "maxoverlap": false,
+                    "maxgap": false,
+                    "filterconsensus": false,
+                    "guidefile": true,
+                    "guiderange": false,
+                    "enrichment": false,
+                    "isunsorted": false,
+                    "support": true
+                },
+                "outputdir": "",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "breakpointfile",
+                    "Trigger",
+                    "outputdir",
+                    "guidefile"
+                ],
+                "support": 1,
+                "triggerReady": {
+                    "inputFile": false,
+                    "breakpointfile": false,
+                    "guidefile": false,
+                    "Trigger": false,
+                    "outputdir": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "inputfile": {
+                    "flag": "-i ",
+                    "label": "Input sam/bam file",
+                    "type": "file"
+                },
+                "breakpointfile": {
+                    "flag": "-b ",
+                    "label": "Breakpoints file",
+                    "type": "file"
+                },
+                "outputdir": {
+                    "default": "/data/breakpoint_files",
+                    "flag": "-d ",
+                    "label": "Output directory",
+                    "type": "directory",
+                    "env": "OUTPUT"
+                },
+                "breakpoints": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "Breakpoints (eg 'chr15::;chr17::')",
+                    "type": "text list"
+                },
+                "bamfile": {
+                    "flag": "--bam ",
+                    "label": "Input file format is bam",
+                    "type": "bool"
+                },
+                "minalignqual": {
+                    "default": 50,
+                    "flag": "-q ",
+                    "label": "Minimum mapq score",
+                    "type": "int",
+                    "env": "bam"
+                },
+                "maxoverlap": {
+                    "default": 20,
+                    "flag": "-o ",
+                    "label": "Max length of fusion overlap",
+                    "type": "int"
+                },
+                "maxgap": {
+                    "default": 80,
+                    "flag": "-g ",
+                    "label": "Max length of fusion gap",
+                    "type": "int"
+                },
+                "filterconsensus": {
+                    "default": 100,
+                    "flag": "-c ",
+                    "label": "Nearby breakpoint distance",
+                    "type": "int"
+                },
+                "guidefile": {
+                    "flag": "-G ",
+                    "label": "Guides file",
+                    "type": "file"
+                },
+                "guiderange": {
+                    "default": 50,
+                    "flag": "-R ",
+                    "label": "Max dist guide can be from read end ",
+                    "type": "int"
+                },
+                "enrichment": {
+                    "default": true,
+                    "flag": "--enrichment ",
+                    "label": "Calculate enrichment",
+                    "type": "bool"
+                },
+                "isunsorted": {
+                    "flag": "--isUnsorted ",
+                    "label": "File is unsorted",
+                    "type": "bool"
+                },
+                "support": {
+                    "default": 3,
+                    "flag": "--support ",
+                    "label": "Minimum supporting reads",
+                    "type": "int"
+                }
+            },
+            "image_name": "biodepot/fusionfinder:alpine_3.15__samtools_1.13__67920851",
+            "command": [
+                "filterSam.pl"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "breakpoints"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "inputfile",
+                "outputdir",
+                "bamfile"
+            ],
+            "options_checked": {
+                "breakpointfile": true,
+                "breakpoints": false,
+                "minalignqual": false,
+                "maxoverlap": false,
+                "maxgap": false,
+                "filterconsensus": false,
+                "guidefile": true,
+                "guiderange": false,
+                "enrichment": false,
+                "isunsorted": false,
+                "support": true
+            },
+            "static_env": {}
+        },
+        {
+            "id": 7,
+            "mem_mb": 4000,
+            "cores": 4,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Dorado",
+            "description": "nanopore_dorado_dorado",
+            "parameters": {
+                "InputDir": "",
+                "Inputfile": "",
+                "OutputDir": "",
+                "chunksize": "",
+                "command": "\"dorado basecaller \"",
+                "controlAreaVisible": true,
+                "device": "cuda:all",
+                "emitfastq": false,
+                "emitsam": false,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "inputConnectionsStore": {
+                    "trigger": [
+                        3
+                    ],
+                    "trigger2": [
+                        2
+                    ],
+                    "InputDir": [
+                        1
+                    ],
+                    "trigger3": [
+                        8
+                    ],
+                    "modelFile": [
+                        1
+                    ]
+                },
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "kitname": "",
+                "modelDir": "",
+                "modelFile": "",
+                "modelstring": "",
+                "modifiedBases": "",
+                "nWorkers": 1,
+                "nameSort": true,
+                "noclassify": false,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "InputDir": true,
+                    "OutputDir": false,
+                    "modelFile": true,
+                    "reference": false,
+                    "device": false,
+                    "nameSort": false,
+                    "Inputfile": false,
+                    "outputfile": true,
+                    "kitname": false,
+                    "resumefrom": false,
+                    "trim": false,
+                    "noclassify": false,
+                    "sortandindex": false,
+                    "modelstring": false,
+                    "emitfastq": false,
+                    "emitsam": false,
+                    "chunksize": false,
+                    "modifiedBases": false,
+                    "modelDir": false
+                },
+                "outputfile": "/data/nanopore-test/bam/20190910_NB4_smalltest/calls-sorted.bam",
+                "reference": "",
+                "repeat": false,
+                "restart_when_done": false,
+                "resumefrom": "",
+                "runMode": 2,
+                "runTriggers": [
+                    "InputDir",
+                    "trigger",
+                    "trigger2",
+                    "trigger3",
+                    "modelFile"
+                ],
+                "sortandindex": false,
+                "triggerReady": {
+                    "InputDir": false,
+                    "trigger": false,
+                    "trigger2": false,
+                    "trigger3": false,
+                    "reference": false,
+                    "modelFile": false
+                },
+                "trim": "",
+                "useGpu": true,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "InputDir": {
+                    "flag": null,
+                    "label": "Input directory",
+                    "type": "directory",
+                    "env": "inputDir"
+                },
+                "OutputDir": {
+                    "flag": "--output-dir ",
+                    "label": "Output directory",
+                    "type": "directory",
+                    "env": "outputDir"
+                },
+                "modelFile": {
+                    "flag": null,
+                    "label": "Dorado model file",
+                    "type": "directory",
+                    "env": "modelFile"
+                },
+                "reference": {
+                    "flag": "--reference",
+                    "label": "Genome reference file",
+                    "type": "file",
+                    "env": "reference"
+                },
+                "device": {
+                    "default": "cuda:all",
+                    "flag": "--device ",
+                    "label": "Base calling device (e.g. auto, cuda:0)",
+                    "type": "str"
+                },
+                "nameSort": {
+                    "flag": null,
+                    "label": "Generate additional name sorted bam",
+                    "type": "bool",
+                    "env": "nameSort"
+                },
+                "command": {
+                    "flag": null,
+                    "label": "Dorado command",
+                    "type": "str",
+                    "env": "command"
+                },
+                "Inputfile": {
+                    "flag": null,
+                    "label": "Input file",
+                    "type": "file",
+                    "env": "inputFile"
+                },
+                "outputfile": {
+                    "flag": null,
+                    "label": "Output file",
+                    "type": "file",
+                    "env": "outputFile"
+                },
+                "kitname": {
+                    "flag": "--kit-name  ",
+                    "label": "Barcode kit name",
+                    "type": "str"
+                },
+                "resumefrom": {
+                    "flag": "--resume-from ",
+                    "label": "Resume from incomplete file",
+                    "type": "file"
+                },
+                "trim": {
+                    "flag": "--trim ",
+                    "label": "Trim ",
+                    "type": "str",
+                    "env": "trim"
+                },
+                "noclassify": {
+                    "flag": "--no-classify",
+                    "label": "--no-classify ",
+                    "type": "bool",
+                    "env": "noclassify"
+                },
+                "sortandindex": {
+                    "flag": null,
+                    "label": "Sort and index bam",
+                    "type": "bool",
+                    "env": "sortIndex"
+                },
+                "modelstring": {
+                    "flag": null,
+                    "label": "Dorado model string (eg. hac)",
+                    "type": "str",
+                    "env": "modelString"
+                },
+                "emitfastq": {
+                    "flag": "--emit-fastq",
+                    "label": "--emit-fastq",
+                    "type": "bool",
+                    "env": "emitFastq"
+                },
+                "emitsam": {
+                    "flag": "--emit-sam",
+                    "label": "--emit-sam",
+                    "type": "bool",
+                    "env": "emitSam"
+                },
+                "chunksize": {
+                    "flag": "-c",
+                    "label": "Chunk size",
+                    "type": "str"
+                },
+                "modifiedBases": {
+                    "flag": "--modified-bases",
+                    "label": "Modified bases",
+                    "type": "str"
+                },
+                "modelDir": {
+                    "flag": "--directory",
+                    "label": "Model download directory",
+                    "type": "directory"
+                }
+            },
+            "image_name": "biodepot/dorado-samtools:latest",
+            "command": [
+                "runDorado.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "command"
+            ],
+            "options_checked": {
+                "InputDir": true,
+                "OutputDir": false,
+                "modelFile": true,
+                "reference": false,
+                "device": false,
+                "nameSort": false,
+                "Inputfile": false,
+                "outputfile": true,
+                "kitname": false,
+                "resumefrom": false,
+                "trim": false,
+                "noclassify": false,
+                "sortandindex": false,
+                "modelstring": false,
+                "emitfastq": false,
+                "emitsam": false,
+                "chunksize": false,
+                "modifiedBases": false,
+                "modelDir": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 8,
+            "mem_mb": 4000,
+            "cores": 4,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Download dorado models",
+            "description": "nanopore_dorado_dorado",
+            "parameters": {
+                "InputDir": "",
+                "Inputfile": "",
+                "OutputDir": "",
+                "chunksize": "",
+                "command": "\"dorado download \"",
+                "controlAreaVisible": true,
+                "device": "cuda:all",
+                "emitfastq": false,
+                "emitsam": false,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "inputConnectionsStore": {
+                    "modelDir": [
+                        1
+                    ]
+                },
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "kitname": "",
+                "modelDir": "",
+                "modelFile": "",
+                "modelstring": "",
+                "modifiedBases": "",
+                "nWorkers": 1,
+                "nameSort": false,
+                "noclassify": false,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "InputDir": false,
+                    "OutputDir": false,
+                    "modelFile": false,
+                    "reference": false,
+                    "device": false,
+                    "nameSort": false,
+                    "Inputfile": false,
+                    "outputfile": false,
+                    "kitname": false,
+                    "resumefrom": false,
+                    "trim": false,
+                    "noclassify": false,
+                    "sortandindex": false,
+                    "modelstring": false,
+                    "emitfastq": false,
+                    "emitsam": false,
+                    "chunksize": false,
+                    "modifiedBases": false,
+                    "modelDir": true
+                },
+                "outputfile": "",
+                "reference": "",
+                "repeat": false,
+                "restart_when_done": false,
+                "resumefrom": "",
+                "runMode": 2,
+                "runTriggers": [
+                    "modelDir"
+                ],
+                "sortandindex": false,
+                "triggerReady": {
+                    "trigger": false,
+                    "InputDir": false,
+                    "modelDir": false
+                },
+                "trim": "",
+                "useGpu": true,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "InputDir": {
+                    "flag": null,
+                    "label": "Input directory",
+                    "type": "directory",
+                    "env": "inputDir"
+                },
+                "OutputDir": {
+                    "flag": "--output-dir ",
+                    "label": "Output directory",
+                    "type": "directory",
+                    "env": "outputDir"
+                },
+                "modelFile": {
+                    "flag": null,
+                    "label": "Dorado model file",
+                    "type": "directory",
+                    "env": "modelFile"
+                },
+                "reference": {
+                    "flag": "--reference",
+                    "label": "Genome reference file",
+                    "type": "file",
+                    "env": "reference"
+                },
+                "device": {
+                    "default": "cuda:all",
+                    "flag": "--device ",
+                    "label": "Base calling device (e.g. auto, cuda:0)",
+                    "type": "str"
+                },
+                "nameSort": {
+                    "flag": null,
+                    "label": "Generate additional name sorted bam",
+                    "type": "bool",
+                    "env": "nameSort"
+                },
+                "command": {
+                    "flag": null,
+                    "label": "Dorado command",
+                    "type": "str",
+                    "env": "command"
+                },
+                "Inputfile": {
+                    "flag": null,
+                    "label": "Input file",
+                    "type": "file",
+                    "env": "inputFile"
+                },
+                "outputfile": {
+                    "flag": null,
+                    "label": "Output file",
+                    "type": "file",
+                    "env": "outputFile"
+                },
+                "kitname": {
+                    "flag": "--kit-name  ",
+                    "label": "Barcode kit name",
+                    "type": "str"
+                },
+                "resumefrom": {
+                    "flag": "--resume-from ",
+                    "label": "Resume from incomplete file",
+                    "type": "file"
+                },
+                "trim": {
+                    "flag": "--trim ",
+                    "label": "Trim ",
+                    "type": "str",
+                    "env": "trim"
+                },
+                "noclassify": {
+                    "flag": "--no-classify",
+                    "label": "--no-classify ",
+                    "type": "bool",
+                    "env": "noclassify"
+                },
+                "sortandindex": {
+                    "flag": null,
+                    "label": "Sort and index bam",
+                    "type": "bool",
+                    "env": "sortIndex"
+                },
+                "modelstring": {
+                    "flag": null,
+                    "label": "Dorado model string (eg. hac)",
+                    "type": "str",
+                    "env": "modelString"
+                },
+                "emitfastq": {
+                    "flag": "--emit-fastq",
+                    "label": "--emit-fastq",
+                    "type": "bool",
+                    "env": "emitFastq"
+                },
+                "emitsam": {
+                    "flag": "--emit-sam",
+                    "label": "--emit-sam",
+                    "type": "bool",
+                    "env": "emitSam"
+                },
+                "chunksize": {
+                    "flag": "-c",
+                    "label": "Chunk size",
+                    "type": "str"
+                },
+                "modifiedBases": {
+                    "flag": "--modified-bases",
+                    "label": "Modified bases",
+                    "type": "str"
+                },
+                "modelDir": {
+                    "flag": "--directory",
+                    "label": "Model download directory",
+                    "type": "directory"
+                }
+            },
+            "image_name": "biodepot/dorado-samtools:latest",
+            "command": [
+                "runDorado.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "command"
+            ],
+            "options_checked": {
+                "InputDir": false,
+                "OutputDir": false,
+                "modelFile": false,
+                "reference": false,
+                "device": false,
+                "nameSort": false,
+                "Inputfile": false,
+                "outputfile": false,
+                "kitname": false,
+                "resumefrom": false,
+                "trim": false,
+                "noclassify": false,
+                "sortandindex": false,
+                "modelstring": false,
+                "emitfastq": false,
+                "emitsam": false,
+                "chunksize": false,
+                "modifiedBases": false,
+                "modelDir": true
+            },
+            "static_env": {}
+        },
+        {
+            "id": 9,
+            "mem_mb": 4000,
+            "cores": 4,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Index",
+            "description": "minimap2_index",
+            "parameters": {
+                "RefGenome": "",
+                "altcontigs": "",
+                "altdrop": 0.15,
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "hpcminimizer": false,
+                "idxnoseq": false,
+                "indexfile": "/data/nanopore-test/genome/GRCh38.primary_assembly.genome.mmi",
+                "inputConnectionsStore": {
+                    "RefGenome": [
+                        1
+                    ],
+                    "trigger": [
+                        12
+                    ]
+                },
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "kmersize": 15,
+                "maxload": "",
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "kmersize": false,
+                    "windowsize": false,
+                    "hpcminimizer": false,
+                    "maxload": false,
+                    "idxnoseq": false,
+                    "altcontigs": false,
+                    "altdrop": false,
+                    "overwrite": false
+                },
+                "overwrite": false,
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "RefGenome",
+                    "trigger"
+                ],
+                "triggerReady": {
+                    "RefGenome": false,
+                    "trigger": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "windowsize": 0,
+                "__version__": 1
+            },
+            "arg_types": {
+                "indexfile": {
+                    "flag": "-d ",
+                    "label": "Reference index file",
+                    "type": "file",
+                    "env": "outputfile"
+                },
+                "RefGenome": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "Reference genome sequence file",
+                    "type": "file"
+                },
+                "kmersize": {
+                    "default": 15,
+                    "flag": "-k ",
+                    "label": "kmer size",
+                    "type": "int"
+                },
+                "windowsize": {
+                    "flag": "-w ",
+                    "label": "Window size",
+                    "type": "int"
+                },
+                "hpcminimizer": {
+                    "flag": "-H ",
+                    "label": "Use HPC minimizers",
+                    "type": "bool"
+                },
+                "maxload": {
+                    "flag": "-I ",
+                    "label": "Max bases to load into RAM (use k/K/mM/g/G as units)",
+                    "type": "str"
+                },
+                "idxnoseq": {
+                    "flag": "--idx-no-seq ",
+                    "label": "Do not store sequences in index",
+                    "type": "bool"
+                },
+                "altcontigs": {
+                    "flag": "-alt ",
+                    "label": "File with list of ALT contigs",
+                    "type": "file"
+                },
+                "altdrop": {
+                    "default": 0.15,
+                    "flag": "--alt-drop",
+                    "label": "Drop this fraction of ALT hits when computing rank and MAQ",
+                    "type": "double"
+                },
+                "overwrite": {
+                    "flag": null,
+                    "label": "Overwrite existing index",
+                    "type": "bool",
+                    "env": "overwrite"
+                }
+            },
+            "image_name": "biodepot/minimap2-index:2.15-r905__d5c53a99",
+            "command": [
+                "runIndex.sh "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "indexfile",
+                "RefGenome"
+            ],
+            "options_checked": {
+                "kmersize": false,
+                "windowsize": false,
+                "hpcminimizer": false,
+                "maxload": false,
+                "idxnoseq": false,
+                "altcontigs": false,
+                "altdrop": false,
+                "overwrite": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 10,
+            "mem_mb": 4000,
+            "cores": 4,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Align & Sort",
+            "description": "minimap2_samtools",
+            "parameters": {
+                "InputFiles": {
+                    "root": "/data/nanopore-test/fastq/20190910_NB4_smalltest",
+                    "pattern": "**/*.fastq",
+                    "findFile": true,
+                    "findDir": false,
+                    "value": [
+                        "/data/nanopore-test/fastq/20190910_NB4_smalltest/calls-sorted.fastq"
+                    ]
+                },
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "indexfile": "",
+                "inputConnectionsStore": {
+                    "trigger": [
+                        7
+                    ],
+                    "indexfile": [
+                        11
+                    ],
+                    "inputFiles": [
+                        1
+                    ],
+                    "outputdir": [
+                        1
+                    ]
+                },
+                "is_async": false,
+                "iterate": true,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "InputFiles"
+                    ],
+                    "data": {
+                        "InputFiles": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        }
+                    },
+                    "iteratedAttrs": [
+                        "InputFiles"
+                    ],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionalflags": "-t 4 ",
+                "optionsChecked": {
+                    "optionalflags": true
+                },
+                "outputdir": "",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "outputdir",
+                    "indexfile",
+                    "trigger"
+                ],
+                "triggerReady": {
+                    "outputdir": false,
+                    "indexfile": false,
+                    "trigger": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "outputdir": {
+                    "flag": null,
+                    "label": "Enter Output Directory",
+                    "type": "directory",
+                    "env": "outputdir"
+                },
+                "indexfile": {
+                    "flag": null,
+                    "label": "Enter Path to Index",
+                    "type": "file",
+                    "env": "indexfile"
+                },
+                "InputFiles": {
+                    "flag": null,
+                    "label": "Input fastq files",
+                    "type": "patternQuery",
+                    "env": "inputfiles"
+                },
+                "optionalflags": {
+                    "flag": " ",
+                    "label": "Optional minimap flags ",
+                    "type": "str"
+                }
+            },
+            "image_name": "biodepot/minimap2_samtools:2.15-r905__1.9__3733bb34",
+            "command": [
+                "runMiniMap2.sh "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": true,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "InputFiles"
+                ],
+                "data": {
+                    "InputFiles": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    }
+                },
+                "iteratedAttrs": [
+                    "InputFiles"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "outputdir",
+                "indexfile",
+                "InputFiles"
+            ],
+            "options_checked": {
+                "optionalflags": true
+            },
+            "static_env": {}
+        },
+        {
+            "id": 11,
+            "mem_mb": 4000,
+            "cores": 4,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "To Fastq",
+            "description": "Samtools",
+            "parameters": {
+                "bamInput": null,
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "fastqOutputDir": "",
+                "inputConnectionsStore": {
+                    "bamInputDir": [
+                        1
+                    ],
+                    "bamInput": [
+                        7
+                    ],
+                    "fastqOutputDir": [
+                        1
+                    ]
+                },
+                "is_async": false,
+                "iterate": true,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "bamInput"
+                    ],
+                    "data": {
+                        "bamInput": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        }
+                    },
+                    "iteratedAttrs": [
+                        "bamInput"
+                    ],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "threads": true,
+                    "taglist": false
+                },
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "bamInput",
+                    "fastqOutputDir"
+                ],
+                "taglist": "",
+                "threads": 4,
+                "triggerReady": {
+                    "bamInput": false,
+                    "fastqOutputDir": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "bamInput": {
+                    "flag": null,
+                    "label": "Input Bam files",
+                    "type": "file list",
+                    "env": "BAMFILE"
+                },
+                "fastqOutputDir": {
+                    "flag": null,
+                    "label": "Output Fastq files directory",
+                    "type": "directory",
+                    "env": "FASTQDIR"
+                },
+                "threads": {
+                    "flag": "--threads ",
+                    "label": "Threads",
+                    "type": "int"
+                },
+                "taglist": {
+                    "flag": "-T ",
+                    "label": "Taglist, copy arbitrary tags to FASTQ header line",
+                    "type": "file"
+                }
+            },
+            "image_name": "brycenofu/samtools:1.15.1__ubuntu_24.04",
+            "command": [
+                "BASENAME=$(basename \"$BAMFILE\" .bam)",
+                "mkdir -p \"$FASTQDIR\"",
+                "FASTQOUT=\"${FASTQDIR}/${BASENAME}.fastq\" ",
+                "samtools fastq _bwb{threads} _bwb{taglist} \"${BAMFILE}\" > \"${FASTQOUT}\""
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": true,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "bamInput"
+                ],
+                "data": {
+                    "bamInput": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    }
+                },
+                "iteratedAttrs": [
+                    "bamInput"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "bamInput",
+                "fastqOutputDir"
+            ],
+            "options_checked": {
+                "threads": true,
+                "taglist": false
+            },
+            "static_env": {}
+        }
+    ],
+    "links": [
+        {
+            "source": 0,
+            "sink": 3,
+            "source_channel": "data_dir",
+            "sink_channel": "directory"
+        },
+        {
+            "source": 0,
+            "sink": 2,
+            "source_channel": "genome_dir",
+            "sink_channel": "directory"
+        },
+        {
+            "source": 0,
+            "sink": 4,
+            "source_channel": "gtf_file",
+            "sink_channel": "inputGtf"
+        },
+        {
+            "source": 0,
+            "sink": 4,
+            "source_channel": "fusion_dir",
+            "sink_channel": "outputDir"
+        },
+        {
+            "source": 0,
+            "sink": 6,
+            "source_channel": "fusion_dir",
+            "sink_channel": "outputdir"
+        },
+        {
+            "source": 6,
+            "sink": 5,
+            "source_channel": "outputdir",
+            "sink_channel": "inputDirectory"
+        },
+        {
+            "source": 4,
+            "sink": 5,
+            "source_channel": "outputDir",
+            "sink_channel": "Trigger"
+        },
+        {
+            "source": 0,
+            "sink": 6,
+            "source_channel": "bff_breakpoints_file",
+            "sink_channel": "breakpointfile"
+        },
+        {
+            "source": 2,
+            "sink": 7,
+            "source_channel": "directory",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 3,
+            "sink": 7,
+            "source_channel": "directory",
+            "sink_channel": "trigger2"
+        },
+        {
+            "source": 0,
+            "sink": 7,
+            "source_channel": "fast5_dir",
+            "sink_channel": "InputDir"
+        },
+        {
+            "source": 8,
+            "sink": 7,
+            "source_channel": "OutputDir",
+            "sink_channel": "trigger3"
+        },
+        {
+            "source": 0,
+            "sink": 7,
+            "source_channel": "model",
+            "sink_channel": "modelFile"
+        },
+        {
+            "source": 7,
+            "sink": 1,
+            "source_channel": "OutputDir",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 7,
+            "sink": 4,
+            "source_channel": "OutputDir",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 0,
+            "sink": 8,
+            "source_channel": "model_dir",
+            "sink_channel": "modelDir"
+        },
+        {
+            "source": 0,
+            "sink": 6,
+            "source_channel": "bff_guides_file",
+            "sink_channel": "guidefile"
+        },
+        {
+            "source": 7,
+            "sink": 10,
+            "source_channel": "OutputDir",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 9,
+            "sink": 10,
+            "source_channel": "indexfile",
+            "sink_channel": "indexfile"
+        },
+        {
+            "source": 0,
+            "sink": 9,
+            "source_channel": "genome_file",
+            "sink_channel": "RefGenome"
+        },
+        {
+            "source": 7,
+            "sink": 11,
+            "source_channel": "outputfile",
+            "sink_channel": "bamInput"
+        },
+        {
+            "source": 0,
+            "sink": 11,
+            "source_channel": "fastq_dir",
+            "sink_channel": "fastqOutputDir"
+        },
+        {
+            "source": 0,
+            "sink": 10,
+            "source_channel": "fastq_files",
+            "sink_channel": "inputFiles"
+        },
+        {
+            "source": 11,
+            "sink": 9,
+            "source_channel": "fastqOutputDir",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 10,
+            "sink": 6,
+            "source_channel": "outputdir",
+            "sink_channel": "Trigger"
+        },
+        {
+            "source": 0,
+            "sink": 10,
+            "source_channel": "minimap_bam_dir",
+            "sink_channel": "outputdir"
+        }
+    ]
+}

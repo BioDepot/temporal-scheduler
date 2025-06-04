@@ -1,0 +1,2794 @@
+{
+    "run_id": "nanopore",
+    "use_local_storage": true,
+    "nodes": [
+        {
+            "id": 0,
+	    "mem_mb": 4000,
+	    "cores": 4,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Basecall first read chunk",
+            "description": "fast_dorado",
+            "parameters": {
+                "chunksize": 2000,
+                "controlAreaVisible": true,
+                "device": "cuda:all",
+                "doradocmd": "\"dorado-first  basecaller --emit-fastq\"",
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "fastqfilename": "first.fastq",
+                "filterlist": "",
+                "inputConnectionsStore": {
+                    "trigger": [
+                        11
+                    ],
+                    "outputDir": [
+                        14
+                    ],
+                    "inputDir": [
+                        14
+                    ]
+                },
+                "inputDir": "",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "modeldir": "/data/models/dna_r9.4.1_e8_fast@v3.4",
+                "nWorkers": 1,
+                "nameSort": false,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "device": false,
+                    "nameSort": false,
+                    "chunksize": true,
+                    "filterlist": false,
+                    "fastqfilename": true,
+                    "asyncmode": false,
+                    "usecpu": false,
+                    "reference": false
+                },
+                "outputDir": "",
+                "reference": "",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "inputDir"
+                ],
+                "triggerReady": {
+                    "InputDir": false,
+                    "trigger": false,
+                    "trigger2": false,
+                    "inputDir": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "usecpu": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "inputDir": {
+                    "flag": null,
+                    "label": "Input fast5/pod5 directory",
+                    "type": "directory",
+                    "env": "inputDir"
+                },
+                "outputDir": {
+                    "flag": null,
+                    "label": "Output directory",
+                    "type": "directory",
+                    "env": "outputDir"
+                },
+                "modeldir": {
+                    "flag": null,
+                    "label": "Dorado model",
+                    "type": "directory",
+                    "env": "modeldir"
+                },
+                "reference": {
+                    "flag": "--reference",
+                    "label": "Genome reference file",
+                    "type": "file"
+                },
+                "device": {
+                    "default": "cuda:all",
+                    "flag": "--device ",
+                    "label": "Base calling device (e.g. auto, cuda:0)",
+                    "type": "str"
+                },
+                "nameSort": {
+                    "flag": null,
+                    "label": "Generate additional name sorted bam",
+                    "type": "bool",
+                    "env": "nameSort"
+                },
+                "doradocmd": {
+                    "default": "dorado",
+                    "flag": null,
+                    "label": "Dorado command",
+                    "type": "str",
+                    "env": "doradocmd"
+                },
+                "chunksize": {
+                    "default": 2000,
+                    "flag": "-c ",
+                    "label": "Chunk size",
+                    "type": "int",
+                    "env": "chunksize"
+                },
+                "filterlist": {
+                    "flag": "-l ",
+                    "label": "Filter list",
+                    "type": "file",
+                    "env": "filterlist"
+                },
+                "fastqfilename": {
+                    "default": "output.fastq",
+                    "flag": null,
+                    "label": "Fastq filename",
+                    "type": "str",
+                    "env": "fastqfilename"
+                },
+                "usecpu": {
+                    "flag": "-x cpu ",
+                    "label": "Use cpu",
+                    "type": "bool",
+                    "env": "usecpu"
+                }
+            },
+            "image_name": "patrickmckeever/fast_dorado:1.0",
+            "command": [
+                "mkdir -p _bwb{outputDir}",
+                "runDorado.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "inputDir",
+                "outputDir",
+                "modeldir",
+                "doradocmd"
+            ],
+            "options_checked": {
+                "device": false,
+                "nameSort": false,
+                "chunksize": true,
+                "filterlist": false,
+                "fastqfilename": true,
+                "asyncmode": false,
+                "usecpu": false,
+                "reference": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 1,
+	    "mem_mb": 4000,
+	    "cores": 4,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Map first chunks",
+            "description": "minimap2_samtools",
+            "parameters": {
+                "InputFiles": null,
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "indexfile": "/data/hg38p.idx",
+                "inputConnectionsStore": {
+                    "outputdir": [
+                        3
+                    ],
+                    "InputFiles": [
+                        13
+                    ]
+                },
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "InputFiles"
+                    ],
+                    "nWorkers": 1
+                },
+                "mergesam": "",
+                "nWorkers": 1,
+                "nthreads": 1,
+                "numSlots": 1,
+                "optionalflags": "",
+                "optionsChecked": {
+                    "optionalflags": false,
+                    "asyncmode": false,
+                    "saveassam": false,
+                    "splitprefix": true,
+                    "mergesam": false,
+                    "nthreads": false
+                },
+                "outputdir": "",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "outputdir"
+                ],
+                "saveassam": true,
+                "splitprefix": "/tmp",
+                "triggerReady": {
+                    "outputdir": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "outputdir": {
+                    "flag": null,
+                    "label": "Enter Output Directory",
+                    "type": "directory",
+                    "env": "outputdir"
+                },
+                "indexfile": {
+                    "flag": null,
+                    "label": "Enter Path to Index",
+                    "type": "file",
+                    "env": "indexfile"
+                },
+                "InputFiles": {
+                    "flag": null,
+                    "label": "Input fastq files",
+                    "type": "file list",
+                    "env": "inputfiles"
+                },
+                "optionalflags": {
+                    "flag": null,
+                    "label": "Optional minimap flags ",
+                    "type": "str",
+                    "env": "optionalflags"
+                },
+                "saveassam": {
+                    "flag": null,
+                    "label": "Save as sam",
+                    "type": "bool",
+                    "env": "saveassam"
+                },
+                "splitprefix": {
+                    "flag": "--split-prefix ",
+                    "label": "Split prefix directory",
+                    "type": "directory",
+                    "env": "splitprefix"
+                },
+                "mergesam": {
+                    "flag": null,
+                    "label": "Merge into one sam file",
+                    "type": "file",
+                    "env": "mergesam"
+                },
+                "nthreads": {
+                    "default": 1,
+                    "flag": "-t  ",
+                    "label": "Number of threads",
+                    "type": "int",
+                    "env": "nthreads"
+                }
+            },
+            "image_name": "biodepot/minimap2-append:latest",
+            "command": [
+                "runMiniMap2.sh "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "InputFiles"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "outputdir",
+                "indexfile",
+                "InputFiles"
+            ],
+            "options_checked": {
+                "optionalflags": false,
+                "asyncmode": false,
+                "saveassam": false,
+                "splitprefix": true,
+                "mergesam": false,
+                "nthreads": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 2,
+	    "mem_mb": 4000,
+	    "cores": 4,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Find partial matches",
+            "description": "BiodepotFusionFinder",
+            "parameters": {
+                "bamfile": false,
+                "breakpointfile": "/data/bff-test/bps",
+                "breakpoints": [],
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "enrichment": false,
+                "exportGraphics": false,
+                "filterconsensus": 100,
+                "filterends": "",
+                "first": "",
+                "guidefile": "",
+                "guiderange": 50,
+                "inputConnectionsStore": {
+                    "Trigger": [
+                        1
+                    ],
+                    "filterends": [
+                        14
+                    ],
+                    "first": [
+                        14
+                    ],
+                    "inputFile": [
+                        14
+                    ]
+                },
+                "inputfile": "",
+                "is_async": false,
+                "isunsorted": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "breakpoints"
+                    ],
+                    "nWorkers": 1
+                },
+                "keepfirst": false,
+                "keeplast": false,
+                "last": false,
+                "maxgap": 80,
+                "maxoverlap": 20,
+                "minalignqual": 50,
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "breakpointfile": true,
+                    "breakpoints": false,
+                    "minalignqual": false,
+                    "maxoverlap": false,
+                    "maxgap": false,
+                    "filterconsensus": false,
+                    "guidefile": false,
+                    "guiderange": false,
+                    "enrichment": false,
+                    "isunsorted": false,
+                    "support": false,
+                    "outputpoorreads": false,
+                    "filterends": true,
+                    "first": true,
+                    "keepfirst": false,
+                    "keeplast": false,
+                    "last": false,
+                    "inputfile": false,
+                    "outputdir": false,
+                    "bamfile": false,
+                    "outputreadslist": false
+                },
+                "outputdir": "/data/breakpoint_files",
+                "outputpoorreads": false,
+                "outputreadslist": false,
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "Trigger"
+                ],
+                "support": 3,
+                "triggerReady": {
+                    "outputdir": false,
+                    "Trigger": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "breakpointfile": {
+                    "flag": "-b ",
+                    "label": "Breakpoints file",
+                    "type": "file"
+                },
+                "outputdir": {
+                    "default": "/data/breakpoint_files",
+                    "flag": "-d ",
+                    "label": "Output directory",
+                    "type": "directory",
+                    "env": "OUTPUT"
+                },
+                "breakpoints": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "Breakpoints (eg 'chr15::;chr17::')",
+                    "type": "text list"
+                },
+                "bamfile": {
+                    "flag": "--bam ",
+                    "label": "Input file format is bam",
+                    "type": "bool"
+                },
+                "minalignqual": {
+                    "default": 50,
+                    "flag": "-q ",
+                    "label": "Minimum mapq score",
+                    "type": "int",
+                    "env": "bam"
+                },
+                "maxoverlap": {
+                    "default": 20,
+                    "flag": "-o ",
+                    "label": "Max length of fusion overlap",
+                    "type": "int"
+                },
+                "maxgap": {
+                    "default": 80,
+                    "flag": "-g ",
+                    "label": "Max length of fusion gap",
+                    "type": "int"
+                },
+                "filterconsensus": {
+                    "default": 100,
+                    "flag": "-c ",
+                    "label": "Nearby breakpoint distance",
+                    "type": "int"
+                },
+                "guidefile": {
+                    "flag": "-G ",
+                    "label": "Guides file",
+                    "type": "file"
+                },
+                "guiderange": {
+                    "default": 50,
+                    "flag": "-R ",
+                    "label": "Max dist guide can be from read end ",
+                    "type": "int"
+                },
+                "enrichment": {
+                    "default": true,
+                    "flag": "--enrichment ",
+                    "label": "Calculate enrichment",
+                    "type": "bool"
+                },
+                "isunsorted": {
+                    "flag": "--isUnsorted ",
+                    "label": "File is unsorted",
+                    "type": "bool"
+                },
+                "support": {
+                    "default": 3,
+                    "flag": "--support ",
+                    "label": "Minimum supporting reads",
+                    "type": "int"
+                },
+                "outputreadslist": {
+                    "flag": null,
+                    "label": "Output reads list",
+                    "type": "bool",
+                    "env": "outputreadslist"
+                },
+                "outputpoorreads": {
+                    "flag": null,
+                    "label": "Output poor reads",
+                    "type": "bool",
+                    "env": "outputpoorreads"
+                },
+                "filterends": {
+                    "flag": null,
+                    "label": "Save filter of partial matches",
+                    "type": "file",
+                    "env": "filterends"
+                },
+                "keepfirst": {
+                    "flag": "--keepFirst ",
+                    "label": "Keep left unmapped reads",
+                    "type": "bool",
+                    "env": "keepfirst"
+                },
+                "keeplast": {
+                    "flag": "--keepLast",
+                    "label": "Keep right unmapped reads",
+                    "type": "bool",
+                    "env": "keeplast"
+                },
+                "inputfile": {
+                    "flag": "-i ",
+                    "label": "Input sam/bam file",
+                    "type": "file"
+                },
+                "first": {
+                    "flag": "--first ",
+                    "label": "Filter based on first reads file",
+                    "type": "file",
+                    "env": "first"
+                },
+                "last": {
+                    "flag": "--last ",
+                    "label": "Filter based on last reads file",
+                    "type": "file",
+                    "env": "last"
+                }
+            },
+            "image_name": "biodepot/fusionfinder:latest",
+            "command": [
+                "runBFF.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "breakpoints"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [],
+            "options_checked": {
+                "breakpointfile": true,
+                "breakpoints": false,
+                "minalignqual": false,
+                "maxoverlap": false,
+                "maxgap": false,
+                "filterconsensus": false,
+                "guidefile": false,
+                "guiderange": false,
+                "enrichment": false,
+                "isunsorted": false,
+                "support": false,
+                "outputpoorreads": false,
+                "filterends": true,
+                "first": true,
+                "keepfirst": false,
+                "keeplast": false,
+                "last": false,
+                "inputfile": false,
+                "outputdir": false,
+                "bamfile": false,
+                "outputreadslist": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 3,
+	    "mem_mb": 4000,
+	    "cores": 4,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Basecall fusions using HAC model",
+            "description": "fast_dorado",
+            "parameters": {
+                "chunksize": 1000,
+                "controlAreaVisible": true,
+                "device": "cuda:all",
+                "doradocmd": "\"dorado basecaller --emit-fastq \"",
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "fastqfilename": "final.fastq",
+                "filterlist": "/data/bff-test/breakpoint_files/readnames",
+                "inputConnectionsStore": {
+                    "trigger": [
+                        5
+                    ],
+                    "outputDir": [
+                        14
+                    ],
+                    "inputDir": [
+                        14
+                    ]
+                },
+                "inputDir": "",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "modeldir": "/data/models/dna_r9.4.1_e8_hac@v3.3",
+                "nWorkers": 1,
+                "nameSort": false,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "reference": false,
+                    "device": false,
+                    "nameSort": false,
+                    "chunksize": true,
+                    "filterlist": true,
+                    "fastqfilename": true,
+                    "usecpu": false
+                },
+                "outputDir": "",
+                "reference": "",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "trigger"
+                ],
+                "triggerReady": {
+                    "outputDir": false,
+                    "trigger": false,
+                    "trigger2": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "usecpu": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "inputDir": {
+                    "flag": null,
+                    "label": "Input fast5/pod5 directory",
+                    "type": "directory",
+                    "env": "inputDir"
+                },
+                "outputDir": {
+                    "flag": null,
+                    "label": "Output directory",
+                    "type": "directory",
+                    "env": "outputDir"
+                },
+                "modeldir": {
+                    "flag": null,
+                    "label": "Dorado model",
+                    "type": "directory",
+                    "env": "modeldir"
+                },
+                "reference": {
+                    "flag": "--reference",
+                    "label": "Genome reference file",
+                    "type": "file"
+                },
+                "device": {
+                    "default": "cuda:all",
+                    "flag": "--device ",
+                    "label": "Base calling device (e.g. auto, cuda:0)",
+                    "type": "str"
+                },
+                "nameSort": {
+                    "flag": null,
+                    "label": "Generate additional name sorted bam",
+                    "type": "bool",
+                    "env": "nameSort"
+                },
+                "doradocmd": {
+                    "default": "dorado",
+                    "flag": null,
+                    "label": "Dorado command",
+                    "type": "str",
+                    "env": "doradocmd"
+                },
+                "chunksize": {
+                    "default": 2000,
+                    "flag": "-c ",
+                    "label": "Chunk size",
+                    "type": "int",
+                    "env": "chunksize"
+                },
+                "filterlist": {
+                    "flag": "-l ",
+                    "label": "Filter list",
+                    "type": "file",
+                    "env": "filterlist"
+                },
+                "fastqfilename": {
+                    "default": "output.fastq",
+                    "flag": null,
+                    "label": "Fastq filename",
+                    "type": "str",
+                    "env": "fastqfilename"
+                },
+                "usecpu": {
+                    "flag": "-x cpu ",
+                    "label": "Use cpu",
+                    "type": "bool",
+                    "env": "usecpu"
+                }
+            },
+            "image_name": "patrickmckeever/fast_dorado:1.0",
+            "command": [
+                "mkdir -p _bwb{outputDir}",
+                "runDorado.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "inputDir",
+                "outputDir",
+                "modeldir",
+                "doradocmd"
+            ],
+            "options_checked": {
+                "reference": false,
+                "device": false,
+                "nameSort": false,
+                "chunksize": true,
+                "filterlist": true,
+                "fastqfilename": true,
+                "usecpu": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 4,
+	    "mem_mb": 4000,
+	    "cores": 4,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Remap and append to existing fusions",
+            "description": "minimap2_samtools",
+            "parameters": {
+                "InputFiles": null,
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "indexfile": "/data/hg38p.idx",
+                "inputConnectionsStore": {
+                    "outputdir": [
+                        9
+                    ],
+                    "InputFiles": [
+                        12
+                    ]
+                },
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "InputFiles"
+                    ],
+                    "nWorkers": 1
+                },
+                "mergesam": "final1.sam",
+                "nWorkers": 1,
+                "nthreads": 1,
+                "numSlots": 1,
+                "optionalflags": "",
+                "optionsChecked": {
+                    "optionalflags": false,
+                    "saveassam": false,
+                    "splitprefix": true,
+                    "mergesam": true,
+                    "nthreads": false
+                },
+                "outputdir": "/data/bff-test/bam",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "outputdir"
+                ],
+                "saveassam": true,
+                "splitprefix": "/tmp",
+                "triggerReady": {
+                    "outputdir": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "outputdir": {
+                    "flag": null,
+                    "label": "Enter Output Directory",
+                    "type": "directory",
+                    "env": "outputdir"
+                },
+                "indexfile": {
+                    "flag": null,
+                    "label": "Enter Path to Index",
+                    "type": "file",
+                    "env": "indexfile"
+                },
+                "InputFiles": {
+                    "flag": null,
+                    "label": "Input fastq files",
+                    "type": "file list",
+                    "env": "inputfiles"
+                },
+                "optionalflags": {
+                    "flag": null,
+                    "label": "Optional minimap flags ",
+                    "type": "str",
+                    "env": "optionalflags"
+                },
+                "saveassam": {
+                    "flag": null,
+                    "label": "Save as sam",
+                    "type": "bool",
+                    "env": "saveassam"
+                },
+                "splitprefix": {
+                    "flag": "--split-prefix ",
+                    "label": "Split prefix directory",
+                    "type": "directory",
+                    "env": "splitprefix"
+                },
+                "mergesam": {
+                    "flag": null,
+                    "label": "Merge into one sam file",
+                    "type": "file",
+                    "env": "mergesam"
+                },
+                "nthreads": {
+                    "default": 1,
+                    "flag": "-t  ",
+                    "label": "Number of threads",
+                    "type": "int",
+                    "env": "nthreads"
+                }
+            },
+            "image_name": "biodepot/minimap2-append:latest",
+            "command": [
+                "runMiniMap2.sh "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "InputFiles"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "outputdir",
+                "indexfile",
+                "InputFiles"
+            ],
+            "options_checked": {
+                "optionalflags": false,
+                "saveassam": false,
+                "splitprefix": true,
+                "mergesam": true,
+                "nthreads": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 5,
+	    "mem_mb": 4000,
+	    "cores": 4,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Find refined fusions",
+            "description": "BiodepotFusionFinder",
+            "parameters": {
+                "bamfile": false,
+                "breakpointfile": "/data/bff-test/bps",
+                "breakpoints": [],
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "enrichment": false,
+                "exportGraphics": false,
+                "filterconsensus": 100,
+                "filterends": "/data/bff-test/output_bam/filterReads",
+                "first": "/data/bff-test/output_bam/first.sam",
+                "guidefile": "",
+                "guiderange": 50,
+                "inputConnectionsStore": {
+                    "Trigger": [
+                        10
+                    ],
+                    "outputdir": [
+                        10
+                    ]
+                },
+                "inputfile": "/data/bff-test/bam/final1.sam",
+                "is_async": false,
+                "isunsorted": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "breakpoints"
+                    ],
+                    "nWorkers": 1
+                },
+                "keepfirst": false,
+                "keeplast": false,
+                "last": "/data/bff-test/output_bam/last.sam",
+                "maxgap": 80,
+                "maxoverlap": 30,
+                "minalignqual": 50,
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "breakpointfile": true,
+                    "outputdir": true,
+                    "breakpoints": false,
+                    "bamfile": false,
+                    "minalignqual": true,
+                    "maxoverlap": true,
+                    "maxgap": false,
+                    "filterconsensus": false,
+                    "guidefile": false,
+                    "guiderange": false,
+                    "enrichment": false,
+                    "isunsorted": false,
+                    "support": true,
+                    "outputreadslist": false,
+                    "outputpoorreads": false,
+                    "filterends": false,
+                    "keepfirst": false,
+                    "keeplast": false,
+                    "inputfile": true,
+                    "first": false,
+                    "last": false
+                },
+                "outputdir": "/data/bff-test/final_breakpoint_files",
+                "outputpoorreads": false,
+                "outputreadslist": false,
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "Trigger"
+                ],
+                "support": 1,
+                "triggerReady": {
+                    "Trigger": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "breakpointfile": {
+                    "flag": "-b ",
+                    "label": "Breakpoints file",
+                    "type": "file"
+                },
+                "outputdir": {
+                    "default": "/data/breakpoint_files",
+                    "flag": "-d ",
+                    "label": "Output directory",
+                    "type": "directory",
+                    "env": "OUTPUT"
+                },
+                "breakpoints": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "Breakpoints (eg 'chr15::;chr17::')",
+                    "type": "text list"
+                },
+                "bamfile": {
+                    "flag": "--bam ",
+                    "label": "Input file format is bam",
+                    "type": "bool"
+                },
+                "minalignqual": {
+                    "default": 50,
+                    "flag": "-q ",
+                    "label": "Minimum mapq score",
+                    "type": "int",
+                    "env": "bam"
+                },
+                "maxoverlap": {
+                    "default": 20,
+                    "flag": "-o ",
+                    "label": "Max length of fusion overlap",
+                    "type": "int"
+                },
+                "maxgap": {
+                    "default": 80,
+                    "flag": "-g ",
+                    "label": "Max length of fusion gap",
+                    "type": "int"
+                },
+                "filterconsensus": {
+                    "default": 100,
+                    "flag": "-c ",
+                    "label": "Nearby breakpoint distance",
+                    "type": "int"
+                },
+                "guidefile": {
+                    "flag": "-G ",
+                    "label": "Guides file",
+                    "type": "file"
+                },
+                "guiderange": {
+                    "default": 50,
+                    "flag": "-R ",
+                    "label": "Max dist guide can be from read end ",
+                    "type": "int"
+                },
+                "enrichment": {
+                    "default": true,
+                    "flag": "--enrichment ",
+                    "label": "Calculate enrichment",
+                    "type": "bool"
+                },
+                "isunsorted": {
+                    "flag": "--isUnsorted ",
+                    "label": "File is unsorted",
+                    "type": "bool"
+                },
+                "support": {
+                    "default": 3,
+                    "flag": "--support ",
+                    "label": "Minimum supporting reads",
+                    "type": "int"
+                },
+                "outputreadslist": {
+                    "flag": null,
+                    "label": "Output reads list",
+                    "type": "bool",
+                    "env": "outputreadslist"
+                },
+                "outputpoorreads": {
+                    "flag": null,
+                    "label": "Output poor reads",
+                    "type": "bool",
+                    "env": "outputpoorreads"
+                },
+                "filterends": {
+                    "flag": null,
+                    "label": "Save filter of partial matches",
+                    "type": "file",
+                    "env": "filterends"
+                },
+                "keepfirst": {
+                    "flag": "--keepFirst ",
+                    "label": "Keep left unmapped reads",
+                    "type": "bool",
+                    "env": "keepfirst"
+                },
+                "keeplast": {
+                    "flag": "--keepLast",
+                    "label": "Keep right unmapped reads",
+                    "type": "bool",
+                    "env": "keeplast"
+                },
+                "inputfile": {
+                    "flag": "-i ",
+                    "label": "Input sam/bam file",
+                    "type": "file"
+                },
+                "first": {
+                    "flag": "--first ",
+                    "label": "Filter based on first reads file",
+                    "type": "file",
+                    "env": "first"
+                },
+                "last": {
+                    "flag": "--last ",
+                    "label": "Filter based on last reads file",
+                    "type": "file",
+                    "env": "last"
+                }
+            },
+            "image_name": "biodepot/fusionfinder:latest",
+            "command": [
+                "runBFF.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "breakpoints"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [],
+            "options_checked": {
+                "breakpointfile": true,
+                "outputdir": true,
+                "breakpoints": false,
+                "bamfile": false,
+                "minalignqual": true,
+                "maxoverlap": true,
+                "maxgap": false,
+                "filterconsensus": false,
+                "guidefile": false,
+                "guiderange": false,
+                "enrichment": false,
+                "isunsorted": false,
+                "support": true,
+                "outputreadslist": false,
+                "outputpoorreads": false,
+                "filterends": false,
+                "keepfirst": false,
+                "keeplast": false,
+                "inputfile": true,
+                "first": false,
+                "last": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 6,
+	    "mem_mb": 4000,
+	    "cores": 4,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Basecall all chunks of matches",
+            "description": "fast_dorado",
+            "parameters": {
+                "chunksize": 1000,
+                "controlAreaVisible": true,
+                "device": "cuda:all",
+                "doradocmd": "\"dorado basecaller --emit-fastq \"",
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "fastqfilename": "filtered.fastq",
+                "filterlist": "",
+                "inputConnectionsStore": {
+                    "trigger": [
+                        2
+                    ],
+                    "filterlist": [
+                        14
+                    ],
+                    "outputDir": [
+                        14
+                    ],
+                    "inputDir": [
+                        14
+                    ]
+                },
+                "inputDir": "",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "modeldir": "/data/models/dna_r9.4.1_e8_fast@v3.4",
+                "nWorkers": 1,
+                "nameSort": false,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "reference": false,
+                    "device": false,
+                    "nameSort": false,
+                    "chunksize": true,
+                    "filterlist": true,
+                    "fastqfilename": true,
+                    "usecpu": false
+                },
+                "outputDir": "",
+                "reference": "",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "trigger"
+                ],
+                "triggerReady": {
+                    "trigger": false,
+                    "trigger2": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "usecpu": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "inputDir": {
+                    "flag": null,
+                    "label": "Input fast5/pod5 directory",
+                    "type": "directory",
+                    "env": "inputDir"
+                },
+                "outputDir": {
+                    "flag": null,
+                    "label": "Output directory",
+                    "type": "directory",
+                    "env": "outputDir"
+                },
+                "modeldir": {
+                    "flag": null,
+                    "label": "Dorado model",
+                    "type": "directory",
+                    "env": "modeldir"
+                },
+                "reference": {
+                    "flag": "--reference",
+                    "label": "Genome reference file",
+                    "type": "file"
+                },
+                "device": {
+                    "default": "cuda:all",
+                    "flag": "--device ",
+                    "label": "Base calling device (e.g. auto, cuda:0)",
+                    "type": "str"
+                },
+                "nameSort": {
+                    "flag": null,
+                    "label": "Generate additional name sorted bam",
+                    "type": "bool",
+                    "env": "nameSort"
+                },
+                "doradocmd": {
+                    "default": "dorado",
+                    "flag": null,
+                    "label": "Dorado command",
+                    "type": "str",
+                    "env": "doradocmd"
+                },
+                "chunksize": {
+                    "default": 2000,
+                    "flag": "-c ",
+                    "label": "Chunk size",
+                    "type": "int",
+                    "env": "chunksize"
+                },
+                "filterlist": {
+                    "flag": "-l ",
+                    "label": "Filter list",
+                    "type": "file",
+                    "env": "filterlist"
+                },
+                "fastqfilename": {
+                    "default": "output.fastq",
+                    "flag": null,
+                    "label": "Fastq filename",
+                    "type": "str",
+                    "env": "fastqfilename"
+                },
+                "usecpu": {
+                    "flag": "-x cpu ",
+                    "label": "Use cpu",
+                    "type": "bool",
+                    "env": "usecpu"
+                }
+            },
+            "image_name": "patrickmckeever/fast_dorado:1.0",
+            "command": [
+                "mkdir -p _bwb{outputDir}",
+                "runDorado.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "inputDir",
+                "outputDir",
+                "modeldir",
+                "doradocmd"
+            ],
+            "options_checked": {
+                "reference": false,
+                "device": false,
+                "nameSort": false,
+                "chunksize": true,
+                "filterlist": true,
+                "fastqfilename": true,
+                "usecpu": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 7,
+	    "mem_mb": 4000,
+	    "cores": 4,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Map complete reads",
+            "description": "minimap2_samtools",
+            "parameters": {
+                "InputFiles": null,
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "indexfile": "/data/hg38p.idx",
+                "inputConnectionsStore": {
+                    "outputdir": [
+                        6
+                    ],
+                    "InputFiles": [
+                        11
+                    ]
+                },
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "InputFiles"
+                    ],
+                    "nWorkers": 1
+                },
+                "mergesam": "final1.sam",
+                "nWorkers": 1,
+                "nthreads": 1,
+                "numSlots": 1,
+                "optionalflags": "",
+                "optionsChecked": {
+                    "optionalflags": false,
+                    "saveassam": false,
+                    "splitprefix": true,
+                    "mergesam": false,
+                    "nthreads": false
+                },
+                "outputdir": "",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "outputdir"
+                ],
+                "saveassam": true,
+                "splitprefix": "/tmp",
+                "triggerReady": {
+                    "outputdir": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "outputdir": {
+                    "flag": null,
+                    "label": "Enter Output Directory",
+                    "type": "directory",
+                    "env": "outputdir"
+                },
+                "indexfile": {
+                    "flag": null,
+                    "label": "Enter Path to Index",
+                    "type": "file",
+                    "env": "indexfile"
+                },
+                "InputFiles": {
+                    "flag": null,
+                    "label": "Input fastq files",
+                    "type": "file list",
+                    "env": "inputfiles"
+                },
+                "optionalflags": {
+                    "flag": null,
+                    "label": "Optional minimap flags ",
+                    "type": "str",
+                    "env": "optionalflags"
+                },
+                "saveassam": {
+                    "flag": null,
+                    "label": "Save as sam",
+                    "type": "bool",
+                    "env": "saveassam"
+                },
+                "splitprefix": {
+                    "flag": "--split-prefix ",
+                    "label": "Split prefix directory",
+                    "type": "directory",
+                    "env": "splitprefix"
+                },
+                "mergesam": {
+                    "flag": null,
+                    "label": "Merge into one sam file",
+                    "type": "file",
+                    "env": "mergesam"
+                },
+                "nthreads": {
+                    "default": 1,
+                    "flag": "-t  ",
+                    "label": "Number of threads",
+                    "type": "int",
+                    "env": "nthreads"
+                }
+            },
+            "image_name": "biodepot/minimap2-append:latest",
+            "command": [
+                "runMiniMap2.sh "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "InputFiles"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "outputdir",
+                "indexfile",
+                "InputFiles"
+            ],
+            "options_checked": {
+                "optionalflags": false,
+                "saveassam": false,
+                "splitprefix": true,
+                "mergesam": false,
+                "nthreads": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 8,
+	    "mem_mb": 4000,
+	    "cores": 4,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Find fusions",
+            "description": "BiodepotFusionFinder",
+            "parameters": {
+                "bamfile": false,
+                "breakpointfile": "/data/bff-test/bps",
+                "breakpoints": [],
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "enrichment": false,
+                "exportGraphics": false,
+                "filterconsensus": 100,
+                "filterends": "/data/bff-test/fusionFilter",
+                "first": "",
+                "guidefile": "",
+                "guiderange": 50,
+                "inputConnectionsStore": {
+                    "Trigger": [
+                        4
+                    ],
+                    "inputfile": [
+                        14
+                    ],
+                    "inputFile": [
+                        14
+                    ]
+                },
+                "inputfile": "",
+                "is_async": false,
+                "isunsorted": true,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "breakpoints"
+                    ],
+                    "nWorkers": 1
+                },
+                "keepfirst": false,
+                "keeplast": false,
+                "last": "",
+                "maxgap": 80,
+                "maxoverlap": 30,
+                "minalignqual": 50,
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "breakpointfile": true,
+                    "outputdir": true,
+                    "breakpoints": false,
+                    "bamfile": false,
+                    "minalignqual": true,
+                    "maxoverlap": false,
+                    "maxgap": false,
+                    "filterconsensus": true,
+                    "guidefile": false,
+                    "guiderange": false,
+                    "enrichment": false,
+                    "isunsorted": false,
+                    "support": true,
+                    "outputreadslist": false,
+                    "outputpoorreads": false,
+                    "filterends": false,
+                    "keepfirst": false,
+                    "keeplast": false,
+                    "inputfile": true,
+                    "first": false,
+                    "last": false
+                },
+                "outputdir": "/data/bff-test/breakpoint_files",
+                "outputpoorreads": false,
+                "outputreadslist": false,
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "Trigger"
+                ],
+                "support": 1,
+                "triggerReady": {
+                    "Trigger": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "breakpointfile": {
+                    "flag": "-b ",
+                    "label": "Breakpoints file",
+                    "type": "file"
+                },
+                "outputdir": {
+                    "default": "/data/breakpoint_files",
+                    "flag": "-d ",
+                    "label": "Output directory",
+                    "type": "directory",
+                    "env": "OUTPUT"
+                },
+                "breakpoints": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "Breakpoints (eg 'chr15::;chr17::')",
+                    "type": "text list"
+                },
+                "bamfile": {
+                    "flag": "--bam ",
+                    "label": "Input file format is bam",
+                    "type": "bool"
+                },
+                "minalignqual": {
+                    "default": 50,
+                    "flag": "-q ",
+                    "label": "Minimum mapq score",
+                    "type": "int",
+                    "env": "bam"
+                },
+                "maxoverlap": {
+                    "default": 20,
+                    "flag": "-o ",
+                    "label": "Max length of fusion overlap",
+                    "type": "int"
+                },
+                "maxgap": {
+                    "default": 80,
+                    "flag": "-g ",
+                    "label": "Max length of fusion gap",
+                    "type": "int"
+                },
+                "filterconsensus": {
+                    "default": 100,
+                    "flag": "-c ",
+                    "label": "Nearby breakpoint distance",
+                    "type": "int"
+                },
+                "guidefile": {
+                    "flag": "-G ",
+                    "label": "Guides file",
+                    "type": "file"
+                },
+                "guiderange": {
+                    "default": 50,
+                    "flag": "-R ",
+                    "label": "Max dist guide can be from read end ",
+                    "type": "int"
+                },
+                "enrichment": {
+                    "default": true,
+                    "flag": "--enrichment ",
+                    "label": "Calculate enrichment",
+                    "type": "bool"
+                },
+                "isunsorted": {
+                    "flag": "--isUnsorted ",
+                    "label": "File is unsorted",
+                    "type": "bool"
+                },
+                "support": {
+                    "default": 3,
+                    "flag": "--support ",
+                    "label": "Minimum supporting reads",
+                    "type": "int"
+                },
+                "outputreadslist": {
+                    "flag": null,
+                    "label": "Output reads list",
+                    "type": "bool",
+                    "env": "outputreadslist"
+                },
+                "outputpoorreads": {
+                    "flag": null,
+                    "label": "Output poor reads",
+                    "type": "bool",
+                    "env": "outputpoorreads"
+                },
+                "filterends": {
+                    "flag": null,
+                    "label": "Save filter of partial matches",
+                    "type": "file",
+                    "env": "filterends"
+                },
+                "keepfirst": {
+                    "flag": "--keepFirst ",
+                    "label": "Keep left unmapped reads",
+                    "type": "bool",
+                    "env": "keepfirst"
+                },
+                "keeplast": {
+                    "flag": "--keepLast",
+                    "label": "Keep right unmapped reads",
+                    "type": "bool",
+                    "env": "keeplast"
+                },
+                "inputfile": {
+                    "flag": "-i ",
+                    "label": "Input sam/bam file",
+                    "type": "file"
+                },
+                "first": {
+                    "flag": "--first ",
+                    "label": "Filter based on first reads file",
+                    "type": "file",
+                    "env": "first"
+                },
+                "last": {
+                    "flag": "--last ",
+                    "label": "Filter based on last reads file",
+                    "type": "file",
+                    "env": "last"
+                }
+            },
+            "image_name": "biodepot/fusionfinder:latest",
+            "command": [
+                "runBFF.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "breakpoints"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [],
+            "options_checked": {
+                "breakpointfile": true,
+                "outputdir": true,
+                "breakpoints": false,
+                "bamfile": false,
+                "minalignqual": true,
+                "maxoverlap": false,
+                "maxgap": false,
+                "filterconsensus": true,
+                "guidefile": false,
+                "guiderange": false,
+                "enrichment": false,
+                "isunsorted": false,
+                "support": true,
+                "outputreadslist": false,
+                "outputpoorreads": false,
+                "filterends": false,
+                "keepfirst": false,
+                "keeplast": false,
+                "inputfile": true,
+                "first": false,
+                "last": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 9,
+	    "mem_mb": 1000,
+	    "cores": 1,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Cleanup",
+            "description": "Cleanup",
+            "parameters": {
+                "basecallext": "pod5",
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "fastqext": "fastq",
+                "inputConnectionsStore": {
+                    "trigger": [
+                        7
+                    ]
+                },
+                "inputDir": "/data/bff-test/data/pod5",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "modelDir": "",
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "bucket_name": true,
+                    "topic_name": false,
+                    "recv_topic": false,
+                    "recv_subscription": false,
+                    "function_name": false,
+                    "policy_name": false,
+                    "role_name": false,
+                    "work_dir": false,
+                    "local_work_dir": false,
+                    "function_region": false,
+                    "cloud_split_dir": false,
+                    "inputDir": true,
+                    "outputDir": true,
+                    "modelDir": false,
+                    "referenceDir": false,
+                    "extension": true,
+                    "fastqext": true,
+                    "basecallext": true
+                },
+                "outputDir": "",
+                "referenceDir": "",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "trigger"
+                ],
+                "triggerReady": {
+                    "inputDir": false,
+                    "outputDir": false,
+                    "trigger": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "inputDir": {
+                    "flag": null,
+                    "label": "Remove files from input directory",
+                    "type": "directory",
+                    "env": "inputDir"
+                },
+                "outputDir": {
+                    "flag": null,
+                    "label": "Remove files from output bam directory",
+                    "type": "directory",
+                    "env": "outputDir"
+                },
+                "modelDir": {
+                    "flag": null,
+                    "label": "Remove files from model directory",
+                    "type": "directory",
+                    "env": "modelDir"
+                },
+                "referenceDir": {
+                    "flag": null,
+                    "label": "Remove files from reference directory",
+                    "type": "directory",
+                    "env": "referenceDir"
+                },
+                "fastqext": {
+                    "default": "fastq",
+                    "flag": null,
+                    "label": "Fastq file extension",
+                    "type": "str",
+                    "env": "fastqext"
+                },
+                "basecallext": {
+                    "default": "fast5",
+                    "flag": null,
+                    "label": "Basecalling file extension",
+                    "type": "str",
+                    "env": "basecallext"
+                }
+            },
+            "image_name": "biodepot/fast-fusion-finder-cleanup:latest",
+            "command": [
+                "cleanup.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [],
+            "options_checked": {
+                "bucket_name": true,
+                "topic_name": false,
+                "recv_topic": false,
+                "recv_subscription": false,
+                "function_name": false,
+                "policy_name": false,
+                "role_name": false,
+                "work_dir": false,
+                "local_work_dir": false,
+                "function_region": false,
+                "cloud_split_dir": false,
+                "inputDir": true,
+                "outputDir": true,
+                "modelDir": false,
+                "referenceDir": false,
+                "extension": true,
+                "fastqext": true,
+                "basecallext": true
+            },
+            "static_env": {}
+        },
+        {
+            "id": 10,
+	    "mem_mb": 1000,
+	    "cores": 1,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": true,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "ScanDirectory",
+            "description": "ScanDirectory",
+            "parameters": {
+                "controlAreaVisible": true,
+                "done_dir": "/data/bff-test/data/pod5.done",
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "filter_list": null,
+                "filter_sam": null,
+                "final_filter_sam": null,
+                "inputConnectionsStore": {},
+                "inputExt": "pod5",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "local_dir": "/data/bff-test/data/pod5",
+                "localscandir": "/data/pod5_complete",
+                "maxFiles": 1,
+                "nWorkers": 1,
+                "nthreads": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "nthreads": false,
+                    "maxFiles": true,
+                    "serverip": false,
+                    "remote_dir": false,
+                    "sshUser": false,
+                    "sshDir": false,
+                    "uselocal": false,
+                    "localscandir": true,
+                    "output_dir": false,
+                    "filter_list": false,
+                    "filter_sam": false,
+                    "final_filter_sam": false
+                },
+                "output_dir": null,
+                "remote_dir": "/srv/lhhung/nanopore-test/",
+                "repeat": true,
+                "restart_when_done": false,
+                "runMode": 0,
+                "runTriggers": [],
+                "serverip": "128.208.252.232",
+                "sshDir": "/home/.ssh",
+                "sshUser": "lhhung",
+                "triggerReady": {},
+                "useGpu": false,
+                "useScheduler": false,
+                "uselocal": true,
+                "working_dir": "/data/bff-test/working"
+            },
+            "arg_types": {
+                "serverip": {
+                    "default": "127.0.0.1",
+                    "flag": null,
+                    "label": "Server ip",
+                    "type": "str",
+                    "env": "remote_server"
+                },
+                "remote_dir": {
+                    "flag": null,
+                    "label": "Remote directory to scan",
+                    "type": "str",
+                    "env": "remote_dir"
+                },
+                "local_dir": {
+                    "flag": null,
+                    "label": "Local directory to copy to",
+                    "type": "directory",
+                    "env": "local_dir"
+                },
+                "working_dir": {
+                    "flag": null,
+                    "label": "Directory to keep track of work in progress",
+                    "type": "directory",
+                    "env": "working_dir"
+                },
+                "sshUser": {
+                    "flag": null,
+                    "label": "SSH Username",
+                    "type": "str",
+                    "env": "sshUser"
+                },
+                "nthreads": {
+                    "default": 1,
+                    "flag": null,
+                    "label": "Number of threads for copying",
+                    "type": "int",
+                    "env": "nthreads"
+                },
+                "sshDir": {
+                    "flag": null,
+                    "label": ".ssh directory",
+                    "type": "directory",
+                    "env": "sshDir"
+                },
+                "done_dir": {
+                    "flag": null,
+                    "label": "Directory of processed files",
+                    "type": "directory",
+                    "env": "done_dir"
+                },
+                "inputExt": {
+                    "default": "fast5",
+                    "flag": null,
+                    "label": "Input file extension",
+                    "type": "str",
+                    "env": "inputExt"
+                },
+                "maxFiles": {
+                    "flag": null,
+                    "label": "Max number of files to transfer at a time",
+                    "type": "int",
+                    "env": "maxFiles"
+                },
+                "uselocal": {
+                    "flag": null,
+                    "label": "Server is localhost",
+                    "type": "bool",
+                    "env": "localcopy"
+                },
+                "localscandir": {
+                    "flag": null,
+                    "label": "Local directory to scan",
+                    "type": "directory",
+                    "env": "local_scan_dir"
+                },
+                "output_files": {
+                    "flag": null,
+                    "type": "file list"
+                }
+            },
+            "image_name": "patrickmckeever/scanandcopy:3.0",
+            "command": [
+                "scanAndCopy.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "local_dir",
+                "working_dir",
+                "done_dir",
+                "inputExt"
+            ],
+            "options_checked": {
+                "nthreads": false,
+                "maxFiles": true,
+                "serverip": false,
+                "remote_dir": false,
+                "sshUser": false,
+                "sshDir": false,
+                "uselocal": false,
+                "localscandir": true,
+                "output_dir": false,
+                "filter_list": false,
+                "filter_sam": false,
+                "final_filter_sam": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 11,
+	    "mem_mb": 500,
+	    "cores": 1,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Find filtered fastq",
+            "description": "findFiles",
+            "parameters": {
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "inputConnectionsStore": {
+                    "inputFile": [
+                        6
+                    ],
+                    "inputDir": [
+                        6
+                    ]
+                },
+                "inputDir": "",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "outFiles"
+                    ],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "outFiles": false
+                },
+                "outFiles": null,
+                "pattern": "filtered*.fastq",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "inputDir"
+                ],
+                "triggerReady": {
+                    "pattern": false,
+                    "inputDir": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "inputDir": {
+                    "flag": null,
+                    "label": "input dir",
+                    "type": "directory"
+                },
+                "pattern": {
+                    "flag": null,
+                    "label": "pattern",
+                    "type": "str"
+                },
+                "outFiles": {
+                    "flag": null,
+                    "type": "file list"
+                }
+            },
+            "image_name": "biodepot/bash_utilities:alpine-3.17.1__24884064__91e2e7b9__1a66801e",
+            "command": [
+                "mkdir -p /tmp/output",
+                "find _bwb{inputDir} -name \"_bwb{pattern}\" > /tmp/output/outFiles"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "outFiles"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "inputDir",
+                "pattern"
+            ],
+            "options_checked": {
+                "outFiles": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 12,
+	    "mem_mb": 500,
+	    "cores": 1,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Find final fastq",
+            "description": "findFiles",
+            "parameters": {
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "inputConnectionsStore": {
+                    "inputFile": [
+                        9
+                    ],
+                    "inputDir": [
+                        9
+                    ]
+                },
+                "inputDir": "",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "outFiles"
+                    ],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "outFiles": false
+                },
+                "outFiles": null,
+                "pattern": "final*.fastq",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "inputDir"
+                ],
+                "triggerReady": {
+                    "inputDir": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "inputDir": {
+                    "flag": null,
+                    "label": "input dir",
+                    "type": "directory"
+                },
+                "pattern": {
+                    "flag": null,
+                    "label": "pattern",
+                    "type": "str"
+                },
+                "outFiles": {
+                    "flag": null,
+                    "type": "file list"
+                }
+            },
+            "image_name": "biodepot/bash_utilities:alpine-3.17.1__24884064__91e2e7b9__1a66801e",
+            "command": [
+                "mkdir -p /tmp/output",
+                "find _bwb{inputDir} -name \"_bwb{pattern}\" > /tmp/output/outFiles"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "outFiles"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "inputDir",
+                "pattern"
+            ],
+            "options_checked": {
+                "outFiles": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 13,
+	    "mem_mb": 500,
+	    "cores": 1,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Find fastq 1",
+            "description": "findFiles",
+            "parameters": {
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "inputConnectionsStore": {
+                    "inputDir": [
+                        3
+                    ]
+                },
+                "inputDir": "",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "outFiles"
+                    ],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "outFiles": false
+                },
+                "outFiles": null,
+                "pattern": "*.fastq",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "inputDir"
+                ],
+                "triggerReady": {
+                    "inputDir": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "inputDir": {
+                    "flag": null,
+                    "label": "input dir",
+                    "type": "directory"
+                },
+                "pattern": {
+                    "flag": null,
+                    "label": "pattern",
+                    "type": "str"
+                },
+                "outFiles": {
+                    "flag": null,
+                    "type": "file list"
+                }
+            },
+            "image_name": "biodepot/bash_utilities:alpine-3.17.1__24884064__91e2e7b9__1a66801e",
+            "command": [
+                "mkdir -p /tmp/output",
+                "find _bwb{inputDir} -name \"_bwb{pattern}\" > /tmp/output/outFiles"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "outFiles"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "inputDir",
+                "pattern"
+            ],
+            "options_checked": {
+                "outFiles": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 14,
+	    "mem_mb": 500,
+	    "cores": 1,
+	    "gpus": 0,
+            "async": true,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Yield_pod5",
+            "description": "Yield_pod5",
+            "parameters": {
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "filter_list": null,
+                "filter_sam": null,
+                "final_filter_sam": null,
+                "inputConnectionsStore": {},
+                "is_async": false,
+                "iterate": true,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "pod5Files"
+                    ],
+                    "data": {
+                        "pod5Files": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        }
+                    },
+                    "iteratedAttrs": [
+                        "pod5Files"
+                    ],
+                    "nWorkers": 1
+                },
+                "local_dir": null,
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "outDir": false,
+                    "pod5Files": true,
+                    "local_dir": false,
+                    "filter_list": false,
+                    "filter_sam": false,
+                    "output_dir": false,
+                    "final_filter_sam": false
+                },
+                "outDir": "",
+                "output_dir": null,
+                "pod5Files": "",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 0,
+                "runTriggers": [],
+                "triggerReady": {},
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "outDir": {
+                    "flag": null,
+                    "label": "Output Dir",
+                    "type": "directory"
+                },
+                "pod5Files": {
+                    "flag": null,
+                    "label": "Pod 5",
+                    "type": "file list",
+                    "env": "podFile"
+                },
+                "local_dir": {
+                    "flag": null,
+                    "type": "str"
+                },
+                "output_dir": {
+                    "flag": null,
+                    "type": "str"
+                },
+                "filter_list": {
+                    "flag": null,
+                    "type": "str"
+                },
+                "filter_sam": {
+                    "flag": null,
+                    "type": "str"
+                },
+                "final_filter_sam": {
+                    "flag": null,
+                    "type": "str"
+                }
+            },
+            "image_name": "biodepot/bash_utilities:alpine-3.17.1__24884064__91e2e7b9__1a66801e",
+            "command": [
+                "mkdir -p /tmp/output",
+                "mkdir -p \"/data/bff-test/$(basename \"${podFile}\" .${podFile##*.})\"",
+                "echo \"/data/bff-test/$(basename \"${podFile}\" .${podFile##*.})\" > /tmp/output/local_dir",
+                "echo \"/data/bff-test/$(basename \"${podFile}\" .${podFile##*.})\" > /tmp/output/output_dir",
+                "echo \"/data/bff-test/$(basename \"${podFile}\" .${podFile##*.})/firstFilter\" > /tmp/output/filter_list",
+                "echo \"/data/bff-test/$(basename \"${podFile}\" .${podFile##*.})/first.sam\" > /tmp/output/filter_sam",
+                "echo \"/data/bff-test/$(basename \"${podFile}\" .${podFile##*.})/filtered.sam\" > /tmp/output/final_filter_sam",
+                "cp $podFile /data/bff-test/$(basename \"${podFile}\" .${podFile##*.})"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": true,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "pod5Files"
+                ],
+                "data": {
+                    "pod5Files": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    }
+                },
+                "iteratedAttrs": [
+                    "pod5Files"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [],
+            "options_checked": {
+                "outDir": false,
+                "pod5Files": true,
+                "local_dir": false,
+                "filter_list": false,
+                "filter_sam": false,
+                "output_dir": false,
+                "final_filter_sam": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 15,
+	    "mem_mb": 500,
+	    "cores": 1,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": 14,
+            "slots": 1,
+            "title": "Sink",
+            "description": "Does nothing, just sink",
+            "parameters": {
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "inputConnectionsStore": {
+                    "inputDir": [
+                        3
+                    ]
+                },
+                "inputDir": "",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "outFiles"
+                    ],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "outFiles": false
+                },
+                "outFiles": null,
+                "pattern": "*.fastq",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "inputDir"
+                ],
+                "triggerReady": {
+                    "inputDir": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "trigger": {
+                    "flag": null,
+                    "label": "input dir",
+                    "type": "directory"
+                }            
+	    },
+            "image_name": "biodepot/bash_utilities:alpine-3.17.1__24884064__91e2e7b9__1a66801e",
+            "command": [
+                "ls"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "outFiles"
+                ],
+                "nWorkers": 1
+            },
+            "options_checked": {
+            },
+            "static_env": {}
+        },
+        {
+            "id": 16,
+	    "mem_mb": 500,
+	    "cores": 1,
+	    "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": 10,
+            "slots": 1,
+            "title": "Sink2",
+            "description": "Does nothing, just sink",
+            "parameters": {
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "inputConnectionsStore": {
+                    "inputDir": [
+                        3
+                    ]
+                },
+                "inputDir": "",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "outFiles"
+                    ],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "outFiles": false
+                },
+                "outFiles": null,
+                "pattern": "*.fastq",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "inputDir"
+                ],
+                "triggerReady": {
+                    "inputDir": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "trigger": {
+                    "flag": null,
+                    "label": "input dir",
+                    "type": "directory"
+                }            
+	    },
+            "image_name": "biodepot/bash_utilities:alpine-3.17.1__24884064__91e2e7b9__1a66801e",
+            "command": [
+                "ls"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "outFiles"
+                ],
+                "nWorkers": 1
+            },
+            "options_checked": {
+            },
+            "static_env": {}
+        }
+    ],
+    "links": [
+        {
+            "source": 1,
+            "sink": 2,
+            "source_channel": "outputdir",
+            "sink_channel": "Trigger"
+        },
+        {
+            "source": 0,
+            "sink": 1,
+            "source_channel": "outputDir",
+            "sink_channel": "outputdir"
+        },
+        {
+            "source": 7,
+            "sink": 8,
+            "source_channel": "outputdir",
+            "sink_channel": "Trigger"
+        },
+        {
+            "source": 6,
+            "sink": 7,
+            "source_channel": "outputDir",
+            "sink_channel": "outputdir"
+        },
+        {
+            "source": 2,
+            "sink": 6,
+            "source_channel": "outputdir",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 5,
+            "sink": 9,
+            "source_channel": "outputdir",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 14,
+            "sink": 9,
+            "source_channel": "output_dir",
+            "sink_channel": "outputDir"
+        },
+        {
+            "source": 8,
+            "sink": 3,
+            "source_channel": "outputdir",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 4,
+            "sink": 5,
+            "source_channel": "outputdir",
+            "sink_channel": "Trigger"
+        },
+        {
+            "source": 11,
+            "sink": 7,
+            "source_channel": "outFiles",
+            "sink_channel": "InputFiles"
+        },
+        {
+            "source": 12,
+            "sink": 4,
+            "source_channel": "outFiles",
+            "sink_channel": "InputFiles"
+        },
+        {
+            "source": 6,
+            "sink": 11,
+            "source_channel": "outputDir",
+            "sink_channel": "inputDir"
+        },
+        {
+            "source": 3,
+            "sink": 12,
+            "source_channel": "outputDir",
+            "sink_channel": "inputDir"
+        },
+        {
+            "source": 0,
+            "sink": 13,
+            "source_channel": "outputDir",
+            "sink_channel": "inputDir"
+        },
+        {
+            "source": 13,
+            "sink": 1,
+            "source_channel": "outFiles",
+            "sink_channel": "InputFiles"
+        },
+        {
+            "source": 14,
+            "sink": 2,
+            "source_channel": "filter_list",
+            "sink_channel": "filterends"
+        },
+        {
+            "source": 14,
+            "sink": 2,
+            "source_channel": "filter_sam",
+            "sink_channel": "first"
+        },
+        {
+            "source": 14,
+            "sink": 2,
+            "source_channel": "local_dir",
+            "sink_channel": "inputFile"
+        },
+        {
+            "source": 14,
+            "sink": 8,
+            "source_channel": "final_filter_sam",
+            "sink_channel": "inputfile"
+        },
+        {
+            "source": 14,
+            "sink": 8,
+            "source_channel": "local_dir",
+            "sink_channel": "inputFile"
+        },
+        {
+            "source": 14,
+            "sink": 0,
+            "source_channel": "output_dir",
+            "sink_channel": "outputDir"
+        },
+        {
+            "source": 14,
+            "sink": 0,
+            "source_channel": "local_dir",
+            "sink_channel": "inputDir"
+        },
+        {
+            "source": 14,
+            "sink": 6,
+            "source_channel": "filter_list",
+            "sink_channel": "filterlist"
+        },
+        {
+            "source": 14,
+            "sink": 6,
+            "source_channel": "output_dir",
+            "sink_channel": "outputDir"
+        },
+        {
+            "source": 14,
+            "sink": 6,
+            "source_channel": "local_dir",
+            "sink_channel": "inputDir"
+        },
+        {
+            "source": 14,
+            "sink": 3,
+            "source_channel": "output_dir",
+            "sink_channel": "outputDir"
+        },
+        {
+            "source": 14,
+            "sink": 3,
+            "source_channel": "local_dir",
+            "sink_channel": "inputDir"
+        },
+        {
+            "source": 10,
+            "sink": 14,
+            "source_channel": "output_files",
+            "sink_channel": "pod5Files"
+        },
+        {
+            "source": 9,
+            "sink": 15,
+            "source_channel": "outputDir",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 9,
+            "sink": 16,
+            "source_channel": "outputDir",
+            "sink_channel": "trigger"
+        }
+    ]
+}

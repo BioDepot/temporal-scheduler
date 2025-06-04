@@ -1,0 +1,86 @@
+<root>
+    <nodes>
+        <node id="0" name="downloadURL" position="(300, 150)" project_name="star-salmon-short"
+              qualified_name="star_salmon_short.OWdownloadURL.OWdownloadURL" title="Download release-98 GRCh38 files"
+              version=""/>
+        <node id="1" name="starIndex" position="(596.0, 193.0)" project_name="star-salmon-short"
+              qualified_name="star_salmon_short.OWstarIndex.OWstarIndex" title="Make STAR indices" version=""/>
+        <node id="2" name="starAlign" position="(176.0, 452.0)" project_name="star-salmon-short"
+              qualified_name="star_salmon_short.OWstarAlign.OWstarAlign" title="Star Align" version=""/>
+        <node id="3" name="gffread" position="(598.0, 76.0)" project_name="star-salmon-short"
+              qualified_name="star_salmon_short.OWgffread.OWgffread" title="Create transcriptome" version=""/>
+        <node id="4" name="Start" position="(149.0, 156.0)" project_name="star-salmon-short"
+              qualified_name="star_salmon_short.OWStart.OWStart" title="Start-index" version=""/>
+        <node id="5" name="10x_format_fa_gtf" position="(447.0, 144.0)" project_name="star-salmon-short"
+              qualified_name="star_salmon_short.OW10x_format_fa_gtf.OW10x_format_fa_gtf" title="10x-format-fa-gtf"
+              version=""/>
+        <node id="6" name="S3_download" position="(177.0, 308.0)" project_name="star-salmon-short"
+              qualified_name="star_salmon_short.OWS3_download.OWS3_download" title="Download fastq from S3" version=""/>
+        <node id="7" name="salmon" position="(337.0, 451.0)" project_name="star-salmon-short"
+              qualified_name="star_salmon_short.OWsalmon.OWsalmon" title="salmon" version=""/>
+        <node id="8" name="Trimgalore" position="(298.0, 303.0)" project_name="star-salmon-short"
+              qualified_name="star_salmon_short.OWTrimgalore.OWTrimgalore" title="Trimgalore" version=""/>
+    </nodes>
+    <links>
+        <link enabled="true" id="0" sink_channel="URL" sink_node_id="0" source_channel="genomegtfURLs"
+              source_node_id="4"/>
+        <link enabled="true" id="1" sink_channel="trigger" sink_node_id="5" source_channel="directory"
+              source_node_id="0"/>
+        <link enabled="true" id="2" sink_channel="outputfile" sink_node_id="3" source_channel="transcriptomefile"
+              source_node_id="4"/>
+        <link enabled="true" id="3" sink_channel="genomefile" sink_node_id="3" source_channel="outputfa"
+              source_node_id="5"/>
+        <link enabled="true" id="4" sink_channel="gtffile" sink_node_id="3" source_channel="outputgtf"
+              source_node_id="5"/>
+        <link enabled="true" id="5" sink_channel="genomeDir" sink_node_id="1" source_channel="genome_dir"
+              source_node_id="4"/>
+        <link enabled="true" id="6" sink_channel="starversion" sink_node_id="1" source_channel="starversion"
+              source_node_id="4"/>
+        <link enabled="true" id="7" sink_channel="genomeFastaFile" sink_node_id="1" source_channel="outputfa"
+              source_node_id="5"/>
+        <link enabled="true" id="8" sink_channel="sjdbGTFfile" sink_node_id="1" source_channel="outputgtf"
+              source_node_id="5"/>
+        <link enabled="true" id="9" sink_channel="directory" sink_node_id="0" source_channel="download_dir"
+              source_node_id="4"/>
+        <link enabled="true" id="10" sink_channel="outputfa" sink_node_id="5" source_channel="genome_file"
+              source_node_id="4"/>
+        <link enabled="true" id="11" sink_channel="inputgtf" sink_node_id="5" source_channel="raw_annotation_file"
+              source_node_id="4"/>
+        <link enabled="true" id="12" sink_channel="outputgtf" sink_node_id="5" source_channel="annotation_file"
+              source_node_id="4"/>
+        <link enabled="true" id="13" sink_channel="inputfa" sink_node_id="5" source_channel="raw_genome_file"
+              source_node_id="4"/>
+        <link enabled="true" id="14" sink_channel="skipDownload" sink_node_id="0" source_channel="bypass_star_index"
+              source_node_id="4"/>
+        <link enabled="true" id="15" sink_channel="skipFormat" sink_node_id="5" source_channel="bypass_star_index"
+              source_node_id="4"/>
+        <link enabled="true" id="16" sink_channel="skipGFF" sink_node_id="3" source_channel="bypass_star_index"
+              source_node_id="4"/>
+        <link enabled="true" id="17" sink_channel="skipIndex" sink_node_id="1" source_channel="bypass_star_index"
+              source_node_id="4"/>
+        <link enabled="true" id="18" sink_channel="readFilesIn" sink_node_id="2" source_channel="trimmedfastqfiles"
+              source_node_id="4"/>
+        <link enabled="true" id="19" sink_channel="starversion" sink_node_id="2" source_channel="starversion"
+              source_node_id="4"/>
+        <link enabled="true" id="20" sink_channel="awsdir" sink_node_id="6" source_channel="s3directory"
+              source_node_id="4"/>
+        <link enabled="true" id="21" sink_channel="downloadDir" sink_node_id="6" source_channel="s3downloaddir"
+              source_node_id="4"/>
+        <link enabled="true" id="22" sink_channel="bucket" sink_node_id="6" source_channel="s3bucket"
+              source_node_id="4"/>
+        <link enabled="true" id="23" sink_channel="inputFiles" sink_node_id="8" source_channel="fastqfiles"
+              source_node_id="4"/>
+        <link enabled="true" id="24" sink_channel="genomeDir" sink_node_id="2" source_channel="genomeDir"
+              source_node_id="1"/>
+        <link enabled="true" id="25" sink_channel="trim_trigger" sink_node_id="2" source_channel="outputDir"
+              source_node_id="8"/>
+        <link enabled="true" id="26" sink_channel="download_trigger" sink_node_id="2" source_channel="downloadDir"
+              source_node_id="6"/>
+        <link enabled="true" id="27" sink_channel="trigger" sink_node_id="7" source_channel="outputDir"
+              source_node_id="2"/>
+        <link enabled="true" id="28" sink_channel="gtffile" sink_node_id="7" source_channel="outputgtf"
+              source_node_id="5"/>
+        <link enabled="true" id="29" sink_channel="transcriptome" sink_node_id="7" source_channel="outputfile"
+              source_node_id="3"/>
+    </links>
+</root>

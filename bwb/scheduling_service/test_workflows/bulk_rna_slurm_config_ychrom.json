@@ -1,0 +1,60 @@
+{
+    "executors": {
+        "slurm": {
+            "ip_addr": "128.208.252.232",
+            "transfer_addr": "128.208.252.232",
+            "user": "lysander",
+            "storage_dir": "/srv/slurm_mnt"
+        }
+    },
+    "configs": {
+        "star": {
+            "executor": "slurm",
+            "partition": "normal",
+            "mem": "32GB",
+            "cpus_per_task": 16
+        },
+        "salmon": {
+            "executor": "slurm",
+            "partition": "normal",
+            "mem": "8GB",
+            "cpus_per_task": 5
+        },
+        "trimgalore": {
+            "executor": "slurm",
+            "partition": "normal",
+            "mem": "7GB",
+            "cpus_per_task": 4
+        },
+        "ychrom": {
+            "executor": "slurm",
+            "partition": "normal",
+            "mem": "8GB",
+            "cpus_per_task": 8
+        },
+        "local": {
+            "executor": "slurm",
+            "partition": "normal",
+            "mem": "1GB",
+            "cpus_per_task": 1
+        },
+        "local_OLD": {
+            "executor": "local"
+        }
+    },
+    "node_configs": {
+        "0": "local",
+        "1": "star",
+        "2": "star",
+        "3": "local",
+        "4": "local",
+        "5": "local",
+        "6": "salmon",
+        "7": "trimgalore",
+        "8": "local",
+        "9": "local",
+        "10": "local",
+        "11": "local",
+        "12": "ychrom"
+    }
+}

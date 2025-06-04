@@ -1,0 +1,25 @@
+{
+    "executors": {
+        "slurm": {
+            "ip_addr": "128.208.252.232",
+            "user": "lysander",
+            "storage_dir": "/home/lysander/slurm_shared"
+        }
+    },
+    "configs": {
+        "slurm": {
+            "executor": "slurm",
+            "partition": "normal",
+            "mem": "4GB",
+            "cpus_per_task": 8
+        }
+    },
+    "node_configs": {
+        "0": "slurm",
+        "1": "slurm",
+        "2": "slurm",
+        "3": "slurm",
+        "4": "slurm",
+        "5": "slurm"
+    }
+}

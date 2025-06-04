@@ -1,0 +1,929 @@
+{
+"workflow_def": {
+    "run_id": "0000",
+    "use_local_storage": true,
+    "nodes": [
+        {
+            "id": 0,
+            "mem_mb": 8000,
+            "cores": 4,
+            "gpus": 0,
+            "slots": 2,
+            "async": false,
+            "barrier_for": null,
+            "title": "SalmonIndex",
+            "description": "SalmonIndex",
+            "parameters": {
+                "controlAreaVisible": true,
+                "decoys": "",
+                "exportGraphics": false,
+                "features": false,
+                "filterSize": 1,
+                "gencode": false,
+                "index": "",
+                "inputConnectionsStore": {
+                    "index": [
+                        3
+                    ],
+                    "trigger": [
+                        5
+                    ]
+                },
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "keepDuplicates": false,
+                "kmerLen": 31,
+                "nThreads": 4,
+                "nWorkers": 1,
+                "noClip": false,
+                "optionsChecked": {
+                    "bootstrap": false,
+                    "seed": false,
+                    "plaintext": false,
+                    "fusion": false,
+                    "single": false,
+                    "single_overhang": false,
+                    "fr_stranded": false,
+                    "rf_stranded": false,
+                    "fragment_length": false,
+                    "stdev": false,
+                    "pseudoBam": false,
+                    "genomeBam": false,
+                    "gtf": false,
+                    "multiSample": false,
+                    "gencode": false,
+                    "features": false,
+                    "keepDuplicates": false,
+                    "nThreads": true,
+                    "filterSize": false,
+                    "tmpdir": false,
+                    "sparse": false,
+                    "decoys": false,
+                    "noClip": false,
+                    "type": false,
+                    "kmerLen": false
+                },
+                "repeat": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "trigger",
+                    "index"
+                ],
+                "sparse": false,
+                "tmpdir": "",
+                "transcriptFasta": "/data/salmon_demo_work/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz",
+                "triggerReady": {
+                    "trigger": false,
+                    "index": false
+                },
+                "type": "puff",
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "index": {
+                    "flag": "-i ",
+                    "label": "Salmon index directory",
+                    "type": "directory"
+                },
+                "transcriptFasta": {
+                    "flag": "-t ",
+                    "label": "Transcript FASTA file",
+                    "type": "file"
+                },
+                "gencode": {
+                    "flag": "--gencode ",
+                    "label": "GENCODE format",
+                    "type": "bool"
+                },
+                "features": {
+                    "flag": "--features ",
+                    "label": "Split feature name at first tab char (.tsv transcript only)",
+                    "type": "bool"
+                },
+                "keepDuplicates": {
+                    "flag": "--keepDuplicates ",
+                    "label": "Keep sequence-identical duplicate transcripts",
+                    "type": "bool"
+                },
+                "nThreads": {
+                    "default": 2,
+                    "flag": "-p ",
+                    "label": "Number of threads",
+                    "type": "int"
+                },
+                "filterSize": {
+                    "default": 1,
+                    "flag": "--filterSize ",
+                    "label": "Bloom filter size for TwoPaCo",
+                    "type": "int"
+                },
+                "tmpdir": {
+                    "flag": "--tmpdir ",
+                    "label": "Directory for TwoPaCo temp files",
+                    "type": "directory"
+                },
+                "sparse": {
+                    "flag": "--sparse ",
+                    "label": "Sparse sampling of k-mer positions",
+                    "type": "bool"
+                },
+                "decoys": {
+                    "flag": "--decoys ",
+                    "label": "Decoys file",
+                    "type": "file"
+                },
+                "noClip": {
+                    "flag": "-n ",
+                    "label": "No clip ploy-A tails",
+                    "type": "bool"
+                },
+                "type": {
+                    "default": "puff",
+                    "flag": "--type ",
+                    "label": "Type of index to build",
+                    "type": "str"
+                },
+                "kmerLen": {
+                    "default": 31,
+                    "flag": "--kmerLen ",
+                    "label": "k-mer size for quasi index",
+                    "type": "int"
+                }
+            },
+            "image_name": "biodepot/salmon:latest",
+            "command": [
+                "salmon index "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "index",
+                "transcriptFasta"
+            ],
+            "options_checked": {
+                "bootstrap": false,
+                "seed": false,
+                "plaintext": false,
+                "fusion": false,
+                "single": false,
+                "single_overhang": false,
+                "fr_stranded": false,
+                "rf_stranded": false,
+                "fragment_length": false,
+                "stdev": false,
+                "pseudoBam": false,
+                "genomeBam": false,
+                "gtf": false,
+                "multiSample": false,
+                "gencode": false,
+                "features": false,
+                "keepDuplicates": false,
+                "nThreads": true,
+                "filterSize": false,
+                "tmpdir": false,
+                "sparse": false,
+                "decoys": false,
+                "noClip": false,
+                "type": false,
+                "kmerLen": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 1,
+            "slots": 2,
+            "async": false,
+            "mem_mb": 500,
+            "cores": 1,
+            "gpus": 0,
+            "barrier_for": null,
+            "title": "View quantification for one sample",
+            "description": "gnumeric",
+            "parameters": {
+                "controlAreaVisible": true,
+                "exportGraphics": true,
+                "inputConnectionsStore": {
+                    "Trigger": [
+                        1
+                    ]
+                },
+                "inputFile": "/data/salmon_demo_work/DRR016125_quant/quant.sf",
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "optionsChecked": {
+                    "inputFile": true
+                },
+                "repeat": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "Trigger"
+                ],
+                "triggerReady": {
+                    "Trigger": false
+                },
+                "useGpu": false,
+                "useScheduler": false,
+                "__version__": 1
+            },
+            "arg_types": {
+                "inputFile": {
+                    "flag": null,
+                    "default": "",
+                    "label": "Input file:",
+                    "type": "file",
+                    "argument": true
+                }
+            },
+            "image_name": "biodepot/gnumeric:1.12.44__buster-slim__e4105988__f8d184ab__7b51306f",
+            "command": [
+                "gnumeric"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [],
+            "options_checked": {
+                "inputFile": true
+            },
+            "static_env": {}
+        },
+        {
+            "id": 2,
+            "slots": 2,
+            "async": false,
+            "mem_mb": 8000,
+            "cores": 4,
+            "gpus": 0,
+            "barrier_for": null,
+            "title": "SalmonQuant",
+            "description": "SalmonQuant",
+            "parameters": {
+                "controlAreaVisible": true,
+                "exportGraphics": false,
+                "geneMap": "",
+                "index": "",
+                "inputConnectionsStore": {
+                    "index": [
+                        4
+                    ],
+                    "mates2": [
+                        3
+                    ],
+                    "mates1": [
+                        3
+                    ],
+                    "trigger": [
+                        6
+                    ],
+                    "outputDirs": [
+                        3
+                    ]
+                },
+                "iterate": true,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "mates1",
+                        "mates2",
+                        "unmatedReads",
+                        "outputDirs"
+                    ],
+                    "data": {
+                        "mates1": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        },
+                        "mates2": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        },
+                        "unmatedReads": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        },
+                        "outputDir": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        }
+                    },
+                    "iteratedAttrs": [
+                        "mates1",
+                        "mates2",
+                        "unmatedReads",
+                        "outputDir"
+                    ],
+                    "nWorkers": 1
+                },
+                "libType": "A",
+                "mates1": null,
+                "mates2": null,
+                "nThreads": 4,
+                "nWorkers": 1,
+                "optionsChecked": {
+                    "bootstrap": false,
+                    "seed": false,
+                    "plaintext": false,
+                    "fusion": false,
+                    "single": false,
+                    "single_overhang": false,
+                    "fr_stranded": false,
+                    "rf_stranded": false,
+                    "fragment_length": false,
+                    "stdev": false,
+                    "pseudoBam": false,
+                    "genomeBam": false,
+                    "gtf": false,
+                    "multiSample": false,
+                    "mates2": true,
+                    "mates1": true,
+                    "unmatedReads": false,
+                    "nThreads": true,
+                    "geneMap": false
+                },
+                "outputDirs": null,
+                "repeat": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "index",
+                    "trigger",
+                    "mates1",
+                    "mates2",
+                    "outputDirs"
+                ],
+                "triggerReady": {
+                    "index": false,
+                    "trigger": false,
+                    "mates1": false,
+                    "mates2": false,
+                    "unmatedReads": false,
+                    "outputDirs": false
+                },
+                "unmatedReads": [],
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "index": {
+                    "flag": "-i",
+                    "label": "Salmon index directory",
+                    "type": "directory"
+                },
+                "libType": {
+                    "default": "A",
+                    "flag": "--libType ",
+                    "label": "Format string for library type",
+                    "type": "str"
+                },
+                "mates1": {
+                    "flag": "--mates1 ",
+                    "label": "FASTQ mate 1 files",
+                    "type": "file list"
+                },
+                "mates2": {
+                    "flag": "--mates2 ",
+                    "label": "FASTQ mate 2 files",
+                    "type": "file list"
+                },
+                "unmatedReads": {
+                    "flag": "--unmatedReads ",
+                    "label": "Unmated reads FASTQ files",
+                    "type": "file list"
+                },
+                "outputDirs": {
+                    "flag": "-o ",
+                    "label": "Output quantification directories",
+                    "type": "directory list"
+                },
+                "nThreads": {
+                    "default": 2,
+                    "flag": "-p ",
+                    "label": "Number of threads",
+                    "type": "int"
+                },
+                "geneMap": {
+                    "flag": "-geneMap ",
+                    "label": "Gene mapping GTF file",
+                    "type": "file"
+                }
+            },
+            "image_name": "biodepot/salmon:latest",
+            "command": [
+                "salmon quant "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": true,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "mates1",
+                    "mates2",
+                    "unmatedReads",
+                    "outputDirs"
+                ],
+                "data": {
+                    "mates1": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    },
+                    "mates2": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    },
+                    "unmatedReads": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    },
+                    "outputDir": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    }
+                },
+                "iteratedAttrs": [
+                    "mates1",
+                    "mates2",
+                    "unmatedReads",
+                    "outputDir"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "index",
+                "libType",
+                "outputDirs"
+            ],
+            "options_checked": {
+                "bootstrap": false,
+                "seed": false,
+                "plaintext": false,
+                "fusion": false,
+                "single": false,
+                "single_overhang": false,
+                "fr_stranded": false,
+                "rf_stranded": false,
+                "fragment_length": false,
+                "stdev": false,
+                "pseudoBam": false,
+                "genomeBam": false,
+                "gtf": false,
+                "multiSample": false,
+                "mates2": true,
+                "mates1": true,
+                "unmatedReads": false,
+                "nThreads": true,
+                "geneMap": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 3,
+            "slots": 2,
+            "async": false,
+            "barrier_for": null,
+            "mem_mb": 500,
+            "cores": 1,
+            "gpus": 0,
+            "title": "Start",
+            "description": "Start",
+            "parameters": {
+                "controlAreaVisible": true,
+                "exportGraphics": false,
+                "index": "/data/salmon_demo_work/athal_index",
+                "inputConnectionsStore": {},
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "samples",
+                        "mate_1",
+                        "mate_2",
+                        "unpaired",
+                        "sample_dl_links",
+                        "output"
+                    ],
+                    "nWorkers": 1
+                },
+                "mate_1": null,
+                "mate_2": null,
+                "nWorkers": 1,
+                "optionsChecked": {
+                    "sra_ids": false,
+                    "mate_1": false,
+                    "mate_2": false,
+                    "unpaired": false,
+                    "sam_output": false,
+                    "hisat2_idx": false,
+                    "gzip": false,
+                    "sorted_bam_output": false,
+                    "bam_output": false,
+                    "metafile": false,
+                    "output": false
+                },
+                "output": null,
+                "repeat": false,
+                "runMode": 0,
+                "runTriggers": [],
+                "sample_dl_links": [
+                    "ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_1.fastq.gz",
+                    "ftp://ftp.sra.ebi.ac.uk/vol1/fastq/DRR016/DRR016125/DRR016125_2.fastq.gz"
+                ],
+                "samples": [
+                    "DRR016125"
+                ],
+                "triggerReady": {},
+                "unpaired": null,
+                "useGpu": false,
+                "useScheduler": true,
+                "work_dir": "/data/salmon_demo_work",
+                "__version__": 1
+            },
+            "arg_types": {
+                "work_dir": {
+                    "flag": "-workdir ",
+                    "label": "Work directory",
+                    "type": "directory",
+                    "env": "work_dir"
+                },
+                "samples": {
+                    "flag": "-ids ",
+                    "label": "Sample basenames",
+                    "type": "text list"
+                },
+                "index": {
+                    "flag": null,
+                    "label": "Salmon index directory",
+                    "type": "directory"
+                },
+                "mate_1": {
+                    "flag": null,
+                    "type": "file list"
+                },
+                "mate_2": {
+                    "flag": null,
+                    "type": "file list"
+                },
+                "unpaired": {
+                    "flag": null,
+                    "type": "file list"
+                },
+                "sample_dl_links": {
+                    "flag": null,
+                    "label": "Sample download links",
+                    "type": "text list"
+                },
+                "output": {
+                    "flag": null,
+                    "type": "directory list"
+                }
+            },
+            "image_name": "biodepot/salmon-start-simple:alpine_3.18",
+            "command": [
+                "python start.py "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "samples",
+                    "mate_1",
+                    "mate_2",
+                    "unpaired",
+                    "sample_dl_links",
+                    "output"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "work_dir",
+                "samples",
+                "index",
+                "sample_dl_links"
+            ],
+            "options_checked": {
+                "sra_ids": false,
+                "mate_1": false,
+                "mate_2": false,
+                "unpaired": false,
+                "sam_output": false,
+                "hisat2_idx": false,
+                "gzip": false,
+                "sorted_bam_output": false,
+                "bam_output": false,
+                "metafile": false,
+                "output": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 4,
+            "mem_mb": 500,
+            "cores": 1,
+            "gpus": 0,
+            "slots": 2,
+            "async": false,
+            "barrier_for": null,
+            "title": "Download samples FASTQ files",
+            "description": "downloadURL",
+            "parameters": {
+                "URL": null,
+                "concatenateFile": "",
+                "controlAreaVisible": true,
+                "decompress": true,
+                "directory": "",
+                "exportGraphics": false,
+                "inputConnectionsStore": {
+                    "directory": [
+                        3
+                    ],
+                    "URL": [
+                        3
+                    ]
+                },
+                "iterate": true,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "URL"
+                    ],
+                    "data": {
+                        "URL": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        }
+                    },
+                    "iteratedAttrs": [
+                        "URL"
+                    ],
+                    "nWorkers": 2
+                },
+                "nWorkers": 2,
+                "optionsChecked": {
+                    "decompress": false,
+                    "concatenateFile": false,
+                    "noClobber": false
+                },
+                "repeat": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "directory",
+                    "URL"
+                ],
+                "triggerReady": {
+                    "directory": false,
+                    "URL": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "URL": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "URL(s)",
+                    "type": "text list"
+                },
+                "decompress": {
+                    "default": true,
+                    "flag": "--decompress",
+                    "label": "Decompress files",
+                    "type": "bool"
+                },
+                "directory": {
+                    "flag": "--directory",
+                    "label": "Download directory",
+                    "type": "directory"
+                },
+                "concatenateFile": {
+                    "flag": "--concatenateFile",
+                    "label": "Download and join into one file",
+                    "type": "file"
+                }
+            },
+            "image_name": "patrickmckeever/downloadurl:0.3",
+            "command": [
+                "download.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": true,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "URL"
+                ],
+                "data": {
+                    "URL": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    }
+                },
+                "iteratedAttrs": [
+                    "URL"
+                ],
+                "nWorkers": 2
+            },
+            "required_parameters": [
+                "URL",
+                "directory"
+            ],
+            "options_checked": {
+                "decompress": false,
+                "concatenateFile": false,
+                "noClobber": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 5,
+            "slots": 2,
+            "mem_mb": 500,
+            "cores": 1,
+            "gpus": 0,
+            "async": false,
+            "barrier_for": null,
+            "title": "Download FASTA file",
+            "description": "downloadURL",
+            "parameters": {
+                "URL": [
+                    "ftp://ftp.ensemblgenomes.org/pub/plants/release-28/fasta/arabidopsis_thaliana/cdna/Arabidopsis_thaliana.TAIR10.28.cdna.all.fa.gz"
+                ],
+                "concatenateFile": "",
+                "controlAreaVisible": true,
+                "decompress": false,
+                "directory": "",
+                "exportGraphics": false,
+                "inputConnectionsStore": {
+                    "directory": [
+                        3
+                    ]
+                },
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "URL"
+                    ],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "optionsChecked": {
+                    "decompress": false,
+                    "concatenateFile": false,
+                    "noClobber": false
+                },
+                "repeat": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "directory"
+                ],
+                "triggerReady": {
+                    "directory": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "URL": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "URL(s)",
+                    "type": "text list"
+                },
+                "decompress": {
+                    "default": true,
+                    "flag": "--decompress",
+                    "label": "Decompress files",
+                    "type": "bool"
+                },
+                "directory": {
+                    "flag": "--directory",
+                    "label": "Download directory",
+                    "type": "directory"
+                },
+                "concatenateFile": {
+                    "flag": "--concatenateFile",
+                    "label": "Download and join into one file",
+                    "type": "file"
+                }
+            },
+            "image_name": "patrickmckeever/downloadurl:0.3",
+            "command": [
+                "download.sh"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "URL"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "URL",
+                "directory"
+            ],
+            "options_checked": {
+                "decompress": false,
+                "concatenateFile": false,
+                "noClobber": false
+            },
+            "static_env": {}
+        }
+    ],
+    "links": [
+        {
+            "source": 2,
+            "sink": 1,
+            "source_channel": "trigger",
+            "sink_channel": "Trigger"
+        },
+        {
+            "source": 3,
+            "sink": 0,
+            "source_channel": "index",
+            "sink_channel": "index"
+        },
+        {
+            "source": 5,
+            "sink": 0,
+            "source_channel": "directory",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 3,
+            "sink": 2,
+            "source_channel": "mate_2",
+            "sink_channel": "mates2"
+        },
+        {
+            "source": 3,
+            "sink": 2,
+            "source_channel": "mate_1",
+            "sink_channel": "mates1"
+        },
+        {
+            "source": 4,
+            "sink": 2,
+            "source_channel": "directory",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 0,
+            "sink": 2,
+            "source_channel": "index",
+            "sink_channel": "index"
+        },
+        {
+            "source": 3,
+            "sink": 4,
+            "source_channel": "work_dir",
+            "sink_channel": "directory"
+        },
+        {
+            "source": 3,
+            "sink": 4,
+            "source_channel": "sample_dl_links",
+            "sink_channel": "URL"
+        },
+        {
+            "source": 3,
+            "sink": 5,
+            "source_channel": "work_dir",
+            "sink_channel": "directory"
+        },
+        {
+            "source": 3,
+            "sink": 2,
+            "source_channel": "output",
+            "sink_channel": "outputDirs"
+        }
+    ]
+}
+}

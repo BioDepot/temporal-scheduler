@@ -1,0 +1,50 @@
+{
+    "executors": {
+        "slurm": {
+            "ip_addr": "bridges2.psc.edu",
+            "user": "mckeever",
+            "storage_dir": "/ocean/projects/bio230034p/mckeever/sched_storage",
+	    "transfer_addr": "data.bridges2.psc.edu"
+        },
+	"local": {}
+    },
+    "configs": {
+        "star": {
+            "executor": "slurm",
+            "partition": "RM-shared",
+            "mem": "40GB",
+            "cpus_per_task": 21,
+            "time": "03:00:00"
+        },
+        "salmon": {
+            "executor": "slurm",
+            "partition": "RM-shared",
+            "mem": "8GB",
+            "cpus_per_task": 5
+        },
+	    "gather_cnts": {
+                "executor": "slurm",
+                "partition": "RM-shared",
+                "mem": "4GB",
+                "cpus_per_task": 3
+	    },
+        "local": {
+            "executor": "local"
+        }
+    },
+    "node_configs": {
+        "0": "local",
+        "1": "star",
+        "2": "star",
+        "3": "local",
+        "4": "local",
+        "5": "local",
+        "6": "salmon",
+        "7": "local",
+        "8": "local",
+        "9": "gather_cnts",
+        "10": "local",
+        "11": "local",
+        "12": "local"
+    }
+}
