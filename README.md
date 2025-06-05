@@ -1,8 +1,8 @@
-# BWB Scheduler
+# Biodepot Scheduler
 
 ## Description
 
-TODO
+This scheduler is based on Temporal.io workflow framework with key modifications to optimize bioinformatics workflows. We support a hybrid architecture across cloud, HPC, and local servers. Asynchronous execution is also supported to reduce execution time. This workflow has been tested using bulk RNA-seq datasets.
 
 ## Getting started
 
@@ -180,4 +180,13 @@ Each node has the following keys, among others:
   - **mem_mb** - Amount of RAM in megabytes required by an instance of a node to run.  
   - **gpus** - The number of GPUs required by an instance of a node to run.  
  
+## Bulk RNA-seq Datasets
+
+The datasets supporting the results of this article are generated as part of the NIH MorPhiC (Molecular Phenotypes of Null Alleles in Cells) program, which is supported by NIH grant UM1HG012651. These datasets are publicly available in the NCBI Gene Expression Omnibus (GEO) repository with accession numbers: [GSE287843](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE287843) and [GSE288288](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=gse288288).
+
+## Acknowledgement
+
+This work is supported by the National Institutes of Health (NIH) grants U24HG012674, R03AI159286 and R21CA280520. 
+This work used Bridges-2 at the Pittsburgh Supercomputing Center through allocation BIO230124: Exploring conducting bioinformatics analysis on HPC for the NIH Morphic project from the Advanced Cyberinfrastructure Coordination Ecosystem: Services & Support (ACCESS) program, which is supported by National Science Foundation grants #2138259, #2138286, #2138307, #2137603, and #2138296.
+
 
