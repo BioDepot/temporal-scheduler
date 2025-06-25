@@ -387,7 +387,7 @@ def get_container_cmd(image_name, cmd, volumes, use_singularity,
         # Writable TMPFS flag is needed because STAR align creates symlink,
         # which is impossible on read-only file system (default).
         # This needs a more robust fix.
-        con_cmd = (f"{singularity_envs} singularity exec {gpu_flag} -p -i --writable-tmpfs --pwd / --cleanenv "
+        con_cmd = (f"{singularity_envs} singularity exec {gpu_flag} -p -i --no-home --writable-tmpfs --pwd / --cleanenv "
                    f"-B {volumes['/tmp']}:/tmp "
                    f"-B {volumes['/data']}:/data {local_sif_path} {singularity_cmd}")
     else:
@@ -425,8 +425,11 @@ async def get_docker_entrypoint(job_dir, img):
     ept_file_name = os.path.join(job_dir, san_img_name + "_ept")
     img_info_json = await cmd_no_output(f"docker inspect {img}")
     img_info = json.loads(img_info_json)
-    ept_arr = img_info[0]["Config"]["Entrypoint"]
-    ept_str = " ".join(ept_arr) if ept_arr is not None else ""
+
+    ept_str = ""
+    if "Config" in img_info[0] and "Entrypoint" in img_info[0]["Config"]:
+        ept_arr = img_info[0]["Config"]["Entrypoint"]
+        ept_str = " ".join(ept_arr) if ept_arr is not None else ""
 
     try:
         with open(ept_file_name, "w+") as f:

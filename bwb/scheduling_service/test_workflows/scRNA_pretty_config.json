@@ -15,55 +15,44 @@
             "cpus_per_task": 23,
             "time": "03:00:00"
         },
-        "salmon": {
+        "large_matrix_mem": {
             "executor": "slurm",
             "partition": "RM-shared",
-            "mem": "12GB",
-            "cpus_per_task": 7
+            "mem": "60GB",
+            "cpus_per_task": 32
         },
-	    "gather_cnts": {
+        "cellbender": {
+            "executor": "slurm",
+            "partition": "GPU-shared",
+            "gpus": "v100-32:1",
+            "time": "05:00:00"
+        },
+	    "assign_features": {
             "executor": "slurm",
              "partition": "RM-shared",
-             "mem": "4GB",
-             "cpus_per_task": 3
+             "mem": "15GB",
+             "cpus_per_task": 8
 	    },
-        "trimgalore": {
-            "executor": "slurm",
-            "partition": "RM-shared",
-            "mem": "7GB",
-            "cpus_per_task": 4,
-            "time": "03:00:00"
-        },
-        "ychrom": {
-            "executor": "slurm",
-            "partition": "RM-shared",
-            "mem": "8GB",
-            "cpus_per_task": 5,
-            "time": "02:00:00"
-        },
-        "local": {
+        "small_job": {
             "executor": "slurm",
             "partition": "RM-shared",
             "mem": "1GB",
             "cpus_per_task": 1
         },
-        "local_OLD": {
+        "local": {
             "executor": "local"
         }
     },
     "node_configs": {
-        "0": "local",
+        "0": "small_job",
         "1": "star",
         "2": "star",
-        "3": "local",
-        "4": "local",
-        "5": "local",
-        "6": "salmon",
-        "7": "trimgalore",
-        "8": "local",
-        "9": "gather_cnts",
-        "10": "local",
-        "11": "local",
-        "12": "ychrom"
+        "3": "large_matrix_mem",
+        "4": "small_job",
+        "5": "cellbender",
+        "6": "assign_features",
+        "7": "small_job",
+        "8": "large_matrix_mem",
+        "9": "small_job"
     }
 }

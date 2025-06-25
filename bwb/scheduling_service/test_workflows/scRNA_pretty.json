@@ -1,0 +1,3043 @@
+{
+    "run_id": "scRNA",
+    "use_local_storage": true,
+    "nodes": [
+        {
+            "id": 0,
+            "input_files": [],
+            "output_files": ["directory"],
+            "mem_mb": 500,
+            "cores": 1,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Download release-110 GRCh38 files",
+            "description": "downloadURL",
+            "parameters": {
+                "URL": null,
+                "concatenateFile": "",
+                "controlAreaVisible": true,
+                "decompress": true,
+                "directory": "",
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "inputConnectionsStore": {
+                    "directory": [
+                        3
+                    ],
+                    "URL": [
+                        3
+                    ],
+                    "trigger": [
+                        3
+                    ],
+                    "skip": [
+                        3
+                    ],
+                    "overwite": [
+                        3
+                    ]
+                },
+                "is_async": false,
+                "iterate": true,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "URL"
+                    ],
+                    "nWorkers": 2,
+                    "data": {
+                        "URL": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        }
+                    },
+                    "iteratedAttrs": [
+                        "URL"
+                    ]
+                },
+                "nWorkers": 2,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "decompress": false,
+                    "concatenateFile": false,
+                    "saveLog": false
+                },
+                "overwrite": false,
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "directory",
+                    "URL"
+                ],
+                "skip": null,
+                "triggerReady": {
+                    "trigger": false,
+                    "directory": false,
+                    "URL": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "URL": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "URL(s)",
+                    "type": "text list"
+                },
+                "decompress": {
+                    "default": true,
+                    "flag": "--decompress",
+                    "label": "Decompress files",
+                    "type": "bool"
+                },
+                "directory": {
+                    "flag": "--directory",
+                    "label": "Download directory",
+                    "type": "directory"
+                },
+                "concatenateFile": {
+                    "flag": "--concatenateFile",
+                    "label": "Download and join into one file",
+                    "type": "file"
+                },
+                "overwrite": {
+                    "flag": null,
+                    "label": "Overwrite existing files",
+                    "type": "bool",
+                    "env": "clobber"
+                },
+                "skip": {
+                    "flag": null,
+                    "label": "Skip downloads",
+                    "type": "bool",
+                    "env": "skip"
+                }
+            },
+            "image_name": "patrickmckeever/downloadurl:0.1",
+            "command": [
+                "sh -c '[ -n \"${skip}\" ] || download.sh  \"$@\"' _ "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": true,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "URL"
+                ],
+                "nWorkers": 2,
+                "data": {
+                    "URL": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    }
+                },
+                "iteratedAttrs": [
+                    "URL"
+                ]
+            },
+            "required_parameters": [
+                "URL",
+                "directory",
+                "overwrite",
+                "skip"
+            ],
+            "options_checked": {
+                "decompress": false,
+                "concatenateFile": false,
+                "saveLog": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 1,
+            "input_files": ["genomefile", "gtffile"],
+            "output_files": ["genomeDir"],
+            "mem_mb": 64000,
+            "cores": 24,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Make indices",
+            "description": "Multi_index",
+            "parameters": {
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "genomefile": "",
+                "gtffile": "",
+                "indicesdir": "",
+                "inputConnectionsStore": {
+                    "skipIndex": [
+                        7
+                    ],
+                    "genomefile": [
+                        2
+                    ],
+                    "gtffile": [
+                        2
+                    ],
+                    "skip": [
+                        3
+                    ],
+                    "usePiscem": [
+                        3
+                    ],
+                    "useKallisto": [
+                        3
+                    ],
+                    "useSplicei": [
+                        3
+                    ],
+                    "indicesdir": [
+                        3
+                    ],
+                    "overwrite": [
+                        3
+                    ],
+                    "useStar": [
+                        3
+                    ],
+                    "useSpliceu": [
+                        3
+                    ],
+                    "useSalmon": [
+                        3
+                    ],
+                    "Trigger": [
+                        3
+                    ]
+                },
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "genomeChrBinNbits": false,
+                    "genomeSAindexNbases": false,
+                    "genomeSAsparseD": false,
+                    "genomeSuffixLengthMax": false,
+                    "sjdbGTFfile": true,
+                    "sjdbFileChrStartEnd ": false,
+                    "sjdbGTFchrPrefix ": false,
+                    "sjdbGTFfeatureExon": false,
+                    "sjdbGTFtagExonParentTranscript": false,
+                    "sjdbGTFtagExonParentGene": false,
+                    "sjdbOverhang": false,
+                    "sjdbScore": false,
+                    "sjdbInsertSave ": false,
+                    "saveLog": false,
+                    "skipIndex": false
+                },
+                "overwrite": true,
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runThreadN": 24,
+                "runTriggers": [
+                    "genomefile"
+                ],
+                "skip": null,
+                "triggerReady": {
+                    "Trigger": false,
+                    "genomedir": false,
+                    "sjdbGTFfile": false,
+                    "genomefile": false
+                },
+                "useGpu": false,
+                "useKallisto": null,
+                "usePiscem": null,
+                "useSalmon": null,
+                "useScheduler": true,
+                "useSplicei": null,
+                "useSpliceu": null,
+                "useStar": null,
+                "__version__": 1
+            },
+            "arg_types": {
+                "genomefile": {
+                    "flag": null,
+                    "label": "Genome file",
+                    "type": "file",
+                    "env": "genome_file"
+                },
+                "gtffile": {
+                    "flag": null,
+                    "label": "GTF file",
+                    "type": "file",
+                    "env": "gtf_file"
+                },
+                "runThreadN": {
+                    "default": 1,
+                    "flag": null,
+                    "label": "Number of threads",
+                    "type": "int",
+                    "env": "n_threads"
+                },
+                "overwrite": {
+                    "flag": null,
+                    "label": "Overwrite files",
+                    "type": "bool",
+                    "env": "overwrite"
+                },
+                "indicesdir": {
+                    "flag": null,
+                    "label": "Index directory",
+                    "type": "directory",
+                    "env": "indices_dir"
+                },
+                "useStar": {
+                    "flag": null,
+                    "label": "Use STAR",
+                    "type": "bool",
+                    "env": "useStar"
+                },
+                "useKallisto": {
+                    "flag": null,
+                    "label": "Use Kallisto",
+                    "type": "bool",
+                    "env": "useKallisto"
+                },
+                "usePiscem": {
+                    "flag": null,
+                    "label": "Use Piscem",
+                    "type": "bool",
+                    "env": "usePiscem"
+                },
+                "useSalmon": {
+                    "flag": null,
+                    "label": "Use Salmon",
+                    "type": "bool",
+                    "env": "useSalmon"
+                },
+                "useSplicei": {
+                    "flag": null,
+                    "label": "Use splicei reference",
+                    "type": "bool",
+                    "env": "useSplicei"
+                },
+                "useSpliceu": {
+                    "flag": null,
+                    "label": "Use spliceu reference",
+                    "type": "bool",
+                    "env": "useSpliceu"
+                },
+                "skip": {
+                    "flag": null,
+                    "label": "Skip indexing",
+                    "type": "bool",
+                    "env": "skip"
+                }
+            },
+            "image_name": "biodepot/multialign:latest",
+            "command": [
+                "sh -c '[ -n \"${skip}\" ] || runMultiIndex.sh  \"$@\"' _ "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "genomefile",
+                "gtffile",
+                "runThreadN",
+                "overwrite",
+                "indicesdir",
+                "useStar",
+                "useKallisto",
+                "usePiscem",
+                "useSalmon",
+                "useSplicei",
+                "useSpliceu",
+                "skip"
+            ],
+            "options_checked": {
+                "genomeChrBinNbits": false,
+                "genomeSAindexNbases": false,
+                "genomeSAsparseD": false,
+                "genomeSuffixLengthMax": false,
+                "sjdbGTFfile": true,
+                "sjdbFileChrStartEnd ": false,
+                "sjdbGTFchrPrefix ": false,
+                "sjdbGTFfeatureExon": false,
+                "sjdbGTFtagExonParentTranscript": false,
+                "sjdbGTFtagExonParentGene": false,
+                "sjdbOverhang": false,
+                "sjdbScore": false,
+                "sjdbInsertSave ": false,
+                "saveLog": false,
+                "skipIndex": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 2,
+            "input_files": ["sampledirs", "indicesdir", "whitelist"],
+            "output_files": ["aligned_samples"],
+            "mem_mb": 64000,
+            "cores": 12,
+            "gpus": 0,
+            "async": true,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Align",
+            "description": "Multi_align",
+            "parameters": {
+                "CBLEN": 16,
+                "R1pattern": "_R1_",
+                "R2pattern": "_R2_",
+                "UMILEN": 12,
+                "concatenate_files": false,
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "fastq_suffix": "fastq.gz",
+                "fastqdirs": null,
+                "gzipped_fastq": true,
+                "indicesdir": "",
+                "inputConnectionsStore": {
+                    "indicesdir": [
+                        5
+                    ],
+                    "useKallisto": [
+                        3
+                    ],
+                    "useSplicei": [
+                        3
+                    ],
+                    "useSalmon": [
+                        3
+                    ],
+                    "usePiscem": [
+                        3
+                    ],
+                    "useStar": [
+                        3
+                    ],
+                    "useSpliceu": [
+                        3
+                    ],
+                    "outputdir": [
+                        3
+                    ]
+                },
+                "is_async": false,
+                "iterate": true,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "fastqdirs",
+                        "sampledirs"
+                    ],
+                    "nWorkers": 2,
+                    "data": {
+                        "fastqdirs": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        },
+                        "starcmd": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        },
+                        "kallistocmd": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        },
+                        "salmoncmd": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        },
+                        "piscemcmd": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        }
+                    },
+                    "iteratedAttrs": [
+                        "fastqdirs"
+                    ]
+                },
+                "kallistocmd": "",
+                "nWorkers": 2,
+                "ntreads": 14,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "parametersFiles": false,
+                    "sysShell": false,
+                    "runThreadN": true,
+                    "runRNGseed": false,
+                    "readFilesCommand": true,
+                    "readMapNumber": false,
+                    "readMatesLengthsIn": false,
+                    "readNameSeparator": false,
+                    "clip3pNbases": false,
+                    "clip5pNbases": false,
+                    "clip3pAdapterSeq": false,
+                    "clip3pAdapterMMp": false,
+                    "clip3pAfterAdapterNbases": false,
+                    "limitIObufferSize": false,
+                    "limitOutSAMoneReadBytes": false,
+                    "outTmpDir": false,
+                    "outStd": false,
+                    "outReadsUnmapped": false,
+                    "outMultimapperOrder": false,
+                    "outSAMtype": true,
+                    "outSAMmode": false,
+                    "outSAMstrandField": false,
+                    "outSAMattributes": true,
+                    "outSAMattrIHstart": false,
+                    "outSAMunmapped": false,
+                    "outSAMorder": false,
+                    "outSAMprimaryFlag": false,
+                    "outSAMreadID": false,
+                    "outSAMmapqUnique": false,
+                    "outSAMflagOR": false,
+                    "outSAMflagAND": false,
+                    "outSAMattrRGline": false,
+                    "outSAMheaderHD": false,
+                    "outSAMheaderPG": false,
+                    "outSAMheaderCommentFile": false,
+                    "outSAMfilter": false,
+                    "outSAMmultNmax": false,
+                    "outBAMcompression": false,
+                    "outBAMsortingThreadN": false,
+                    "bamRemoveDuplicatesType": false,
+                    "bamRemoveDuplicatesMate2basesN": false,
+                    "outWigType": false,
+                    "outWigStrand": false,
+                    "outWigReferencesPrefix": false,
+                    "outWigNorm": false,
+                    "outFilterType": false,
+                    "outFilterMultimapScoreRange": false,
+                    "outFilterMultimapNmax": true,
+                    "outFilterMismatchNmax": false,
+                    "outFilterMismatchNoverLmax ": false,
+                    "outFilterMismatchNoverReadLmax": false,
+                    "outFilterScoreMin": false,
+                    "outFilterScoreMinOverLread": false,
+                    "outFilterMatchNmin": false,
+                    "outFilterMatchNminOverLread": false,
+                    "outFilterIntronMotifs": false,
+                    "scoreGap": false,
+                    "scoreGapNoncan": false,
+                    "scoreGapGCAG": false,
+                    "scoreGapATAC": false,
+                    "scoreGenomicLengthLog2scale": false,
+                    "scoreDelOpen": false,
+                    "scoreDelBase": false,
+                    "scoreInsOpen": false,
+                    "scoreInsBase": false,
+                    "scoreStitchSJshift": false,
+                    "seedSearchStartLmax": false,
+                    "seedSearchStartLmaxOverLread": false,
+                    "seedSearchLmax": false,
+                    "seedMultimapNmax": false,
+                    "seedPerReadNmax": false,
+                    "seedPerWindowNmax": false,
+                    "seedNoneLociPerWindow": false,
+                    "alignIntronMin": false,
+                    "alignIntronMax": false,
+                    "alignMatesGapMax": false,
+                    "alignSJoverhangMin": false,
+                    "alignSJstitchMismatchNmax": false,
+                    "alignSJDBoverhangMin": true,
+                    "alignSplicedMateMapLmin": false,
+                    "alignSplicedMateMapLminOverLmate": false,
+                    "alignWindowsPerReadNmax": false,
+                    "alignTranscriptsPerWindowNmax": false,
+                    "alignTranscriptsPerReadNmax": false,
+                    "alignEndsType": false,
+                    "alignEndsProtrude": false,
+                    "alignSoftClipAtReferenceEnds": false,
+                    "winAnchorMultimapNmax": false,
+                    "winBinNbits": false,
+                    "winAnchorDistNbins": false,
+                    "winFlankNbins": false,
+                    "winReadCoverageRelativeMin": false,
+                    "winReadCoverageBasesMin": false,
+                    "chimOutType": false,
+                    "chimSegmentMin": false,
+                    "chimScoreMin": false,
+                    "chimScoreDropMax": false,
+                    "chimScoreSeparation": false,
+                    "chimScoreJunctionNonGTAG": false,
+                    "chimJunctionOverhangMin": false,
+                    "chimSegmentReadGapMax": false,
+                    "chimFilter": false,
+                    "quantMode": true,
+                    "quantTranscriptomeBAMcompression": false,
+                    "quantTranscriptomeBan": true,
+                    "twopassMode": true,
+                    "twopass1readsN ": false,
+                    "genomeLoad": true,
+                    "saveLog": false,
+                    "apelist": false,
+                    "spelist": false,
+                    "outputFilePrefix": false,
+                    "multipleSample": false,
+                    "starcmd": false,
+                    "kallistocmd": false,
+                    "salmoncmd": false,
+                    "piscemcmd": false,
+                    "star_whitelist": true,
+                    "kallisto_whitelist": false,
+                    "alevin_whitelist": false,
+                    "sampledirs": false
+                },
+                "organize_samples": false,
+                "outputdir": "",
+                "overwrite": true,
+                "piscemcmd": "",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "indicesdir"
+                ],
+                "salmoncmd": "",
+                "sampledirs": null,
+                "skip": false,
+                "starcmd": "",
+                "triggerReady": {
+                    "trigger": false,
+                    "genomeDir": false,
+                    "readFilesIn": false,
+                    "starversion": false,
+                    "trim_trigger": false,
+                    "download_trigger": false,
+                    "Trigger": false,
+                    "indicesdir": false
+                },
+                "useGpu": false,
+                "useKallisto": null,
+                "usePiscem": null,
+                "useSalmon": null,
+                "useScheduler": true,
+                "useSplicei": null,
+                "useSpliceu": null,
+                "useStar": null,
+                "whitelist": "",
+                "aligned_samples": "",
+                "__version__": 1
+            },
+            "arg_types": {
+                "fastqdirs": {
+                    "flag": null,
+                    "label": "Fastq directories (organized by experiment)",
+                    "type": "directory list",
+                    "env": "fastqdirs"
+                },
+                "outputdir": {
+                    "flag": null,
+                    "label": "Base output directory ",
+                    "type": "directory",
+                    "env": "outputdir"
+                },
+                "ntreads": {
+                    "default": 8,
+                    "flag": null,
+                    "label": "Number of threads",
+                    "type": "int",
+                    "env": "nthreads"
+                },
+                "indicesdir": {
+                    "flag": null,
+                    "label": "Index directory",
+                    "type": "directory",
+                    "env": "indices_dir"
+                },
+                "useStar": {
+                    "flag": null,
+                    "label": "Use STAR",
+                    "type": "bool",
+                    "env": "useStar"
+                },
+                "useKallisto": {
+                    "flag": null,
+                    "label": "Use Kallisto",
+                    "type": "bool",
+                    "env": "useKallisto"
+                },
+                "usePiscem": {
+                    "flag": null,
+                    "label": "Use Piscem",
+                    "type": "bool",
+                    "env": "usePiscem"
+                },
+                "useSalmon": {
+                    "flag": null,
+                    "label": "Use Salmon",
+                    "type": "bool",
+                    "env": "useSalmon"
+                },
+                "useSplicei": {
+                    "flag": null,
+                    "label": "Use splicei reference",
+                    "type": "bool",
+                    "env": "useSplicei"
+                },
+                "useSpliceu": {
+                    "flag": null,
+                    "label": "Use spliceu reference",
+                    "type": "bool",
+                    "env": "useSpliceu"
+                },
+                "starcmd": {
+                    "flag": null,
+                    "label": "STAR command",
+                    "type": "file",
+                    "env": "starcmd"
+                },
+                "kallistocmd": {
+                    "flag": null,
+                    "label": "Kallisto command",
+                    "type": "file",
+                    "env": "kallistocmd"
+                },
+                "salmoncmd": {
+                    "flag": null,
+                    "label": "Salmon command",
+                    "type": "file",
+                    "env": "salmoncmd"
+                },
+                "piscemcmd": {
+                    "flag": null,
+                    "label": "Piscem command",
+                    "type": "file",
+                    "env": "piscemcmd"
+                },
+                "overwrite": {
+                    "flag": null,
+                    "label": "Overwrite files",
+                    "type": "bool",
+                    "env": "overwrite"
+                },
+                "whitelist": {
+                    "flag": null,
+                    "label": "Whitelist file",
+                    "type": "file",
+                    "env": "whitelist"
+                },
+                "R1pattern": {
+                    "default": "_R1_",
+                    "flag": null,
+                    "label": "R1 files pattern",
+                    "type": "str",
+                    "env": "R1pattern"
+                },
+                "R2pattern": {
+                    "default": "_R2_",
+                    "flag": null,
+                    "label": "R2 files pattern",
+                    "type": "str",
+                    "env": "R2pattern"
+                },
+                "gzipped_fastq": {
+                    "flag": null,
+                    "label": "Gzipped fastq",
+                    "type": "bool",
+                    "env": "gzipped_fastq"
+                },
+                "fastq_suffix": {
+                    "default": "fastq",
+                    "flag": null,
+                    "label": "Fastq_suffix",
+                    "type": "str",
+                    "env": "fastq_suffix"
+                },
+                "CBLEN": {
+                    "default": 16,
+                    "flag": null,
+                    "label": "Cell barcode length",
+                    "type": "int",
+                    "env": "CBLEN"
+                },
+                "UMILEN": {
+                    "default": 12,
+                    "flag": null,
+                    "label": "Cell UMI  length",
+                    "type": "int",
+                    "env": "UMILEN"
+                },
+                "organize_samples": {
+                    "flag": null,
+                    "label": "Organize by samples",
+                    "type": "bool",
+                    "env": "organize_samples"
+                },
+                "concatenate_files": {
+                    "flag": null,
+                    "label": "Concatenate sample files",
+                    "type": "bool",
+                    "env": "concatenate_files"
+                },
+                "sampledirs": {
+                    "flag": null,
+                    "type": "directory list",
+                    "env": "sampledirs"
+                },
+                "skip": {
+                    "flag": null,
+                    "label": "Skip alignment",
+                    "type": "bool",
+                    "env": "skip"
+                },
+                "aligned_samples": {
+                    "flag": null,
+                    "type": "directory list"
+                }
+            },
+            "image_name": "biodepot/multialign:latest",
+            "command": [
+                "sh -c '[ -n \"${skip}\" ] || runMultiAlign.sh  \"$@\"' _ ",
+                "echo \"_bwb{outputdir}/$(basename _bwb{fastqdirs})\" > /tmp/output/aligned_samples"
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": true,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "fastqdirs",
+                    "sampledirs"
+                ],
+                "nWorkers": 2,
+                "data": {
+                    "fastqdirs": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    },
+                    "starcmd": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    },
+                    "kallistocmd": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    },
+                    "salmoncmd": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    },
+                    "piscemcmd": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    }
+                },
+                "iteratedAttrs": [
+                    "fastqdirs"
+                ]
+            },
+            "required_parameters": [
+                "fastqdirs",
+                "outputdir",
+                "ntreads",
+                "indicesdir",
+                "useStar",
+                "useKallisto",
+                "usePiscem",
+                "useSalmon",
+                "useSplicei",
+                "useSpliceu",
+                "overwrite",
+                "whitelist",
+                "R1pattern",
+                "R2pattern",
+                "gzipped_fastq",
+                "fastq_suffix",
+                "CBLEN",
+                "UMILEN",
+                "organize_samples",
+                "concatenate_files",
+                "skip"
+            ],
+            "options_checked": {
+                "parametersFiles": false,
+                "sysShell": false,
+                "runThreadN": true,
+                "runRNGseed": false,
+                "readFilesCommand": true,
+                "readMapNumber": false,
+                "readMatesLengthsIn": false,
+                "readNameSeparator": false,
+                "clip3pNbases": false,
+                "clip5pNbases": false,
+                "clip3pAdapterSeq": false,
+                "clip3pAdapterMMp": false,
+                "clip3pAfterAdapterNbases": false,
+                "limitIObufferSize": false,
+                "limitOutSAMoneReadBytes": false,
+                "outTmpDir": false,
+                "outStd": false,
+                "outReadsUnmapped": false,
+                "outMultimapperOrder": false,
+                "outSAMtype": true,
+                "outSAMmode": false,
+                "outSAMstrandField": false,
+                "outSAMattributes": true,
+                "outSAMattrIHstart": false,
+                "outSAMunmapped": false,
+                "outSAMorder": false,
+                "outSAMprimaryFlag": false,
+                "outSAMreadID": false,
+                "outSAMmapqUnique": false,
+                "outSAMflagOR": false,
+                "outSAMflagAND": false,
+                "outSAMattrRGline": false,
+                "outSAMheaderHD": false,
+                "outSAMheaderPG": false,
+                "outSAMheaderCommentFile": false,
+                "outSAMfilter": false,
+                "outSAMmultNmax": false,
+                "outBAMcompression": false,
+                "outBAMsortingThreadN": false,
+                "bamRemoveDuplicatesType": false,
+                "bamRemoveDuplicatesMate2basesN": false,
+                "outWigType": false,
+                "outWigStrand": false,
+                "outWigReferencesPrefix": false,
+                "outWigNorm": false,
+                "outFilterType": false,
+                "outFilterMultimapScoreRange": false,
+                "outFilterMultimapNmax": true,
+                "outFilterMismatchNmax": false,
+                "outFilterMismatchNoverLmax ": false,
+                "outFilterMismatchNoverReadLmax": false,
+                "outFilterScoreMin": false,
+                "outFilterScoreMinOverLread": false,
+                "outFilterMatchNmin": false,
+                "outFilterMatchNminOverLread": false,
+                "outFilterIntronMotifs": false,
+                "scoreGap": false,
+                "scoreGapNoncan": false,
+                "scoreGapGCAG": false,
+                "scoreGapATAC": false,
+                "scoreGenomicLengthLog2scale": false,
+                "scoreDelOpen": false,
+                "scoreDelBase": false,
+                "scoreInsOpen": false,
+                "scoreInsBase": false,
+                "scoreStitchSJshift": false,
+                "seedSearchStartLmax": false,
+                "seedSearchStartLmaxOverLread": false,
+                "seedSearchLmax": false,
+                "seedMultimapNmax": false,
+                "seedPerReadNmax": false,
+                "seedPerWindowNmax": false,
+                "seedNoneLociPerWindow": false,
+                "alignIntronMin": false,
+                "alignIntronMax": false,
+                "alignMatesGapMax": false,
+                "alignSJoverhangMin": false,
+                "alignSJstitchMismatchNmax": false,
+                "alignSJDBoverhangMin": true,
+                "alignSplicedMateMapLmin": false,
+                "alignSplicedMateMapLminOverLmate": false,
+                "alignWindowsPerReadNmax": false,
+                "alignTranscriptsPerWindowNmax": false,
+                "alignTranscriptsPerReadNmax": false,
+                "alignEndsType": false,
+                "alignEndsProtrude": false,
+                "alignSoftClipAtReferenceEnds": false,
+                "winAnchorMultimapNmax": false,
+                "winBinNbits": false,
+                "winAnchorDistNbins": false,
+                "winFlankNbins": false,
+                "winReadCoverageRelativeMin": false,
+                "winReadCoverageBasesMin": false,
+                "chimOutType": false,
+                "chimSegmentMin": false,
+                "chimScoreMin": false,
+                "chimScoreDropMax": false,
+                "chimScoreSeparation": false,
+                "chimScoreJunctionNonGTAG": false,
+                "chimJunctionOverhangMin": false,
+                "chimSegmentReadGapMax": false,
+                "chimFilter": false,
+                "quantMode": true,
+                "quantTranscriptomeBAMcompression": false,
+                "quantTranscriptomeBan": true,
+                "twopassMode": true,
+                "twopass1readsN ": false,
+                "genomeLoad": true,
+                "saveLog": false,
+                "apelist": false,
+                "spelist": false,
+                "outputFilePrefix": false,
+                "multipleSample": false,
+                "starcmd": false,
+                "kallistocmd": false,
+                "salmoncmd": false,
+                "piscemcmd": false,
+                "star_whitelist": true,
+                "kallisto_whitelist": false,
+                "alevin_whitelist": false,
+                "sampledirs": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 3,
+            "input_files": ["alignsDir"],
+            "output_files": ["alignsDir"],
+            "mem_mb": 64000,
+            "cores": 1,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Read counts",
+            "description": "read_counts",
+            "parameters": {
+                "alignsDir": null,
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "filter_features": true,
+                "inputConnectionsStore": {
+                    "inputDir": [
+                        6
+                    ]
+                },
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "alignsDir"
+                    ],
+                    "nWorkers": 3,
+                    "data": {
+                        "alignsDir": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        }
+                    },
+                    "iteratedAttrs": [
+                        "alignsDir"
+                    ]
+                },
+                "nThreads": 1,
+                "nWorkers": 3,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "tablesDir": false,
+                    "mtpercent": false,
+                    "nThreads": true
+                },
+                "overwrite": false,
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "trigger"
+                ],
+                "skip": false,
+                "triggerReady": {
+                    "countsDir": false,
+                    "trigger": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1,
+                "PATH": "/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin",
+                "NUMBA_CACHE_DIR": "/tmp"
+            },
+            "arg_types": {
+                "alignsDir": {
+                    "flag": null,
+                    "label": "Alignment directories",
+                    "type": "directory list",
+                    "env": "alignsdir"
+                },
+                "overwrite": {
+                    "flag": "--overwrite ",
+                    "label": "Overwrite",
+                    "type": "bool",
+                    "env": "overwrite"
+                },
+                "filter_features": {
+                    "flag": "--filter_features",
+                    "label": "Filter out features in gene list",
+                    "type": "bool",
+                    "env": "filter_features"
+                },
+                "skip": {
+                    "flag": null,
+                    "label": "Skip execution",
+                    "type": "bool",
+                    "env": "skip"
+                },
+                "nThreads": {
+                    "default": 1,
+                    "flag": "--nThreads ",
+                    "label": "Number of Threads",
+                    "type": "int",
+                    "env": "nThreads"
+                },
+                "PATH": {
+                    "flag": null,
+                    "label": "Path inside container (needed for singularity reasons)",
+                    "type": "str",
+                    "env": "PATH"
+                },
+                "NUMBA_CACHE_DIR": {
+                    "flag": null,
+                    "label": "Path to NUMBA cache dir (needed for singularity reasons)",
+                    "type": "str",
+                    "env": "NUMBA_CACHE_DIR"
+                }
+            },
+            "image_name": "biodepot/scrna-matrices:latest",
+            "command": [
+                " python3 /data/morphic-scRNA-seq/read_counts.py "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "alignsDir"
+                ],
+                "nWorkers": 3,
+                "data": {
+                    "alignsDir": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    }
+                },
+                "iteratedAttrs": [
+                    "alignsDir"
+                ]
+            },
+            "required_parameters": [
+                "alignsDir",
+                "overwrite",
+                "filter_features",
+                "skip"
+            ],
+            "options_checked": {
+                "tablesDir": false,
+                "mtpercent": false,
+                "nThreads": true
+            },
+            "static_env": {}
+        },
+        {
+            "id": 4,
+            "input_files": [],
+            "output_files": [],
+            "mem_mb": 500,
+            "cores": 1,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "10x_format_fa_gtf",
+            "description": "10x_format_fa_gtf",
+            "parameters": {
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "inputConnectionsStore": {
+                    "inputfa": [
+                        3
+                    ],
+                    "inputgtf": [
+                        3
+                    ],
+                    "outputfa": [
+                        3
+                    ],
+                    "outputgtf": [
+                        3
+                    ],
+                    "trigger": [
+                        1
+                    ],
+                    "skip": [
+                        3
+                    ],
+                    "overwritefiles": [
+                        3
+                    ]
+                },
+                "inputfa": "",
+                "inputfeaturefa": "/data/scRNAseq_output/features/all_genes.fasta",
+                "inputfeaturegtf": "/data/scRNAseq_output/features/all_genes.gtf",
+                "inputgtf": "",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "inputfeaturegtf": true,
+                    "inputfeaturefa": true
+                },
+                "outputfa": "",
+                "outputgtf": "",
+                "overwritefiles": true,
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "trigger"
+                ],
+                "skip": null,
+                "triggerReady": {
+                    "trigger": false
+                },
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "inputfa": {
+                    "flag": null,
+                    "label": "Input fa file",
+                    "type": "file",
+                    "env": "INPUTFA"
+                },
+                "outputfa": {
+                    "flag": null,
+                    "label": "Output fa file",
+                    "type": "file",
+                    "env": "OUTPUTFA"
+                },
+                "inputgtf": {
+                    "flag": null,
+                    "label": "Input GTF file",
+                    "type": "file",
+                    "env": "INPUTGTF"
+                },
+                "outputgtf": {
+                    "flag": null,
+                    "label": "Output GTF file",
+                    "type": "file",
+                    "env": "OUTPUTGTF"
+                },
+                "overwritefiles": {
+                    "flag": null,
+                    "label": "Overwrite existing files",
+                    "type": "bool",
+                    "env": "overwrite"
+                },
+                "inputfeaturegtf": {
+                    "flag": null,
+                    "label": "Input Features GTF file",
+                    "type": "file",
+                    "env": "INPUTFGTF"
+                },
+                "inputfeaturefa": {
+                    "flag": null,
+                    "label": "Input Features fasta file",
+                    "type": "file",
+                    "env": "INPUTFFA"
+                },
+                "skip": {
+                    "flag": null,
+                    "label": "Skip execution",
+                    "type": "bool",
+                    "env": "skip"
+                }
+            },
+            "image_name": "biodepot/format-fa-gtf-10x-sc:latest",
+            "command": [
+                "sh -c '[ -n \"${skip}\" ] || format-fa-gtf.pl \"$@\"' _ "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "inputfa",
+                "outputfa",
+                "inputgtf",
+                "outputgtf",
+                "overwritefiles",
+                "skip"
+            ],
+            "options_checked": {
+                "inputfeaturegtf": true,
+                "inputfeaturefa": true
+            },
+            "static_env": {}
+        },
+        {
+            "id": 5,
+            "input_files": ["alignsDir"],
+            "output_files": ["alignsDir"],
+            "mem_mb": 32000,
+            "cores": 1,
+            "gpus": 1,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Remove ambient noise",
+            "description": "cellbender",
+            "parameters": {
+                "additional_flags": "",
+                "alignsDir": [],
+                "cb_counts_file": "cellbender_counts.h5",
+                "cb_subdir": "cellbender",
+                "controlAreaVisible": true,
+                "cpu_cores": 16,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "inputConnectionsStore": {
+                    "trigger": [
+                        8
+                    ]
+                },
+                "input_pattern": "counts.h5ad",
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "alignsDir"
+                    ],
+                    "nWorkers": 1,
+                    "data": {
+                        "alignsDir": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        }
+                    },
+                    "iteratedAttrs": [
+                        "alignsDir"
+                    ]
+                },
+                "layername": "denoised",
+                "nThreads": 1,
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "additional_flags": false
+                },
+                "output_pattern": "final_counts.h5ad",
+                "overwrite_cellbender": true,
+                "overwrite_layer": true,
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "trigger",
+                    "alignsDir"
+                ],
+                "skip": false,
+                "triggerReady": {
+                    "trigger": false,
+                    "alignsDir": false
+                },
+                "useGpu": true,
+                "useScheduler": true,
+                "usecpu": false,
+                "__version__": 1
+            },
+            "arg_types": {
+                "alignsDir": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "Alignments directory",
+                    "type": "directory list",
+                    "env": "alignsDir"
+                },
+                "overwrite_cellbender": {
+                    "flag": null,
+                    "label": "Overwrite existing cellbender files",
+                    "type": "bool",
+                    "env": "overwrite_cellbender"
+                },
+                "input_pattern": {
+                    "default": "filter_counts.h5ad",
+                    "flag": null,
+                    "label": "Input file pattern",
+                    "type": "str",
+                    "env": "input_pattern"
+                },
+                "output_pattern": {
+                    "default": "final_counts.h5ad",
+                    "flag": null,
+                    "label": "Output file pattern",
+                    "type": "str",
+                    "env": "output_pattern"
+                },
+                "nThreads": {
+                    "default": 1,
+                    "flag": null,
+                    "label": "Number of simultaneous cellbender processes",
+                    "type": "int",
+                    "env": "nThreads"
+                },
+                "cb_subdir": {
+                    "default": "cellbender",
+                    "flag": null,
+                    "label": "CellBender subdirectory (path relative to input file directory)",
+                    "type": "str",
+                    "env": "cb_subdir"
+                },
+                "cb_counts_file": {
+                    "default": "cellbender_counts.h5",
+                    "flag": null,
+                    "label": "Cellbender counts file (in CellBender directory)",
+                    "type": "str",
+                    "env": "cb_file"
+                },
+                "overwrite_layer": {
+                    "flag": null,
+                    "label": "Overwrite existing denoised layer",
+                    "type": "bool",
+                    "env": "overwrite_layer"
+                },
+                "usecpu": {
+                    "flag": null,
+                    "label": "Use CPU (very slow)",
+                    "type": "bool",
+                    "env": "usecpu"
+                },
+                "layername": {
+                    "default": "denoised",
+                    "flag": null,
+                    "label": "CellBender layer name",
+                    "type": "str",
+                    "env": "layername"
+                },
+                "cpu_cores": {
+                    "default": 1,
+                    "flag": null,
+                    "label": "CPU cores for cellbender",
+                    "type": "int",
+                    "env": "cpu_cores"
+                },
+                "additional_flags": {
+                    "flag": null,
+                    "label": "Additional flags",
+                    "type": "str",
+                    "env": "additional_flags"
+                },
+                "skip": {
+                    "flag": null,
+                    "label": "Skip execution",
+                    "type": "bool",
+                    "env": "skip"
+                }
+            },
+            "image_name_OLD": "biodepot/cellbender:0.3.2",
+            "image_name": "biodepot/cellbender:0.3.2",
+            "command": [
+                "cd /tmp && remove_noise.sh "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "alignsDir"
+                ],
+                "nWorkers": 1,
+                "data": {
+                    "alignsDir": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    }
+                },
+                "iteratedAttrs": [
+                    "alignsDir"
+                ]
+            },
+            "required_parameters": [
+                "alignsDir",
+                "overwrite_cellbender",
+                "input_pattern",
+                "output_pattern",
+                "nThreads",
+                "cb_subdir",
+                "cb_counts_file",
+                "overwrite_layer",
+                "usecpu",
+                "layername",
+                "cpu_cores",
+                "skip"
+            ],
+            "options_checked": {
+                "additional_flags": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 6,
+            "input_files": ["inputdirs", "whitelist", "features_file"],
+	        "output_files": ["outputdir"],
+	        "mem_mb": 32000,
+	        "cores": 16,
+	        "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Assign feature barcodes",
+            "description": "feature_finder",
+            "parameters": {
+                "as_named": false,
+                "averageReadLength": 250,
+                "barcodePattern": "_R1_",
+                "barcode_constant_offset": 0,
+                "barcode_length": 16,
+                "barcode_n": 1,
+                "consumerThreads": 4,
+                "controlAreaVisible": true,
+                "debugmode": false,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "feature_constant_offset": 26,
+                "feature_n": 3,
+                "features_file": "/data/project_14361_feature_ref_v2_202405_alt.csv",
+                "forwardPattern": "_R2_",
+                "imputfiles": [],
+                "inputConnectionsStore": {
+                    "outputdir": [
+                        3
+                    ]
+                },
+                "inputdirs": [
+                    "/storage/pooled_scRNA_seq_202401/larry-barcodes/A",
+                    "/storage/pooled_scRNA_seq_202401/larry-barcodes/B",
+                    "/storage/pooled_scRNA_seq_202401/larry-barcodes/C",
+                    "/storage/pooled_scRNA_seq_202401/larry-barcodes/D",
+                    "/storage/pooled_scRNA_seq_202401/larry-barcodes/E",
+                    "/storage/pooled_scRNA_seq_202401/larry-barcodes/F",
+                    "/storage/pooled_scRNA_seq_202401/larry-barcodes/G_1",
+                    "/storage/pooled_scRNA_seq_202401/larry-barcodes/G_2",
+                    "/storage/pooled_scRNA_seq_202401/larry-barcodes/H",
+                    "/storage/pooled_scRNA_seq_202401/larry-barcodes/I",
+                    "/storage/pooled_scRNA_seq_202401/larry-barcodes/J",
+                    "/storage/pooled_scRNA_seq_202401/larry-barcodes/L_1",
+                    "/storage/pooled_scRNA_seq_202401/larry-barcodes/L_2"
+                ],
+                "is_async": false,
+                "iterate": true,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "imputfiles",
+                        "inputdirs"
+                    ],
+                    "nWorkers": 7,
+                    "data": {
+                        "imputfiles": {
+                            "groupSize": "4",
+                            "threads": "1",
+                            "ram": "0"
+                        }
+                    },
+                    "iteratedAttrs": [
+                        "imputfiles"
+                    ]
+                },
+                "keep_existing": true,
+                "maxHammingDistance": 5,
+                "maxThreads": 32,
+                "maximum_mismatch": 3,
+                "minPosterior": 0.975,
+                "min_counts": 0,
+                "nWorkers": 7,
+                "nprocesses": 6,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "min_counts": true,
+                    "debugmode": false,
+                    "process_in_order": false,
+                    "maximum_mismatch": false,
+                    "barcode_n": false,
+                    "feature_n": false,
+                    "stringency": true,
+                    "imputfiles": false,
+                    "inputdirs": true,
+                    "feature_constant_offset": true,
+                    "nprocesses": true,
+                    "barcode_constant_offset": false,
+                    "maxThreads": true,
+                    "readBufferLines": true,
+                    "as_named": false,
+                    "reverse_complement": false,
+                    "parallelbyFile": false,
+                    "consumerThreads": false,
+                    "barcodePattern": true,
+                    "forwardPattern": true,
+                    "reversePattern": false,
+                    "averageReadLength": true,
+                    "minPosterior": false,
+                    "searchThreads": true
+                },
+                "outputdir": "",
+                "parallelbyFile": false,
+                "process_in_order": false,
+                "readBufferLines": 2048,
+                "repeat": false,
+                "restart_when_done": false,
+                "reversePattern": "_R3_",
+                "reverse_complement": false,
+                "runMode": 2,
+                "runTriggers": [
+                    "outputdir"
+                ],
+                "searchThreads": 2,
+                "skip": false,
+                "stringency": 1,
+                "triggerReady": {
+                    "outputdir": false
+                },
+                "umi_length": 12,
+                "useGpu": false,
+                "useScheduler": true,
+                "whitelist": "",
+                "__version__": 1
+            },
+            "arg_types": {
+                "imputfiles": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "Feature barcode fastq files",
+                    "type": "file list"
+                },
+                "inputdirs": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "Feature barcode fastq directories",
+                    "type": "directory list"
+                },
+                "keep_existing": {
+                    "flag": "-k ",
+                    "label": "Keep existing results",
+                    "type": "bool"
+                },
+                "whitelist": {
+                    "flag": "-w ",
+                    "label": "Cell barcode whitelist",
+                    "type": "file"
+                },
+                "barcode_length": {
+                    "default": 16,
+                    "flag": "-b ",
+                    "label": "Cell barcode length",
+                    "type": "int"
+                },
+                "features_file": {
+                    "flag": "-f ",
+                    "label": "Features sequences file",
+                    "type": "file"
+                },
+                "maxHammingDistance": {
+                    "default": 5,
+                    "flag": "-m ",
+                    "label": "Max Hamming distance",
+                    "type": "int"
+                },
+                "stringency": {
+                    "default": 1,
+                    "flag": "-s ",
+                    "label": "UMI deduping stringency",
+                    "type": "int"
+                },
+                "min_counts": {
+                    "default": 0,
+                    "flag": "-i ",
+                    "label": "Minimum feature-umi counts for deduping",
+                    "type": "int"
+                },
+                "outputdir": {
+                    "default": "",
+                    "flag": "-d ",
+                    "label": "Output directory",
+                    "type": "directory"
+                },
+                "feature_constant_offset": {
+                    "default": 26,
+                    "flag": "-o ",
+                    "label": "Number of constant basepairs in feature sequences",
+                    "type": "int"
+                },
+                "nprocesses": {
+                    "flag": "-t ",
+                    "label": "Maximum number of processes to fork off",
+                    "type": "int"
+                },
+                "searchThreads": {
+                    "default": 4,
+                    "flag": "-S ",
+                    "label": "Number of threads to use for hamming search (1:2:4)",
+                    "type": "int"
+                },
+                "consumerThreads": {
+                    "flag": "-c ",
+                    "label": "Number of threads to process each sample",
+                    "type": "int"
+                },
+                "maxThreads": {
+                    "flag": "-T ",
+                    "label": "Max total number of threads to use",
+                    "type": "int"
+                },
+                "parallelbyFile": {
+                    "flag": "-P ",
+                    "label": "Separate thread for each fastq file",
+                    "type": "bool"
+                },
+                "umi_length": {
+                    "default": 12,
+                    "flag": "-u ",
+                    "label": "Length of feature UMI",
+                    "type": "int"
+                },
+                "debugmode": {
+                    "flag": "-v ",
+                    "label": "Verbose messages",
+                    "type": "bool"
+                },
+                "process_in_order": {
+                    "flag": "-a ",
+                    "label": "Do not try to organize by sample name",
+                    "type": "bool"
+                },
+                "maximum_mismatch": {
+                    "default": 3,
+                    "flag": "--max_barcode_mismatches ",
+                    "label": "Maximum ambiguous barcodes matched before ignoring",
+                    "type": "int"
+                },
+                "barcode_n": {
+                    "default": 1,
+                    "flag": null,
+                    "label": "Maximum number of N's in cellular barcode",
+                    "type": "int"
+                },
+                "feature_n": {
+                    "default": 3,
+                    "flag": null,
+                    "label": "Maximum number of N's in feature barcode",
+                    "type": "int"
+                },
+                "barcode_constant_offset": {
+                    "flag": "-B ",
+                    "label": "Offset for barcode sequences",
+                    "type": "int"
+                },
+                "readBufferLines": {
+                    "default": 2048,
+                    "flag": "-R  ",
+                    "label": "Number of lines in fastq read buffer",
+                    "type": "int"
+                },
+                "as_named": {
+                    "flag": "-a ",
+                    "label": "Do not group fastq files by sample name",
+                    "type": "bool"
+                },
+                "reverse_complement": {
+                    "flag": "-r ",
+                    "label": "Reverse complement sequence barcode",
+                    "type": "bool"
+                },
+                "barcodePattern": {
+                    "default": "_R1_",
+                    "flag": "--barcode_fastq_pattern ",
+                    "label": "Barcode fastq pattern",
+                    "type": "str"
+                },
+                "forwardPattern": {
+                    "default": "_R2_",
+                    "flag": "--forward_fastq_pattern ",
+                    "label": "Forward fastq pattern",
+                    "type": "str"
+                },
+                "reversePattern": {
+                    "default": "_R3_",
+                    "flag": "--reverse_fastq_pattern ",
+                    "label": "Reverse fastq pattern",
+                    "type": "str"
+                },
+                "averageReadLength": {
+                    "flag": "-L ",
+                    "label": "Average read length",
+                    "type": "int"
+                },
+                "minPosterior": {
+                    "default": 0.975,
+                    "flag": "-M ",
+                    "label": "Minimum probability for ambiguous barcode",
+                    "type": "double"
+                },
+                "skip": {
+                    "flag": null,
+                    "label": "Skip execution",
+                    "type": "bool",
+                    "env": "skip"
+                }
+            },
+            "image_name": "biodepot/process_features:latest",
+            "command": [
+                "echo Unimplemented || assignBarcodes "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": true,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "imputfiles",
+                    "inputdirs"
+                ],
+                "nWorkers": 7,
+                "data": {
+                    "imputfiles": {
+                        "groupSize": "4",
+                        "threads": "1",
+                        "ram": "0"
+                    }
+                },
+                "iteratedAttrs": [
+                    "imputfiles"
+                ]
+            },
+            "required_parameters": [
+                "keep_existing",
+                "whitelist",
+                "barcode_length",
+                "features_file",
+                "maxHammingDistance",
+                "outputdir",
+                "umi_length",
+                "skip"
+            ],
+            "options_checked": {
+                "min_counts": true,
+                "debugmode": false,
+                "process_in_order": false,
+                "maximum_mismatch": false,
+                "barcode_n": false,
+                "feature_n": false,
+                "stringency": true,
+                "imputfiles": false,
+                "inputdirs": true,
+                "feature_constant_offset": true,
+                "nprocesses": true,
+                "barcode_constant_offset": false,
+                "maxThreads": true,
+                "readBufferLines": true,
+                "as_named": false,
+                "reverse_complement": false,
+                "parallelbyFile": false,
+                "consumerThreads": false,
+                "barcodePattern": true,
+                "forwardPattern": true,
+                "reversePattern": false,
+                "averageReadLength": true,
+                "minPosterior": false,
+                "searchThreads": true
+            },
+            "static_env": {}
+        },
+        {
+            "id": 7,
+            "input_files": [],
+            "output_files": [],
+            "mem_mb": 50,
+            "cores": 1,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Start",
+            "description": "Start",
+            "parameters": {
+                "aligneddir": "/data/processing/morphic-test/test/alignedfiles",
+                "annotation_file": "/data/scRNAseq_output_test/genome/genome.gtf",
+                "awscredentialsdir": "/data/.aws",
+                "controlAreaVisible": true,
+                "countsdir": "/data/processing/morphic-test/test/counts",
+                "download_dir": "/data/scRNAseq_output_test/genome",
+                "downloadindexlink": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "fastqfiles": [],
+                "fastqdirs": [
+                    "/data/pooled_scRNA_seq_202401_short/A"
+                ],
+                "genome_dir": "/data/scRNAseq_output_test/genome",
+                "genome_file": "/data/scRNAseq_output_test/genome/genome.fa",
+                "genomegtfURLs": null,
+                "inputConnectionsStore": {},
+                "is_async": false,
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "genomegtfURLs",
+                        "fastqfiles"
+                    ],
+                    "nWorkers": 1
+                },
+                "nWorkers": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "bypass_star_index": false,
+                    "downloadindexlink": false,
+                    "fastqfiles": true,
+                    "trimmedfastqfiles": false,
+                    "awscredentialsdir": true,
+                    "genomegtfURLs": false
+                },
+                "overwrite": false,
+                "raw_annotation_file": "/data/scRNAseq_output_test/genome/gencode.v44.primary_assembly.annotation.gtf",
+                "raw_genome_file": "/data/scRNAseq_output_test/genome/Homo_sapiens.GRCh38.dna.primary_assembly.fa",
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 0,
+                "runTriggers": [],
+                "s3bucket": "morphic-bio-processing",
+                "s3destdirectory": "processed/morphic-test/test",
+                "s3downloaddir": "/data/morphic-bio-processing/morphic-test/test",
+                "s3sourcedirectory": "morphic-test/test",
+                "skip_indexing": true,
+                "transcriptomefile": "/data/scRNAseq_output_test/genome/transcriptome.fa",
+                "triggerReady": {},
+                "useGpu": false,
+                "useKallisto": false,
+                "usePiscem": false,
+                "useSalmon": false,
+                "useScheduler": true,
+                "useSplicei": true,
+                "useSpliceu": true,
+                "useStar": true,
+                "work_dir": "/data/scRNAseq_output_test",
+                "whitelist": "/data/10x_version3_whitelist.txt",
+                "__version__": 1
+            },
+            "arg_types": {
+                "fastqdirs": {
+                    "flag": null,
+                    "label": "Fastq directories (organized by experiment)",
+                    "type": "directory list"
+                },
+                "whitelist": {
+                    "flag": null,
+                    "label": "Cell barcode whitelist",
+                    "type": "file"
+                },
+                "work_dir": {
+                    "flag": null,
+                    "label": "Work directory",
+                    "type": "directory",
+                    "env": "work_dir"
+                },
+                "genome_dir": {
+                    "flag": null,
+                    "label": "Genome directory",
+                    "type": "directory",
+                    "env": "genome_dir"
+                },
+                "genome_file": {
+                    "flag": null,
+                    "label": "Genome reference file",
+                    "type": "file",
+                    "env": "genome_file"
+                },
+                "annotation_file": {
+                    "flag": null,
+                    "label": "Annotation file (gtf)",
+                    "type": "file",
+                    "env": "annotation_file"
+                },
+                "skip_indexing": {
+                    "default": true,
+                    "flag": null,
+                    "label": "Skip indexing",
+                    "type": "bool",
+                    "env": "skip_indexing"
+                },
+                "downloadindexlink": {
+                    "flag": null,
+                    "label": "Download index link",
+                    "type": "bool",
+                    "env": "DOWNLOADINDEXLINK"
+                },
+                "transcriptomefile": {
+                    "flag": null,
+                    "label": "Transcriptome file",
+                    "type": "file",
+                    "env": "transcriptomefile"
+                },
+                "download_dir": {
+                    "flag": null,
+                    "label": "Download directory",
+                    "type": "directory",
+                    "env": "download_dir"
+                },
+                "genomegtfURLs": {
+                    "flag": null,
+                    "type": "text list",
+                    "env": "genomegtfURLs"
+                },
+                "raw_genome_file": {
+                    "flag": null,
+                    "label": "Raw genome file",
+                    "type": "file",
+                    "env": "raw_genome_file"
+                },
+                "raw_annotation_file": {
+                    "flag": null,
+                    "label": "Raw annotation file (gtf)",
+                    "type": "file",
+                    "env": "raw_annotation_file"
+                },
+                "fastqfiles": {
+                    "flag": null,
+                    "label": "Fastq files (R1/R2)",
+                    "type": "file list",
+                    "env": "fastqfiles"
+                },
+                "s3sourcedirectory": {
+                    "flag": null,
+                    "label": "S3 source directory ",
+                    "type": "str"
+                },
+                "s3bucket": {
+                    "flag": null,
+                    "label": "s3 bucket",
+                    "type": "str"
+                },
+                "s3downloaddir": {
+                    "flag": null,
+                    "label": "Directory to store s3 downloads",
+                    "type": "directory",
+                    "env": "s3downloaddir"
+                },
+                "aligneddir": {
+                    "flag": null,
+                    "label": "Aligned directory",
+                    "type": "directory",
+                    "env": "aligneddir"
+                },
+                "s3destdirectory": {
+                    "flag": null,
+                    "label": "S3 destination directory ",
+                    "type": "str"
+                },
+                "awscredentialsdir": {
+                    "flag": null,
+                    "label": "AWS credentials directory",
+                    "type": "directory"
+                },
+                "countsdir": {
+                    "flag": null,
+                    "label": "Counts directory",
+                    "type": "directory",
+                    "env": "countsdir"
+                },
+                "useStar": {
+                    "flag": null,
+                    "label": "Use STAR",
+                    "type": "bool",
+                    "env": "useStar"
+                },
+                "useKallisto": {
+                    "flag": null,
+                    "label": "Use Kallisto",
+                    "type": "bool",
+                    "env": "useKallisto"
+                },
+                "usePiscem": {
+                    "flag": null,
+                    "label": "Use Piscem",
+                    "type": "bool",
+                    "env": "usePiscem"
+                },
+                "useSalmon": {
+                    "flag": null,
+                    "label": "Use Salmon",
+                    "type": "bool",
+                    "env": "useSalmon"
+                },
+                "useSplicei": {
+                    "flag": null,
+                    "label": "Use splicei reference",
+                    "type": "bool",
+                    "env": "useSplicei"
+                },
+                "useSpliceu": {
+                    "flag": null,
+                    "label": "Use spliceu reference",
+                    "type": "bool",
+                    "env": "useSpliceu"
+                },
+                "overwrite": {
+                    "flag": null,
+                    "label": "Overwrite",
+                    "type": "bool",
+                    "env": "overwrite"
+                }
+            },
+            "image_name": "biodepot/scrna-seq-start:latest",
+            "command": [
+                "/data/morphic-scRNA-seq/Start/Dockerfiles/start.sh "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "genomegtfURLs",
+                    "fastqfiles"
+                ],
+                "nWorkers": 1
+            },
+            "required_parameters": [
+                "work_dir",
+                "genome_dir",
+                "genome_file",
+                "annotation_file",
+                "skip_indexing",
+                "transcriptomefile",
+                "download_dir",
+                "raw_genome_file",
+                "raw_annotation_file",
+                "s3sourcedirectory",
+                "s3bucket",
+                "s3downloaddir",
+                "aligneddir",
+                "s3destdirectory",
+                "countsdir",
+                "useStar",
+                "useKallisto",
+                "usePiscem",
+                "useSalmon",
+                "useSplicei",
+                "useSpliceu",
+                "overwrite"
+            ],
+            "options_checked": {
+                "bypass_star_index": false,
+                "downloadindexlink": false,
+                "fastqfiles": true,
+                "trimmedfastqfiles": false,
+                "awscredentialsdir": true,
+                "genomegtfURLs": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 8,
+            "input_files": ["alignsDir"],
+            "output_files": ["alignsDir"],
+            "mem_mb": 32000,
+            "cores": 16,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Filter_counts",
+            "description": "Filter_counts",
+            "parameters": {
+                "alignsDir": null,
+                "controlAreaVisible": true,
+                "end_async": false,
+                "end_async_title": null,
+                "exportGraphics": false,
+                "inputConnectionsStore": {
+                    "alignsDir": [
+                        7
+                    ]
+                },
+                "is_async": false,
+                "iterate": true,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "alignsDir"
+                    ],
+                    "data": {
+                        "alignsDir": {
+                            "groupSize": "1",
+                            "threads": "1",
+                            "ram": "0"
+                        }
+                    },
+                    "iteratedAttrs": [
+                        "alignsDir"
+                    ],
+                    "nWorkers": 3
+                },
+                "maxgenes": 2500,
+                "mingenes": 200,
+                "mtpercent": 5,
+                "nWorkers": 3,
+                "n_mad": 3,
+                "nthreads": 1,
+                "numSlots": 1,
+                "optionsChecked": {
+                    "mingenes": false,
+                    "maxgenes": false
+                },
+                "overwrite": true,
+                "repeat": false,
+                "restart_when_done": false,
+                "runMode": 0,
+                "runTriggers": [],
+                "skip": false,
+                "triggerReady": {},
+                "useGpu": false,
+                "useScheduler": true,
+                "__version__": 1
+            },
+            "arg_types": {
+                "alignsDir": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "Alignments directory",
+                    "type": "directory list",
+                    "env": "alignsDir"
+                },
+                "overwrite": {
+                    "flag": null,
+                    "label": "Overwrite",
+                    "type": "bool",
+                    "env": "overwrite"
+                },
+                "mingenes": {
+                    "default": 200,
+                    "flag": null,
+                    "label": "Filter: min genes",
+                    "type": "int",
+                    "env": "min_genes"
+                },
+                "maxgenes": {
+                    "default": 2500,
+                    "flag": null,
+                    "label": "Filter: max genes",
+                    "type": "int",
+                    "env": "max_genes"
+                },
+                "mtpercent": {
+                    "default": 5.0,
+                    "flag": null,
+                    "label": "Filter: max mt% ",
+                    "type": "double",
+                    "env": "mtpercent"
+                },
+                "nthreads": {
+                    "default": 1,
+                    "flag": null,
+                    "label": "Number of threads",
+                    "type": "int",
+                    "env": "nthreads"
+                },
+                "skip": {
+                    "flag": null,
+                    "label": "Skip execution",
+                    "type": "bool",
+                    "env": "skip"
+                },
+                "n_mad": {
+                    "default": 3,
+                    "flag": null,
+                    "label": "Standard deviations for n_genes",
+                    "type": "int",
+                    "env": "n_mad"
+                }
+            },
+            "image_name": "biodepot/scrna-matrices:latest",
+            "command": [
+                "filter.sh "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": true,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "alignsDir"
+                ],
+                "data": {
+                    "alignsDir": {
+                        "groupSize": "1",
+                        "threads": "1",
+                        "ram": "0"
+                    }
+                },
+                "iteratedAttrs": [
+                    "alignsDir"
+                ],
+                "nWorkers": 3
+            },
+            "required_parameters": [
+                "alignsDir",
+                "overwrite",
+                "mtpercent",
+                "nthreads",
+                "skip",
+                "n_mad"
+            ],
+            "options_checked": {
+                "mingenes": false,
+                "maxgenes": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 11,
+            "input_files": ["inputdirs"],
+            "output_files": ["outputdir"],
+            "mem_mb": 32000,
+            "cores": 16,
+            "gpus": 0,
+            "async": false,
+            "end_async": false,
+            "restart_when_done": false,
+            "barrier_for": null,
+            "slots": 1,
+            "title": "Assign expresion features",
+            "description": "feature_finder",
+            "parameters": {
+                "as_named": false,
+                "averageReadLength": 250,
+                "barcodePattern": "_R1_",
+                "barcode_constant_offset": 0,
+                "barcode_length": 16,
+                "barcode_n": 1,
+                "consumerThreads": 0,
+                "controlAreaVisible": true,
+                "debugmode": false,
+                "exportGraphics": false,
+                "feature_constant_offset": 26,
+                "feature_n": 3,
+                "features_file": "/data/project_14361_feature_ref_v2_202405_alt.csv",
+                "forwardPattern": "_R2_",
+                "imputfiles": [],
+                "inputConnectionsStore": {},
+                "inputdirs": [
+                    "/storage/pooled_scRNA_seq_202401/A",
+                    "/storage/pooled_scRNA_seq_202401/B",
+                    "/storage/pooled_scRNA_seq_202401/C",
+                    "/storage/pooled_scRNA_seq_202401/D",
+                    "/storage/pooled_scRNA_seq_202401/E",
+                    "/storage/pooled_scRNA_seq_202401/F",
+                    "/storage/pooled_scRNA_seq_202401/G_1",
+                    "/storage/pooled_scRNA_seq_202401/G_2",
+                    "/storage/pooled_scRNA_seq_202401/H",
+                    "/storage/pooled_scRNA_seq_202401/I",
+                    "/storage/pooled_scRNA_seq_202401/J",
+                    "/storage/pooled_scRNA_seq_202401/L_1",
+                    "/storage/pooled_scRNA_seq_202401/L_2"
+                ],
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "imputfiles",
+                        "inputdirs"
+                    ]
+                },
+                "keep_existing": true,
+                "maxHammingDistance": 5,
+                "maxThreads": 32,
+                "maximum_mismatch": 3,
+                "minPosterior": 0.975,
+                "min_counts": 0,
+                "nWorkers": 1,
+                "nprocesses": 6,
+                "optionsChecked": {
+                    "imputfiles": false,
+                    "inputdirs": true,
+                    "stringency": true,
+                    "min_counts": true,
+                    "feature_constant_offset": true,
+                    "nprocesses": true,
+                    "searchThreads": true,
+                    "consumerThreads": false,
+                    "maxThreads": true,
+                    "parallelbyFile": false,
+                    "debugmode": false,
+                    "process_in_order": false,
+                    "maximum_mismatch": false,
+                    "barcode_n": false,
+                    "feature_n": false,
+                    "barcode_constant_offset": false,
+                    "readBufferLines": true,
+                    "as_named": false,
+                    "reverse_complement": false,
+                    "barcodePattern": true,
+                    "forwardPattern": true,
+                    "reversePattern": false,
+                    "averageReadLength": true,
+                    "minPosterior": false
+                },
+                "outputdir": "/storage/gex",
+                "parallelbyFile": false,
+                "process_in_order": false,
+                "readBufferLines": 2048,
+                "repeat": false,
+                "reversePattern": "_R3_",
+                "reverse_complement": false,
+                "runMode": 0,
+                "runTriggers": [],
+                "searchThreads": 4,
+                "skip": false,
+                "stringency": 1,
+                "triggerReady": {},
+                "umi_length": 12,
+                "useGpu": false,
+                "useScheduler": true,
+                "whitelist": ""
+            },
+            "arg_types": {
+                "imputfiles": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "Feature barcode fastq files",
+                    "type": "file list"
+                },
+                "inputdirs": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "Feature barcode fastq directories",
+                    "type": "directory list"
+                },
+                "keep_existing": {
+                    "flag": "-k ",
+                    "label": "Keep existing results",
+                    "type": "bool"
+                },
+                "whitelist": {
+                    "flag": "-w ",
+                    "label": "Cell barcode whitelist",
+                    "type": "file"
+                },
+                "barcode_length": {
+                    "default": 16,
+                    "flag": "-b ",
+                    "label": "Cell barcode length",
+                    "type": "int"
+                },
+                "features_file": {
+                    "flag": "-f ",
+                    "label": "Features sequences file",
+                    "type": "file"
+                },
+                "maxHammingDistance": {
+                    "default": 5,
+                    "flag": "-m ",
+                    "label": "Max Hamming distance",
+                    "type": "int"
+                },
+                "stringency": {
+                    "default": 1,
+                    "flag": "-s ",
+                    "label": "UMI deduping stringency",
+                    "type": "int"
+                },
+                "min_counts": {
+                    "default": 0,
+                    "flag": "-i ",
+                    "label": "Minimum feature-umi counts for deduping",
+                    "type": "int"
+                },
+                "outputdir": {
+                    "default": "",
+                    "flag": "-d ",
+                    "label": "Output directory",
+                    "type": "directory"
+                },
+                "feature_constant_offset": {
+                    "default": 26,
+                    "flag": "-o ",
+                    "label": "Number of constant basepairs in feature sequences",
+                    "type": "int"
+                },
+                "nprocesses": {
+                    "flag": "-t ",
+                    "label": "Maximum number of processes to fork off",
+                    "type": "int"
+                },
+                "searchThreads": {
+                    "default": 4,
+                    "flag": "-S ",
+                    "label": "Number of threads to use for hamming search (1:2:4)",
+                    "type": "int"
+                },
+                "consumerThreads": {
+                    "flag": "-c ",
+                    "label": "Number of threads to process each sample",
+                    "type": "int"
+                },
+                "maxThreads": {
+                    "flag": "-T ",
+                    "label": "Max total number of threads to use",
+                    "type": "int"
+                },
+                "parallelbyFile": {
+                    "flag": "-P ",
+                    "label": "Separate thread for each fastq file",
+                    "type": "bool"
+                },
+                "umi_length": {
+                    "default": 12,
+                    "flag": "-u ",
+                    "label": "Length of feature UMI",
+                    "type": "int"
+                },
+                "debugmode": {
+                    "flag": "-v ",
+                    "label": "Verbose messages",
+                    "type": "bool"
+                },
+                "process_in_order": {
+                    "flag": "-a ",
+                    "label": "Do not try to organize by sample name",
+                    "type": "bool"
+                },
+                "maximum_mismatch": {
+                    "default": 3,
+                    "flag": "--max_barcode_mismatches ",
+                    "label": "Maximum ambiguous barcodes matched before ignoring",
+                    "type": "int"
+                },
+                "barcode_n": {
+                    "default": 1,
+                    "flag": null,
+                    "label": "Maximum number of N's in cellular barcode",
+                    "type": "int"
+                },
+                "feature_n": {
+                    "default": 3,
+                    "flag": null,
+                    "label": "Maximum number of N's in feature barcode",
+                    "type": "int"
+                },
+                "barcode_constant_offset": {
+                    "flag": "-B ",
+                    "label": "Offset for barcode sequences",
+                    "type": "int"
+                },
+                "readBufferLines": {
+                    "default": 2048,
+                    "flag": "-R  ",
+                    "label": "Number of lines in fastq read buffer",
+                    "type": "int"
+                },
+                "as_named": {
+                    "flag": "-a ",
+                    "label": "Do not group fastq files by sample name",
+                    "type": "bool"
+                },
+                "reverse_complement": {
+                    "flag": "-r ",
+                    "label": "Reverse complement sequence barcode",
+                    "type": "bool"
+                },
+                "barcodePattern": {
+                    "default": "_R1_",
+                    "flag": "--barcode_fastq_pattern ",
+                    "label": "Barcode fastq pattern",
+                    "type": "str"
+                },
+                "forwardPattern": {
+                    "default": "_R2_",
+                    "flag": "--forward_fastq_pattern ",
+                    "label": "Forward fastq pattern",
+                    "type": "str"
+                },
+                "reversePattern": {
+                    "default": "_R3_",
+                    "flag": "--reverse_fastq_pattern ",
+                    "label": "Reverse fastq pattern",
+                    "type": "str"
+                },
+                "averageReadLength": {
+                    "flag": "-L ",
+                    "label": "Average read length",
+                    "type": "int"
+                },
+                "minPosterior": {
+                    "default": 0.975,
+                    "flag": "-M ",
+                    "label": "Minimum probability for ambiguous barcode",
+                    "type": "double"
+                },
+                "skip": {
+                    "flag": null,
+                    "label": "Skip execution",
+                    "type": "bool",
+                    "env": "skip"
+                }
+            },
+            "image_name": "biodepot/process_features:latest",
+            "command": [
+                "assignBarcodes "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "imputfiles",
+                    "inputdirs"
+                ]
+            },
+            "required_parameters": [
+                "keep_existing",
+                "whitelist",
+                "barcode_length",
+                "features_file",
+                "maxHammingDistance",
+                "outputdir",
+                "umi_length",
+                "skip"
+            ],
+            "options_checked": {
+                "imputfiles": false,
+                "inputdirs": true,
+                "stringency": true,
+                "min_counts": true,
+                "feature_constant_offset": true,
+                "nprocesses": true,
+                "searchThreads": true,
+                "consumerThreads": false,
+                "maxThreads": true,
+                "parallelbyFile": false,
+                "debugmode": false,
+                "process_in_order": false,
+                "maximum_mismatch": false,
+                "barcode_n": false,
+                "feature_n": false,
+                "barcode_constant_offset": false,
+                "readBufferLines": true,
+                "as_named": false,
+                "reverse_complement": false,
+                "barcodePattern": true,
+                "forwardPattern": true,
+                "reversePattern": false,
+                "averageReadLength": true,
+                "minPosterior": false
+            },
+            "static_env": {}
+        },
+        {
+            "id": 9,
+            "mem_mb": 8000,
+            "cores": 1,
+            "gpus": 0,
+            "async": false,
+            "end_async": true,
+            "restart_when_done": false,
+            "barrier_for": 2,
+            "slots": 1,
+            "title": "Upload main files",
+            "description": "S3_upload_async",
+            "parameters": {
+                "bucket": "fakeBucket",
+                "controlAreaVisible": true,
+                "credentials_dir": "/data/.aws",
+                "doneDir": "/data/processing/morphic-ucsf/UCSF_Bulk_EB_Timecourse/Tables",
+                "exportGraphics": false,
+                "inputConnectionsStore": {},
+                "iterate": false,
+                "iterateSettings": {
+                    "iterableAttrs": [
+                        "uploadDir"
+                    ]
+                },
+                "nWorkers": 1,
+                "optionsChecked": {
+                    "nthreads": false,
+                    "key": false,
+                    "secret": false,
+                    "region": false,
+                    "profile": false,
+                    "doneDir": true,
+                    "sleeptime": true
+                },
+                "profile": "",
+                "repeat": false,
+                "runMode": 0,
+                "runTriggers": [],
+                "s3Dir": "",
+                "sleeptime": 60,
+                "triggerReady": {},
+                "uploadDir": [
+                    "/data/processing/morphic-ucsf/UCSF_Bulk_EB_Timecourse/alignedfiles",
+                    "/data/processing/morphic-ucsf/UCSF_Bulk_EB_Timecourse/Counts",
+                    "/data/processing/morphic-ucsf/UCSF_Bulk_EB_Timecourse/downloads",
+                    "/data/processing/morphic-ucsf/UCSF_Bulk_EB_Timecourse/trimmed",
+                    "/data/processing/morphic-ucsf/UCSF_Bulk_EB_Timecourse/Tables"
+                ],
+                "useGpu": false,
+                "useScheduler": true
+            },
+            "arg_types": {
+                "credentials_dir": {
+                    "default": "/data/.aws",
+                    "flag": null,
+                    "argument": true,
+                    "label": "AWS directory",
+                    "type": "directory"
+                },
+                "uploadDir": {
+                    "flag": null,
+                    "label": "Directories to upload",
+                    "type": "directory list",
+                    "env": "localdirs"
+                },
+                "bucket": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "S3 bucket",
+                    "type": "str"
+                },
+                "s3Dir": {
+                    "flag": null,
+                    "argument": true,
+                    "label": "S3 prefix",
+                    "type": "str"
+                },
+                "profile": {
+                    "flag": null,
+                    "label": "Profile",
+                    "type": "str",
+                    "env": "aws_profile"
+                },
+                "doneDir": {
+                    "flag": null,
+                    "label": "Done directory (async)",
+                    "type": "directory",
+                    "env": "doneDir"
+                },
+                "sleeptime": {
+                    "default": 60,
+                    "flag": null,
+                    "label": "Time (s) between checking for files (async)",
+                    "type": "int",
+                    "env": "MIN_TIME_BETWEEN_CHECKS"
+                }
+            },
+            "image_name": "biodepot/s3upload_async:latest",
+            "command": [
+                "echo Unimplemented || upload.sh "
+            ],
+            "port_mappings": [],
+            "port_vars": null,
+            "iterate": false,
+            "iterate_settings": {
+                "iterableAttrs": [
+                    "uploadDir"
+                ]
+            },
+            "required_parameters": [
+                "credentials_dir",
+                "uploadDir",
+                "bucket",
+                "s3Dir"
+            ],
+            "options_checked": {
+                "nthreads": false,
+                "key": false,
+                "secret": false,
+                "region": false,
+                "profile": false,
+                "doneDir": true,
+                "sleeptime": true
+            },
+            "static_env": {}
+        }
+    ],
+    "links": [
+        {
+            "source": 0,
+            "sink": 4,
+            "source_channel": "directory",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 7,
+            "sink": 0,
+            "source_channel": "genomegtfURLs",
+            "sink_channel": "URL"
+        },
+        {
+            "source": 7,
+            "sink": 0,
+            "source_channel": "download_dir",
+            "sink_channel": "directory"
+        },
+        {
+            "source": 7,
+            "sink": 4,
+            "source_channel": "genome_file",
+            "sink_channel": "outputfa"
+        },
+        {
+            "source": 7,
+            "sink": 4,
+            "source_channel": "annotation_file",
+            "sink_channel": "outputgtf"
+        },
+        {
+            "source": 7,
+            "sink": 4,
+            "source_channel": "raw_genome_file",
+            "sink_channel": "inputfa"
+        },
+        {
+            "source": 7,
+            "sink": 4,
+            "source_channel": "raw_annotation_file",
+            "sink_channel": "inputgtf"
+        },
+        {
+            "source": 7,
+            "sink": 0,
+            "source_channel": "work_dir",
+            "sink_channel": "trigger"
+        },
+        {
+            "source": 7,
+            "sink": 0,
+            "source_channel": "skip_indexing",
+            "sink_channel": "skip"
+        },
+        {
+            "source": 7,
+            "sink": 4,
+            "source_channel": "skip_indexing",
+            "sink_channel": "skip"
+        },
+        {
+            "source": 7,
+            "sink": 0,
+            "source_channel": "overwrite",
+            "sink_channel": "overwite"
+        },
+        {
+            "source": 7,
+            "sink": 4,
+            "source_channel": "overwrite",
+            "sink_channel": "overwritefiles"
+        },
+        {
+            "source": 7,
+            "sink": 6,
+            "source_channel": "countsdir",
+            "sink_channel": "outputdir"
+        },
+        {
+            "source": 4,
+            "sink": 1,
+            "source_channel": "outputfa",
+            "sink_channel": "genomefile"
+        },
+        {
+            "source": 4,
+            "sink": 1,
+            "source_channel": "outputgtf",
+            "sink_channel": "gtffile"
+        },
+        {
+            "source": 7,
+            "sink": 1,
+            "source_channel": "skip_indexing",
+            "sink_channel": "skip"
+        },
+        {
+            "source": 7,
+            "sink": 1,
+            "source_channel": "usePiscem",
+            "sink_channel": "usePiscem"
+        },
+        {
+            "source": 7,
+            "sink": 1,
+            "source_channel": "useKallisto",
+            "sink_channel": "useKallisto"
+        },
+        {
+            "source": 7,
+            "sink": 1,
+            "source_channel": "useSplicei",
+            "sink_channel": "useSplicei"
+        },
+        {
+            "source": 7,
+            "sink": 1,
+            "source_channel": "genome_dir",
+            "sink_channel": "indicesdir"
+        },
+        {
+            "source": 7,
+            "sink": 1,
+            "source_channel": "overwrite",
+            "sink_channel": "overwrite"
+        },
+        {
+            "source": 7,
+            "sink": 1,
+            "source_channel": "useStar",
+            "sink_channel": "useStar"
+        },
+        {
+            "source": 7,
+            "sink": 1,
+            "source_channel": "useSpliceu",
+            "sink_channel": "useSpliceu"
+        },
+        {
+            "source": 7,
+            "sink": 1,
+            "source_channel": "useSalmon",
+            "sink_channel": "useSalmon"
+        },
+        {
+            "source": 7,
+            "sink": 1,
+            "source_channel": "work_dir",
+            "sink_channel": "Trigger"
+        },
+        {
+            "source": 1,
+            "sink": 2,
+            "source_channel": "indicesdir",
+            "sink_channel": "indicesdir"
+        },
+        {
+            "source": 7,
+            "sink": 2,
+            "source_channel": "useKallisto",
+            "sink_channel": "useKallisto"
+        },
+        {
+            "source": 7,
+            "sink": 2,
+            "source_channel": "useSpliceu",
+            "sink_channel": "useSplicei"
+        },
+        {
+            "source": 7,
+            "sink": 2,
+            "source_channel": "useSalmon",
+            "sink_channel": "useSalmon"
+        },
+        {
+            "source": 7,
+            "sink": 2,
+            "source_channel": "usePiscem",
+            "sink_channel": "usePiscem"
+        },
+        {
+            "source": 7,
+            "sink": 2,
+            "source_channel": "useStar",
+            "sink_channel": "useStar"
+        },
+        {
+            "source": 7,
+            "sink": 2,
+            "source_channel": "useSplicei",
+            "sink_channel": "useSpliceu"
+        },
+        {
+            "source": 7,
+            "sink": 2,
+            "source_channel": "aligneddir",
+            "sink_channel": "outputdir"
+        },
+        {
+            "source": 7,
+            "sink": 2,
+            "source_channel": "whitelist",
+            "sink_channel": "whitelist"
+        },
+        {
+            "source": 7,
+            "sink": 2,
+            "source_channel": "fastqdirs",
+            "sink_channel": "fastqdirs"
+        },
+        {
+            "source": 7,
+            "sink": 6,
+            "source_channel": "whitelist",
+            "sink_channel": "whitelist"
+        },
+        {
+            "source": 2,
+            "sink": 3,
+            "source_channel": "aligned_samples",
+            "sink_channel": "alignsDir"
+        },
+        {
+            "source": 8,
+            "sink": 5,
+            "source_channel": "alignsDir",
+            "sink_channel": "alignsDir"
+        },
+        {
+            "source": 3,
+            "sink": 8,
+            "source_channel": "alignsDir",
+            "sink_channel": "alignsDir"
+        },
+        {
+            "source": 5,
+            "sink": 9,
+            "source_channel": "alignsDir",
+            "sink_channel": "Trigger"
+        }
+    ]
+}

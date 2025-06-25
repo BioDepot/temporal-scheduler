@@ -184,17 +184,19 @@ class SlurmActivity:
         # liberal with RAM estimates for SLURM cluster but not otherwise.
         if "mem" in config:
             sbatch_str += f"#SBATCH --mem={config['mem']}\n"
-        else:
+        elif "gpus" not in config:
             sbatch_str += f"#SBATCH --mem={resource_req.mem_mb}MB\n"
 
         if "cpus_per_task" in config:
             sbatch_str += f"#SBATCH --cpus-per-task={config['cpus_per_task']}\n"
-        else:
+        elif "gpus" not in config:
             sbatch_str += f"#SBATCH --cpus-per-task={resource_req.cpus}\n"
 
-        # TODO: GPU support.
+        if "gpus" in config:
+            sbatch_str += f"#SBATCH --gpus={config['gpus']}\n"
 
-        # Add #SBATCH --array if using job array
+        # TODO: Add job array support
+
         # CMD should already include singularity handling.
         if "modules" in config:
             for module in config["modules"]:

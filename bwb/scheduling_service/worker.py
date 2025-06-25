@@ -70,7 +70,7 @@ def verify_env():
               "to install rsync.")
 
 
-async def get_worker(given_queue_name=None, cpus=None, ram_mb=None, gpus=0) -> Tuple[WorkerResources, Worker, Worker]:
+async def get_worker(given_queue_name=None, cpus=None, ram_mb=None, gpus=1) -> Tuple[WorkerResources, Worker, Worker]:
     load_dotenv()
     temporal_ept = os.getenv("TEMPORAL_ENDPOINT_URL")
     print(f"Connecting to temporal endpoint {temporal_ept}")

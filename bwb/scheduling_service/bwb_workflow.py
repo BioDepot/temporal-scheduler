@@ -598,6 +598,7 @@ class BwbWorkflow:
                 files_already_on_executor,
                 self.bucket_id
             )
+
             await executor.sync_dir(sync_dir_params, worker_queue_id, self.use_local_storage)
             self.completed_ids.add(node_id)
             await self.start_eligible_successor_nodes(node_id, succ_ancestor_list)
@@ -658,6 +659,8 @@ class BwbWorkflow:
             await self.executors["slurm"].ensure_child_workflow_is_initiated()
 
         await self.build_node_images()
+
+        print(len(self.nodes))
 
         start_node_id = self.graph_manager.get_start_node()
         ancestor_list = AncestorList(len(self.nodes))

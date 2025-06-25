@@ -1673,17 +1673,15 @@
                     "fastqfiles": true,
                     "awscredentialsdir": true
                 },
-                "raw_annotation_file": "/data/processing/morphic-jax/JAX_RNAseq_ExtraEmbryonic/downloads/gencode.v32.primary_assembly.annotation.gtf",
+                "raw_annotation_file": "/data/processing/morphic-jax/JAX_RNAseq_ExtraEmbryonic/downloads/gencode.v44.primary_assembly.annotation.gtf",
                 "raw_genome_file": "/data/processing/morphic-jax/JAX_RNAseq_ExtraEmbryonic/downloads/Homo_sapiens.GRCh38.dna.primary_assembly.fa",
                 "repeat": false,
                 "runMode": 0,
                 "runTriggers": [],
                 "s3bucket": "morphic-bio-processing",
                 "s3destdirectory": "processed/morphic-jax/JAX_RNAseq_ExtraEmbryonic",
-                "s3downloaddir_FULL": "/data/ISL1",
-                "s3downloaddir_FULL": "/data/JAX_RNAseq09",
-                "s3downloaddir": "/data/JAX_RNAseq09",
-                "s3downloaddir_FULL": "/data/JAX_RNAseq5_ExE_CBO-short",
+                "s3downloaddir": "/data/JAX_RNAseq11",
+                "s3downloaddir_SHORT": "/data/JAX_onefile",
                 "s3sourcedirectory": "morphic-jax/JAX_RNAseq_ExtraEmbryonic",
                 "starversion": "2.7.11a",
                 "transcriptomefile": "/data/processing/genome/transcriptome.fa",
@@ -2829,7 +2827,7 @@
                     "env": "nThreads"
                 }
             },
-            "image_name": "patrickmckeever/filtery:0.5",
+            "image_name": "patrickmckeever/filtery:0.6",
             "command": [
                 "asyncFilterChrY.sh "
             ],

@@ -18,15 +18,41 @@ async def assign_workers(params: AssignWorkersParams) -> AssignWorkersResult:
 
     serviced_reqs: DefaultDict[int, Dict[CmdQueueId, str]] = defaultdict(dict)
     revised_worker_resources: Dict[str, WorkerResources] = {}
+    #for worker_queue, worker in params.worker_resources.items():
+    #    remaining_cpu = worker.resources.cpus
+    #    remaining_gpu = worker.resources.gpus
+    #    remaining_mem = worker.resources.mem_mb
+    #    for node_id, requests_by_cmd_id in open_reqs.items():
+    #        if node_id not in [5,3,0]:
+    #            continue
+    #        for cmd_id, request in requests_by_cmd_id.items():
+    #            if node_id in serviced_reqs and cmd_id in serviced_reqs[node_id]:
+    #                continue
+    #            if request.cpus <= remaining_cpu and request.mem_mb <= remaining_mem and request.gpus <= remaining_gpu:
+    #                serviced_reqs[node_id][cmd_id] = worker.queue_id
+    #                remaining_cpu -= request.cpus
+    #                remaining_gpu -= request.gpus
+    #                remaining_mem -= request.mem_mb
+
+    #        revised_worker_resources[worker.queue_id] = WorkerResources(
+    #            resources=ResourceVector(remaining_cpu, remaining_gpu, remaining_mem),
+    #            queue_id=worker_queue
+    #        )
+
     for worker_queue, worker in params.worker_resources.items():
         remaining_cpu = worker.resources.cpus
         remaining_gpu = worker.resources.gpus
         remaining_mem = worker.resources.mem_mb
+        if worker.queue_id in revised_worker_resources:
+            remaining_cpu = revised_worker_resources[worker.queue_id].resources.cpus
+            remaining_gpu = revised_worker_resources[worker.queue_id].resources.gpus
+            remaining_mem = revised_worker_resources[worker.queue_id].resources.mem_mb
+
         for node_id, requests_by_cmd_id in open_reqs.items():
             for cmd_id, request in requests_by_cmd_id.items():
                 if node_id in serviced_reqs and cmd_id in serviced_reqs[node_id]:
                     continue
-                if request.cpus <= remaining_cpu and request.mem_mb <= remaining_mem and request.gpus <= request.gpus:
+                if request.cpus <= remaining_cpu and request.mem_mb <= remaining_mem and request.gpus <= remaining_gpu:
                     serviced_reqs[node_id][cmd_id] = worker.queue_id
                     remaining_cpu -= request.cpus
                     remaining_gpu -= request.gpus

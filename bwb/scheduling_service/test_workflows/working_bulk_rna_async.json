@@ -1680,7 +1680,8 @@
                 "runTriggers": [],
                 "s3bucket": "morphic-bio-processing",
                 "s3destdirectory": "processed/morphic-jax/JAX_RNAseq_ExtraEmbryonic",
-                "s3downloaddir": "/data/JAX_RNAseq10",
+                "s3downloaddir_OLD": "/data/JAX_onefile",
+                "s3downloaddir": "/data/JAX_RNAseq11",
                 "s3sourcedirectory": "morphic-jax/JAX_RNAseq_ExtraEmbryonic",
                 "starversion": "2.7.11a",
                 "transcriptomefile": "/data/processing/genome/transcriptome.fa",
@@ -2209,7 +2210,7 @@
             },
             "input_files": ["inputFiles"],
             "output_files": ["outputDir"],
-            "image_name": "patrickmckeever/trimgalore_async:0.4",
+            "image_name": "patrickmckeever/trimgalore_async:0.2",
             "command": [
                 "run_trimgalore.sh"
             ],
