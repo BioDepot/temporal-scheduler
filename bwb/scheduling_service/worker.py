@@ -188,7 +188,9 @@ async def get_slurm_worker(slurm_config):
     ssh_password = os.getenv("SSH_PASSWORD")
     ssh_client = paramiko.SSHClient()
     ssh_client.load_system_host_keys()
+    ssh_port = int(slurm_config.get("port", 22))
     ssh_client.connect(slurm_config["ip_addr"],
+                       port=ssh_port,
                        username=slurm_config["user"],
                        password=ssh_password)
     transport = ssh_client.get_transport()
@@ -202,10 +204,12 @@ async def get_slurm_worker(slurm_config):
         slurm_config["user"],
         slurm_config["ip_addr"],
         slurm_config["storage_dir"],
-        xfer_addr
+        xfer_addr,
+        ssh_port=ssh_port,
+        xfer_port=int(slurm_config.get("transfer_port", ssh_port))
     )
 
-    slurm_queue = f"{slurm_config['user']}@{slurm_config['ip_addr']}"
+    slurm_queue = f"{slurm_config['user']}@{slurm_config['ip_addr']}:{ssh_port}"
     temporal_ept = os.getenv("TEMPORAL_ENDPOINT_URL")
     temporal_client = await Client.connect(temporal_ept)
     worker = Worker(

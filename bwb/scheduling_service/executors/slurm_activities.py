@@ -19,7 +19,7 @@ class SlurmActivity:
     # is a supported temporal pattern, see
     # https://docs.temporal.io/develop/python/python-sdk-sync-vs-async
     def __init__(self, client: paramiko.SSHClient, user: str, ip_addr: str, work_dir: str,
-            xfer_addr: Optional[str] = None):
+            xfer_addr: Optional[str] = None, ssh_port: int = 22, xfer_port: Optional[int] = None):
         self.user = user
         self.ip_addr = ip_addr
         self.client = client
@@ -31,8 +31,15 @@ class SlurmActivity:
         # an optional field in the config and transfer data to the login node
         # otherwise.
         self.xfer_addr = xfer_addr if xfer_addr is not None else self.ip_addr
+        self.ssh_port = ssh_port
+        self.xfer_port = xfer_port if xfer_port is not None else ssh_port
         debug_mode  = os.getenv("DEBUG_MODE")
         self.debug_mode = debug_mode is not None and debug_mode.lower() == "true"
+
+    def ssh_transport_cmd(self) -> str:
+        if self.xfer_port == 22:
+            return "ssh"
+        return f"ssh -p {self.xfer_port}"
 
     async def exec_cmd(self, cmd):
         async with self.semaphore:
@@ -217,7 +224,7 @@ class SlurmActivity:
         await asyncio.sleep(5)
 
         stdin, stdout, stderr = await asyncio.to_thread(self.client.exec_command, f"ls {path}")
-        return await asyncio.thread(stdout.channel.recv_exit_status) == 0
+        return await asyncio.to_thread(stdout.channel.recv_exit_status) == 0
 
     @activity.defn
     async def start_slurm_job(self, cmd_obj: SlurmContainerCmdParams) -> SlurmCmdObj:
@@ -407,20 +414,21 @@ class SlurmActivity:
 
     async def rsync(self, local_path, remote_path, upload):
         remote_path_full = f"{self.user}@{self.xfer_addr}:{remote_path}"
+        ssh_cmd = self.ssh_transport_cmd()
 
         if upload:
             if self.debug_mode:
                 self.sudo_exec_cmd(f"chown -R {self.user} {os.path.dirname(remote_path)}")
-            print(f"rsync -av -e ssh {local_path} {remote_path_full}")
+            print(f"rsync -av -e '{ssh_cmd}' {local_path} {remote_path_full}")
             await self.exec_cmd(f"mkdir -p {os.path.dirname(remote_path)}")
-            out = await cmd_no_output(f"rsync -av -e ssh {local_path} {remote_path_full}")
+            out = await cmd_no_output(f"rsync -av -e '{ssh_cmd}' {local_path} {remote_path_full}")
         else:
             if self.debug_mode:
                 self.sudo_exec_cmd(f"chown -R {self.user} {remote_path}")
-            print(f"rsync -av -e ssh {remote_path_full} {local_path}")
+            print(f"rsync -av -e '{ssh_cmd}' {remote_path_full} {local_path}")
             await self.exec_cmd(f"mkdir -p {os.path.dirname(remote_path)}")
             async with self.rsync_semaphore:
-                out = await cmd_no_output(f"rsync -av -e ssh {remote_path_full} {local_path}")
+                out = await cmd_no_output(f"rsync -av -e '{ssh_cmd}' {remote_path_full} {local_path}")
 
         if out is None:
             raise ApplicationError(f"rsync failed")
@@ -443,7 +451,7 @@ class SlurmActivity:
                 for file in file_list:
                     local_path = container_to_host_path(file, local_volumes)
                     remote_path = container_to_host_path(file, remote_volumes)
-                    await self.rsync(local_path, remote_path, upload=True)
+                    await self.rsync(local_path, remote_path, upload=False)
 
         sif_basename = params.sif_path
         remote_storage_dir = params.remote_storage_dir

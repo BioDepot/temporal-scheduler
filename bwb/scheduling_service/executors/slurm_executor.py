@@ -36,6 +36,7 @@ class SlurmExecutor(AbstractExecutor):
                 non_retryable=True
             )
         self.ip_addr = slurm_config["ip_addr"]
+        self.port = int(slurm_config.get("port", 22))
 
         if "user" not in slurm_config:
             raise ApplicationError(
@@ -72,14 +73,15 @@ class SlurmExecutor(AbstractExecutor):
         pass
 
     def get_queue_id(self) -> str:
-        return f"{self.user}@{self.ip_addr}"
+        return f"{self.user}@{self.ip_addr}:{self.port}"
 
     async def ensure_child_workflow_is_initiated(self):
         if self.child_workflow is None:
-            queue_name = f"{self.user}@{self.ip_addr}"
+            queue_name = self.get_queue_id()
             initial_poller_state = SlurmPollerState(
                 self.ip_addr,
                 self.user,
+                self.port,
                 {}, {}, {}
             )
             self.child_workflow: Optional[ChildWorkflowHandle] = await workflow.start_child_workflow(

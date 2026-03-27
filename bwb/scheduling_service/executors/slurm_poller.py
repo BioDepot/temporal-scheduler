@@ -26,11 +26,15 @@ class SlurmPoller:
         }
         self.ip_addr = poller_state.ip_addr
         self.user = poller_state.user
+        self.port = getattr(poller_state, "port", 22)
+
+    def get_queue_id(self) -> str:
+        return f"{self.user}@{self.ip_addr}:{self.port}"
 
     @workflow.run
     async def run(self, poller_state: SlurmPollerState):
         try:
-            queue_id = f"{self.user}@{self.ip_addr}"
+            queue_id = self.get_queue_id()
             requester_workflow: ExternalWorkflowHandle = workflow.get_external_workflow_handle(
                 workflow.info().parent.workflow_id,
                 run_id=workflow.info().parent.run_id
@@ -80,6 +84,7 @@ class SlurmPoller:
             continuation_state = SlurmPollerState(
                 self.ip_addr,
                 self.user,
+                self.port,
                 self.outstanding_jobs,
                 self.outstanding_requests,
                 self.job_results
@@ -96,7 +101,7 @@ class SlurmPoller:
 
     @workflow.signal
     async def submit_slurm_cmd(self, cmd_params: InterWorkflowSlurmCmdRequest):
-        queue_name = f"{self.user}@{self.ip_addr}"
+        queue_name = self.get_queue_id()
         slurm_cmd_obj = await workflow.execute_activity(
             SlurmActivity.start_slurm_job,
             cmd_params.request,

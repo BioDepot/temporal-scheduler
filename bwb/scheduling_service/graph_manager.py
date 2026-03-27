@@ -108,6 +108,11 @@ class GraphManager:
         # once for every time the async node runs (and, if it itself is
         # async, this recurses).
         for node in async_nodes:
+            # Some workflows use async scatter nodes without an explicit
+            # gather barrier. Those nodes still run asynchronously, but
+            # they do not form a barrier-bounded greedy scheduling block.
+            if node not in self.async_barriers:
+                continue
             barrier = self.async_barriers[node]
             for descendant in descendants[node]:
                 if barrier not in ancestors[descendant]:

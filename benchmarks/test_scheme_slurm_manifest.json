@@ -1,0 +1,12 @@
+{
+  "api_base_url": "http://localhost:8000",
+  "benchmarks": [
+    {
+      "name": "test-scheme-slurm",
+      "workflow_path": "../bwb/scheduling_service/test_workflows/test_scheme.json",
+      "config_path": "../bwb/scheduling_service/test_workflows/test_scheme_slurm_config.json",
+      "register_worker": false,
+      "iterations": 1
+    }
+  ]
+}

@@ -122,8 +122,50 @@ curl -H "Content-Type: application/json" --data '{"workflow_id": "[WORKFLOW_ID]"
 Workers for SLURM require special treatment, since these must manage an SSH connection with the SLURM server. To run a SLURM worker connecting to a given slurm server, run the following, where `CONFIG_PATH` is the path to a valid configuration file for a workflow specifying a SLURM executor; one such example is given in `bwb/scheduling_service/test_workflows/nsf_bulkrna_slurm_config.json`.
 
 ```commandline
-python bwb/scheduling_service/worker.py --slurm [CONFIG_PATH]
+python bwb/scheduling_service/worker.py slurm --config [CONFIG_PATH]
 ```
+
+The SLURM config may also include optional `port` and `transfer_port` keys if the SSH endpoint is not on port 22.
+
+For a same-machine local Slurm test target, use:
+
+```bash
+bash scripts/local_slurm_test_env_up.sh
+python3 -m bwb_scheduler.benchmark_harness benchmarks/test_scheme_local_docker_slurm_manifest.json --wait-for-api-seconds 120 --poll-seconds 10 --timeout-seconds 7200
+bash scripts/local_slurm_test_env_down.sh
+```
+
+Or run the whole thing in one shot:
+
+```bash
+bash scripts/run_local_slurm_e2e.sh
+```
+
+To run the full salmon path from Orange `.ows` IR through scheduler JSON decode, Temporal submission, and execution on the local Docker Slurm cluster:
+
+```bash
+bash scripts/run_salmon_ir_local_slurm_e2e.sh
+```
+
+This wrapper:
+- decodes `star_salmon_short/star_salmon_short.ows` with `python3 -m bwb_scheduler.ir_to_scheduler`
+- writes generated files under `benchmarks/generated/`
+- brings up the local Slurm + Temporal test environment
+- submits the decoded workflow and waits for completion
+- tears the environment back down unless `KEEP_LOCAL_SLURM_TEST_ENV_UP=true`
+
+Useful options:
+- pass a different `.ows` file as the first argument: `bash scripts/run_salmon_ir_local_slurm_e2e.sh /path/to/workflow.ows`
+- set `RUN_ID=my-run` to override the decoded workflow `run_id`
+- set `KEEP_LOCAL_SLURM_TEST_ENV_UP=true` to leave the environment running after the benchmark finishes
+
+Useful scripts:
+- `scripts/setup_local_slurm_host.sh`
+- `scripts/run_local_docker_slurm_worker.sh --detach`
+- `scripts/local_slurm_test_env_up.sh`
+- `scripts/local_slurm_test_env_down.sh`
+- `scripts/run_local_slurm_e2e.sh`
+- `scripts/run_salmon_ir_local_slurm_e2e.sh`
 
 ## Running the Bulk RNA workflow.
 
@@ -188,5 +230,3 @@ The datasets supporting the results of this article are generated as part of the
 
 This work is supported by the National Institutes of Health (NIH) grants U24HG012674, R03AI159286 and R21CA280520. 
 This work used Bridges-2 at the Pittsburgh Supercomputing Center through allocation BIO230124: Exploring conducting bioinformatics analysis on HPC for the NIH Morphic project from the Advanced Cyberinfrastructure Coordination Ecosystem: Services & Support (ACCESS) program, which is supported by National Science Foundation grants #2138259, #2138286, #2138307, #2137603, and #2138296.
-
-

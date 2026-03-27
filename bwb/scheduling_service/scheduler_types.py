@@ -177,6 +177,7 @@ class InterWorkflowSlurmCmdRequest:
 class SlurmPollerState:
     ip_addr: str
     user: str
+    port: int
     outstanding_jobs: Dict[str, SlurmCmdObj]
     outstanding_requests: Dict[str, InterWorkflowSlurmCmdRequest]
     job_results: Dict[str, SlurmCmdResult]

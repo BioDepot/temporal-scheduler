@@ -1,0 +1,16 @@
+{
+  "api_base_url": "http://localhost:8000",
+  "default_worker": {
+    "queue": "worker1",
+    "cpus": 8,
+    "mem_mb": 16000,
+    "gpus": 0
+  },
+  "benchmarks": [
+    {
+      "name": "salmon-demo",
+      "request_path": "../bwb/scheduling_service/test_workflows/test_scheme_req.json",
+      "iterations": 1
+    }
+  ]
+}
