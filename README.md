@@ -205,6 +205,8 @@ When the workflow is run, all outputs related to it will be stored in `[SCHED_ST
 - **use_local_storage** - If set to false, the scheduler will upload (download) file dependencies to (from) a minio instance specified in the `.env`.
 If you are running workers on different machines which share a filesystem, you can use this field and set `SCHED_STORAGE_DIR` to a directory within the shared mount in order to elide file transfers.
 - **links** - An array of objects in which each object is essentially the same as a BWB channel, transmitting an output from a source to a sink node. `source_channel` (`sink_channel`)  gives the name of this parameter in the source (sink) node.
+  - **condition_ref** - Optional string naming a top-level condition record that guards this edge.
+  - **condition** - Optional object carrying inline condition metadata when a reference is not enough.
 - **nodes** - An array of objects, each specifying a node (basically a BWB widget) in a format very close to OWS. Each object therein has a uniquely-identifying integer key `id`.
 Each node has the following keys, among others:
   - **arg_types** - str -> object map. Key is a parameter name, value is an object specifying how that parameter’s value should be incorporated into the command for this node (widget). (I.e. If “argument” is true, the corresponding parameter will be passed as a direct argument to the command; if “flag” has a value, then it will be passed as “{flag} {value}”; if “env” has a value, it will be passed as an “{env} {value}”.) This is taken directly from BWB.
@@ -221,6 +223,11 @@ Each node has the following keys, among others:
   - **cores** - The number of CPU cores required by an instance of a node to run.  
   - **mem_mb** - Amount of RAM in megabytes required by an instance of a node to run.  
   - **gpus** - The number of GPUs required by an instance of a node to run.  
+- **conditions** - Optional array of condition records. A reasonable scheduler-side extension is to mirror the Workflow IR vocabulary used by `bwb-nextflow-utils`: each record should have an `id`, and may also include fields like `type`, `expr`, `source_language`, and `status`.
+  - **condition_ref** - Optional string on a node naming the condition that guards execution of that node.
+  - **condition** - Optional object on a node carrying inline condition metadata.
+
+At present these conditional fields are metadata only. The current scheduler ignores them at execution time, but preserving them in the JSON lets decoders round-trip conditional structure from upstream IR without inventing a second format.
  
 ## Bulk RNA-seq Datasets
 

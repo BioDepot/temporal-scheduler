@@ -80,6 +80,75 @@ class UnsupportedWorkflowError(ValueError):
     pass
 
 
+def _link_key(link: dict[str, Any]) -> tuple[int, int, str, str]:
+    return (
+        link["source"],
+        link["sink"],
+        link["source_channel"],
+        link["sink_channel"],
+    )
+
+
+def attach_condition_metadata(
+    decoded_workflow: dict[str, Any],
+    *,
+    conditions: list[dict[str, Any]] | None = None,
+    node_conditions: dict[int, dict[str, Any]] | None = None,
+    link_conditions: dict[tuple[int, int, str, str], dict[str, Any]] | None = None,
+) -> dict[str, Any]:
+    """Attach optional conditional metadata to a scheduler workflow.
+
+    This mirrors the minimal conditional vocabulary already used in the
+    Workflow IR produced by bwb-nextflow-utils:
+    - top-level ``conditions``
+    - ``condition_ref`` / ``condition`` on nodes
+    - ``condition_ref`` / ``condition`` on links
+
+    The scheduler currently treats these fields as metadata only.
+    """
+    conditioned = copy.deepcopy(decoded_workflow)
+    conditioned["conditions"] = copy.deepcopy(conditions or conditioned.get("conditions", []))
+
+    normalized_node_conditions = node_conditions or {}
+    for node in conditioned["nodes"]:
+        metadata = normalized_node_conditions.get(node["id"])
+        if metadata is None:
+            continue
+        if "condition_ref" in metadata:
+            node["condition_ref"] = metadata["condition_ref"]
+        if "condition" in metadata:
+            node["condition"] = copy.deepcopy(metadata["condition"])
+
+    if link_conditions:
+        link_conditions_by_key = {
+            _link_key(link): metadata for link, metadata in (
+                (
+                    {
+                        "source": source,
+                        "sink": sink,
+                        "source_channel": source_channel,
+                        "sink_channel": sink_channel,
+                    },
+                    metadata,
+                )
+                for (source, sink, source_channel, sink_channel), metadata in link_conditions.items()
+            )
+        }
+    else:
+        link_conditions_by_key = {}
+
+    for link in conditioned["links"]:
+        metadata = link_conditions_by_key.get(_link_key(link))
+        if metadata is None:
+            continue
+        if "condition_ref" in metadata:
+            link["condition_ref"] = metadata["condition_ref"]
+        if "condition" in metadata:
+            link["condition"] = copy.deepcopy(metadata["condition"])
+
+    return conditioned
+
+
 def _normalize_ir_value(value: Any) -> Any:
     if isinstance(value, OrderedDict):
         return {key: _normalize_ir_value(inner) for key, inner in value.items()}
@@ -259,6 +328,7 @@ def decode_salmon_ir_to_scheduler_json(
         "use_local_storage": use_local_storage,
         "nodes": decoded_nodes,
         "links": decoded_links,
+        "conditions": [],
     }
 
 
