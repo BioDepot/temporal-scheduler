@@ -84,29 +84,37 @@ async def build_node_img(build_info: ImageBuildParams) -> dict:
             ept_path
         )
 
-    remote_fs = get_remote_fs()
-    sif_remote_path = os.path.join(bucket_id, "images", f"{san_img_name}.sif")
-    ept_remote_path = os.path.join(bucket_id, "images", f"{san_img_name}_ept")
-    ept = get_remote_sif_entrypoint(remote_fs, docker_img, ept_remote_path)
-    if remote_fs.exists(sif_remote_path):
-        return {
-            "success": ept is not None,
-            "sif_path": f"{san_img_name}.sif",
-            "ept": ept
-        }
+    try:
+        remote_fs = get_remote_fs()
+        sif_remote_path = os.path.join(bucket_id, "images", f"{san_img_name}.sif")
+        ept_remote_path = os.path.join(bucket_id, "images", f"{san_img_name}_ept")
+        ept = get_remote_sif_entrypoint(remote_fs, docker_img, ept_remote_path)
+        if remote_fs.exists(sif_remote_path):
+            return {
+                "success": ept is not None,
+                "sif_path": f"{san_img_name}.sif",
+                "ept": ept
+            }
 
-    local_build_output = await build_sif_locally(
-        docker_img,
-        volumes,
-        local_image_dir,
-        sif_path,
-        ept_path
-    )
+        local_build_output = await build_sif_locally(
+            docker_img,
+            volumes,
+            local_image_dir,
+            sif_path,
+            ept_path
+        )
 
-    if not local_build_output["success"]:
+        if not local_build_output["success"]:
+            return local_build_output
+
+        await upload_and_heartbeat(sif_path, sif_remote_path, remote_fs)
+        await upload_and_heartbeat(ept_path, ept_remote_path, remote_fs)
         return local_build_output
-
-    await upload_and_heartbeat(sif_path, sif_remote_path, remote_fs)
-    await upload_and_heartbeat(ept_path, ept_remote_path, remote_fs)
-    return local_build_output
-
+    except Exception:
+        return await build_sif_locally(
+            docker_img,
+            volumes,
+            local_image_dir,
+            sif_path,
+            ept_path
+        )

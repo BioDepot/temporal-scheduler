@@ -166,6 +166,30 @@ Useful scripts:
 - `scripts/local_slurm_test_env_down.sh`
 - `scripts/run_local_slurm_e2e.sh`
 - `scripts/run_salmon_ir_local_slurm_e2e.sh`
+- `scripts/run_arabidopsis_conditional_local_slurm_e2e.sh`
+
+To run the Arabidopsis conditional path from the upstream Nextflow IR round-trip through scheduler JSON decode, Temporal submission, and local Docker Slurm execution:
+
+```bash
+bash scripts/run_arabidopsis_conditional_local_slurm_e2e.sh
+```
+
+This wrapper:
+- generates the Arabidopsis IR with `/mnt/pikachu/bwb-nextflow-utils/scripts/run_rnaseq_arabidopsis_roundtrip.py`
+- decodes that IR with `python3 -m bwb_scheduler.nextflow_ir_to_scheduler`
+- stages the Arabidopsis FASTQs, transcript FASTA, and prebuilt index into scheduler storage
+- starts the local Temporal + Slurm harness
+- submits the workflow and waits for completion
+- tears the environment back down unless `KEEP_LOCAL_SLURM_TEST_ENV_UP=true`
+
+Useful options:
+- set `MAKE_INDEX=true` or `MAKE_INDEX=false` to exercise the conditional and prebuilt-index modes
+- set `RUN_ID=my-run` to control the generated scheduler JSON and manifest names
+- set `ROUNDTRIP_WORK_DIR=/tmp/custom_roundtrip` to keep upstream IR/BWB outputs in a custom location
+- set `USE_LOCAL_STORAGE=true` for the local shared-filesystem harness; this is the default and recommended mode
+
+The latest successful Arabidopsis conditional validation artifact is:
+- `benchmarks/results/benchmark_run_20260328T074511Z.json`
 
 ## Running the Bulk RNA workflow.
 
@@ -223,11 +247,24 @@ Each node has the following keys, among others:
   - **cores** - The number of CPU cores required by an instance of a node to run.  
   - **mem_mb** - Amount of RAM in megabytes required by an instance of a node to run.  
   - **gpus** - The number of GPUs required by an instance of a node to run.  
-- **conditions** - Optional array of condition records. A reasonable scheduler-side extension is to mirror the Workflow IR vocabulary used by `bwb-nextflow-utils`: each record should have an `id`, and may also include fields like `type`, `expr`, `source_language`, and `status`.
+- **conditions** - Optional array of condition records. The scheduler mirrors the Workflow IR vocabulary used by `bwb-nextflow-utils`: each record should have an `id`, and may also include fields like `type`, `expr`, `source_language`, and `status`.
+- **condition_context** - Optional object providing runtime values used to evaluate conditions, for example `{ "make_index": true }`.
   - **condition_ref** - Optional string on a node naming the condition that guards execution of that node.
   - **condition** - Optional object on a node carrying inline condition metadata.
 
-At present these conditional fields are metadata only. The current scheduler ignores them at execution time, but preserving them in the JSON lets decoders round-trip conditional structure from upstream IR without inventing a second format.
+The current scheduler evaluates a small boolean subset of these conditions at workflow start:
+- variable names such as `make_index`
+- negation such as `!make_index`
+- `true`
+- `false`
+
+Execution behavior:
+- nodes with a false condition are retained in status output and marked skipped
+- links with a false condition are pruned before graph execution
+- downstream nodes can still use static fallback parameters when a conditioned link is pruned
+
+Conditional implementation and Arabidopsis local-harness plan:
+- `docs/conditional_execution_runbook.md`
  
 ## Bulk RNA-seq Datasets
 

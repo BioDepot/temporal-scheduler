@@ -276,6 +276,9 @@ class SlurmActivity:
     async def poll_slurm(self, outstanding_cmds: Dict[str, SlurmCmdObj]) -> Dict[str, SlurmCmdResult]:
         # A dictionary with ints as keys will get serialized into one
         # with str keys by virtue of temporal using JSON.
+        outstanding_cmds = {
+            int(job_id): cmd_obj for job_id, cmd_obj in outstanding_cmds.items()
+        }
         outstanding_jobs = list(map(int, outstanding_cmds.keys()))
         results = {}
 
@@ -285,15 +288,18 @@ class SlurmActivity:
             await self.exec_cmd("ls")
             return results
 
-        job_records = await self.run_sacct(outstanding_jobs)
+        job_records = list(await self.run_sacct(outstanding_jobs))
+        print(f"poll_slurm outstanding_jobs={outstanding_jobs} sacct_records={job_records}")
         done_job_codes = {"BOOT_FAIL", "CANCELLED", "COMPLETED", "DEADLINE", "FAILED", "NODE_FAIL", "OUT_OF_MEMORY",
                           "PREEMPTED"}
         failed_job_codes = {"BOOT_FAIL", "CANCELLED", "DEADLINE", "FAILED", "NODE_FAIL", "OUT_OF_MEMORY"}
         for record in job_records:
+            # We only care about the top-level Slurm job state. Step records like
+            # `.batch` can lag or transiently disagree even after the parent job
+            # is complete, which would otherwise keep the poller spinning.
             if "." in record[0]:
-                job_id = record[0].split(".")[0]
-            else:
-                job_id = record[0]
+                continue
+            job_id = int(record[0])
 
             if record[1] in done_job_codes:
                 exit_code = record[2]
@@ -323,13 +329,16 @@ class SlurmActivity:
         # it's scheduled, before it switches to pending just seconds
         # later. I have no idea what could be causing this.
         await asyncio.sleep(3)
-        completed_job_ids = map(int, results.keys())
-        completed_job_records = await self.run_sacct(completed_job_ids)
+        completed_job_ids = list(map(int, results.keys()))
+        completed_job_records = list(await self.run_sacct(completed_job_ids))
+        print(
+            f"poll_slurm completed_job_ids={completed_job_ids} "
+            f"confirmation_records={completed_job_records}"
+        )
         for record in completed_job_records:
             if "." in record[0]:
-                job_id = record[0].split(".")[0]
-            else:
-                job_id = record[0]
+                continue
+            job_id = int(record[0])
 
             if record[1] not in done_job_codes:
                 # Necessary check because jobID can appear multiple
@@ -426,7 +435,7 @@ class SlurmActivity:
             if self.debug_mode:
                 self.sudo_exec_cmd(f"chown -R {self.user} {remote_path}")
             print(f"rsync -av -e '{ssh_cmd}' {remote_path_full} {local_path}")
-            await self.exec_cmd(f"mkdir -p {os.path.dirname(remote_path)}")
+            os.makedirs(os.path.dirname(local_path), exist_ok=True)
             async with self.rsync_semaphore:
                 out = await cmd_no_output(f"rsync -av -e '{ssh_cmd}' {remote_path_full} {local_path}")
 
@@ -451,7 +460,7 @@ class SlurmActivity:
                 for file in file_list:
                     local_path = container_to_host_path(file, local_volumes)
                     remote_path = container_to_host_path(file, remote_volumes)
-                    await self.rsync(local_path, remote_path, upload=False)
+                    await self.rsync(local_path, remote_path, upload=True)
 
         sif_basename = params.sif_path
         remote_storage_dir = params.remote_storage_dir
@@ -478,4 +487,4 @@ class SlurmActivity:
                     assert file != ""
                     local_path = container_to_host_path(file, local_volumes)
                     remote_path = container_to_host_path(file, remote_volumes)
-                    await self.rsync(local_path, remote_path, upload=True)
+                    await self.rsync(local_path, remote_path, upload=False)

@@ -18,6 +18,7 @@ from bwb.scheduling_service.cmd_queue import get_updated_ancestor_list
 from bwb.scheduling_service.executors.slurm_executor import SlurmExecutor
 from bwb.scheduling_service.executors.local_executor import LocalExecutor
 from bwb.scheduling_service.executors.abstract_executor import AbstractExecutor
+from bwb.scheduling_service.conditions import apply_conditions_to_workflow
 from bwb.scheduling_service.graph_manager import GraphManager
 from bwb.scheduling_service.scheduler_types import BwbWorkflowParams, ResourceVector, WorkerResourceAlloc, CmdFiles, \
     CmdOutput, InterWorkflowCmdResponse, CmdQueueId, ImageBuildParams, SyncDirParams, ContainerCmdParams, \
@@ -28,13 +29,15 @@ from bwb.scheduling_service.scheduler_types import BwbWorkflowParams, ResourceVe
 class BwbWorkflow:
     @workflow.init
     def __init__(self, params: BwbWorkflowParams) -> None:
-        bwb_workflow = params.scheme
+        bwb_workflow = apply_conditions_to_workflow(params.scheme)
 
         self.nodes = []
         self.links = []
         self.id_to_node = {}
         self.id_to_attrs = {}
         self.completed_ids = set()
+        self.skipped_nodes = bwb_workflow.get("_skipped_nodes", {})
+        self.condition_results = bwb_workflow.get("_condition_results", {})
 
         # Storage-related fields.
         self.use_singularity = params.use_singularity
@@ -272,6 +275,8 @@ class BwbWorkflow:
                     node_id, file_name)
 
             if "executor" not in src_node_conf:
+                continue
+            if len(recipient_nodes) == 0:
                 continue
 
             can_elide = True
@@ -701,9 +706,16 @@ class BwbWorkflow:
     @workflow.query
     def get_status(self) -> dict:
         node_statuses = self.graph_manager.get_status()
+        for node_id, skipped_node in self.skipped_nodes.items():
+            node_statuses[node_id] = {
+                "status": skipped_node["status"],
+                "outputs": {},
+                "logs": {},
+            }
         return {
             "workflow_status": self.workflow_status,
-            "node_statuses": node_statuses
+            "node_statuses": node_statuses,
+            "condition_results": self.condition_results,
         }
 
     @workflow.signal

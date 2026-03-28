@@ -48,6 +48,11 @@ class SlurmPoller:
                     task_queue=queue_id,
                     start_to_close_timeout=timedelta(seconds=10000),
                 )
+                if self.outstanding_jobs:
+                    print(
+                        f"SlurmPoller outstanding={sorted(self.outstanding_jobs.keys())} "
+                        f"polled={list(slurm_cmd_results.keys())}"
+                    )
 
                 # Job ID will be serialized as str because it was turned
                 # into JSON by temporal.
@@ -56,6 +61,7 @@ class SlurmPoller:
                     self.job_results[job_id] = result
                     corresponding_request = self.outstanding_requests[job_id]
                     del self.outstanding_jobs[job_id]
+                    del self.outstanding_requests[job_id]
 
                     # I'm uncertain if we should put some upper-bound
                     # on the number of times we restart. As I understand it,
@@ -78,6 +84,11 @@ class SlurmPoller:
                             corresponding_request.cmd_queue_id,
                             slurm_outputs,
                             "slurm"
+                        )
+                        print(
+                            f"SlurmPoller signaling result for job_id={job_id} "
+                            f"node_id={corresponding_request.node_id} "
+                            f"cmd_queue_id={corresponding_request.cmd_queue_id}"
                         )
                         await requester_workflow.signal("handle_polling_result", response_to_slurm_req)
 
@@ -112,3 +123,7 @@ class SlurmPoller:
         job_id = slurm_cmd_obj.job_id
         self.outstanding_jobs[job_id] = slurm_cmd_obj
         self.outstanding_requests[job_id] = cmd_params
+        print(
+            f"SlurmPoller submitted job_id={job_id} "
+            f"node_id={cmd_params.node_id} cmd_queue_id={cmd_params.cmd_queue_id}"
+        )

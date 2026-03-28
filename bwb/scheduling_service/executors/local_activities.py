@@ -90,6 +90,25 @@ async def get_container_outputs(cnt: str, volumes: dict, use_singularity: bool) 
     return outputs
 
 
+async def ensure_local_dependency(local_path: str, remote_path: str, remote_fs) -> None:
+    if os.path.exists(local_path):
+        return
+
+    try:
+        await download_and_heartbeat(local_path, remote_path, remote_fs)
+    except Exception as exc:
+        if os.path.exists(local_path):
+            return
+        raise ApplicationError(
+            f"Failed to download dependency {remote_path} to {local_path}"
+        ) from exc
+
+    if not os.path.exists(local_path):
+        raise ApplicationError(
+            f"Dependency {remote_path} is unavailable and was not staged locally at {local_path}"
+        )
+
+
 # Activity to run a singularity command on a specified, pre-existing
 # SIF. (I.e. must run after the build_singularity_img activity.)
 @activity.defn
@@ -196,10 +215,12 @@ async def download_file_deps(params: DownloadFileDepsParams):
     volumes = await setup_volumes(bucket_id)
 
     for key, file_set in cmd_files.input_files.items():
+        if key in params.elideable_transfers:
+            continue
         for file in file_set:
             local_path = container_to_host_path(file, volumes)
             remote_path = container_to_remote_path(file, bucket_id)
-            await download_and_heartbeat(local_path, remote_path, remote_fs)
+            await ensure_local_dependency(local_path, remote_path, remote_fs)
 
     # If using singularity, download the relevant SIF
     # file to image directory.
@@ -209,7 +230,7 @@ async def download_file_deps(params: DownloadFileDepsParams):
         storage_dir = os.getenv("SCHED_STORAGE_DIR")
         local_sif_path = os.path.join(storage_dir, "images", sif_basename)
         remote_sif_path = os.path.join(bucket_id, "images", sif_basename)
-        await download_and_heartbeat(local_sif_path, remote_sif_path, remote_fs)
+        await ensure_local_dependency(local_sif_path, remote_sif_path, remote_fs)
 
 
 # Ensure that all files which exist in params.local_path
