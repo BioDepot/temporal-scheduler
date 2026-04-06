@@ -1,7 +1,6 @@
 # Go SLURM Backend Extraction — Review Summary
 
 > Branch: `feature/go-slurm-scheduler`
-> Commits: 3f59320, 0acec30, 61cc75a
 > Date: 2026-04-06
 
 ## 1. What Was Built
@@ -29,17 +28,32 @@ go_slurm_backend/
   polling/sacct.go           RunSacct, AwaitFileExistence, JOB_CODES
   polling/jobs.go            StartJob, GetOutputs, processRawCmdOutputs
   polling/sacct_test.go
-  server/server.go           HTTP handlers for all 6 endpoints
+  server/server.go           HTTP handlers for all 6 endpoints + connection pool
   server/server_test.go
   main.go                    entry point (-addr flag, default :8765)
   go.mod / go.sum
 
+deployment/
+  Dockerfile.go-slurm-backend   multi-stage Go 1.22 build → alpine runtime
+  docker-compose.yml             go-slurm-backend service (host networking)
+
+scripts/
+  setup_local_slurm_host.sh     refreshes known_hosts on cluster restart
+  local_slurm_test_env_up.sh    auto-shifts GO_SLURM_HOST_PORT on conflict
+  run_local_docker_slurm_worker.sh  passes GO_SLURM_BACKEND_URL to worker
+
 bwb/scheduling_service/executors/
-  slurm_activities_go_shim.py   GoSlurmActivity — new Python shim
+  slurm_activities_go_shim.py   GoSlurmActivity — Python shim
   slurm_activities.py           original Paramiko implementation (unchanged)
 
 bwb/scheduling_service/
   worker.py                  updated to select Go vs Paramiko at startup
+
+tests/
+  test_go_slurm_shim.py     12 unit tests for GoSlurmActivity
+
+bwb_scheduler/
+  benchmark_harness.py       added progress logging to poll loop
 ```
 
 ---
@@ -64,6 +78,10 @@ by using a single `sync.Mutex` throughout.
 `ssh_rsync.go` — `Upload` and `Download` run rsync via `sh -c`.  Uses
 `transfer_addr` when set (NSF cluster pattern), falls back to `ip_addr`.
 Port is configurable; defaults to 22.
+
+**Phase 4 fix:** removed dead `bytes.Buffer` assignments from `rsyncCmd`
+that caused `exec: Stdout already set` errors when callers used
+`CombinedOutput()`.
 
 ### sbatch (`sbatch/`)
 
@@ -107,9 +125,7 @@ failed-job partial reads).
 | POST | `/get_slurm_outputs` | `polling.GetOutputs` for each job |
 | POST | `/download_from_slurm_login_node` | `rsyncfs.Download` |
 
-Every request includes `ssh_config` in the body; the handler opens a fresh
-`SSHExecutor`, calls the backend function, closes the connection, and returns
-JSON.  Errors are returned as `{"error": "..."}` with HTTP 200 (the caller
+Errors are returned as `{"error": "..."}` with HTTP 200 (the caller
 inspects the field).
 
 `main.go` starts the server on `-addr` (default `:8765`).
@@ -124,9 +140,10 @@ Drop-in replacement for `SlurmActivity`.  Same six `@activity.defn` method
 names; no Paramiko dependency.  Uses `requests.post` wrapped in
 `asyncio.to_thread`.
 
-Constructor reads SSH config from the slurm config dict.  Backend URL
-precedence: `slurm_config["go_backend_url"]` → `GO_SLURM_BACKEND_URL` env
-var → `http://localhost:8765`.
+Backend URL precedence: `GO_SLURM_BACKEND_URL` env var →
+`slurm_config["go_backend_url"]` → `http://localhost:8765`.  Env var
+takes priority so the port-shifting logic in test harnesses works even
+when the config JSON hard-codes a port.
 
 #### Activity mapping
 
@@ -149,6 +166,12 @@ change command formatting, the shim passes the Python-built command as
 using `FormSingularityCmd` is preserved for future callers that supply
 structured `SlurmCmdTemplate` input.
 
+#### `cmd_prefix` support
+
+Fully plumbed: `slurm_config["cmd_prefix"]` → Python shim `_ssh_config` →
+Go `SshConfig.CmdPrefix` → prepended to every SSH command in `SSHExecutor.Exec`.
+Used on clusters requiring a wrapper (e.g. `docker exec slurmdbd`).
+
 ### `worker.py` change
 
 `get_slurm_worker` now checks for `go_backend_url` in the config or
@@ -158,11 +181,44 @@ falls through to the original Paramiko path unchanged.
 
 ---
 
-## 6. Tests
+## 6. Phase 4 — E2E Validation & Integration Fixes
+
+### Bugs discovered and fixed during E2E testing
+
+| Bug | Root cause | Fix |
+|-----|-----------|-----|
+| `rsyncfs: "Stdout already set"` | `rsyncCmd` pre-set `cmd.Stdout`/`cmd.Stderr` but callers used `CombinedOutput()` | Removed dead buffer assignments from `rsyncCmd` |
+| Go backend can't reach SLURM at localhost:3022 | Container was on bridge network; `localhost` resolved to its own loopback | Switched to `network_mode: host` in docker-compose |
+| Go backend can't find SIF images for rsync upload | `SCHED_STORAGE_DIR` not mounted into the sidecar | Added `${SCHED_STORAGE_DIR}:/data/sched_storage` volume |
+| `knownhosts: key mismatch` on cluster restart | SLURM container regenerates SSH host keys; stale `known_hosts` entry remains | `setup_local_slurm_host.sh` now runs `ssh-keygen -R` + `ssh-keyscan` |
+| `GO_SLURM_BACKEND_URL` env var ignored | Config JSON `go_backend_url` took precedence; port-shifting had no effect | Swapped URL resolution priority: env var first |
+| Benchmark harness silent during runs | `poll_until_terminal` printed nothing; impossible to tell if workflow submitted | Added progress logging: workflow ID on submit, status+nodes on each poll tick |
+
+### E2E results — all passing
+
+| Test harness | Workflow | Result | Time |
+|-------------|----------|--------|------|
+| `test_scheme_local_docker_slurm` | 6-node salmon demo | Finished | 70 s |
+| `salmon-IR` | conditional workflow (IR decoded) | Finished | 70 s |
+| `arabidopsis-conditional` | 3-node with salmon index build | Finished | 90 s |
+
+### Port conflict auto-resolution
+
+`local_slurm_test_env_up.sh` now detects if port 8765 is already in use
+(e.g. by another service) and shifts `GO_SLURM_HOST_PORT` to the next free
+port in 8765–8865.  The shifted port is:
+
+- Persisted to `deployment/.env` as `GO_SLURM_HOST_PORT`
+- Passed to docker-compose via the `-addr` flag on the Go binary
+- Passed to the Python worker container as `GO_SLURM_BACKEND_URL`
+
+---
+
+## 7. Tests
+
+### Go unit tests (`go test ./...`)
 
 ```
-go test ./...   (all pass)
-
 go-slurm-backend/sbatch       — 4 tests: directives, job config overrides,
                                  GPU flag, RandID uniqueness
 go-slurm-backend/polling      — 6 tests: sacct parsing, field mapping,
@@ -172,12 +228,20 @@ go-slurm-backend/server       — 4 tests: healthz, malformed JSON → 400,
                                  unknown route → 404, Content-Type header
 ```
 
-No Python unit tests were added in this PR; the shim is designed to be
-exercised by the Phase 4 E2E harnesses.
+### Python shim unit tests (`tests/test_go_slurm_shim.py`)
+
+12 tests using `unittest.mock.patch` on `requests.post`:
+
+- `setup_login_node_volumes`: dirs check, error propagation
+- `start_slurm_job`: raw_cmd set, extra_dirs, job_config, tmp_dir mapping
+- `poll_slurm`: done, running, empty, failed
+- `get_slurm_outputs`: success path (tmp_output_host_path), failed path
+- `upload_to_slurm_login_node`: count per file, elideable skip
+- `download_from_slurm_login_node`: path mapping
 
 ---
 
-## 7. Activation
+## 8. Activation
 
 To route a SLURM worker through the Go backend, start the sidecar:
 
@@ -195,39 +259,43 @@ before starting the Python worker:
 python bwb/scheduling_service/worker.py slurm --config slurm_config.json
 ```
 
+For the full Docker Compose stack:
+
+```bash
+bash scripts/local_slurm_test_env_up.sh
+```
+
+This builds both images (`bwb-scheduler` and `go-slurm-backend`), starts
+all services, auto-shifts the Go backend port if needed, and waits for the
+scheduler API and Temporal namespace to be ready.
+
 The Paramiko path is still active for any worker that does not set either key.
 
 ---
 
-## 8. Known Gaps / Phase 4
+## 9. Remaining Work
 
-- **E2E validation not yet run.**  The existing harnesses should be the first
-  test:
-  - `scripts/run_local_slurm_e2e.sh`
-  - `scripts/run_salmon_ir_local_slurm_e2e.sh`
-  - `scripts/run_arabidopsis_conditional_local_slurm_e2e.sh`
 - **Connection pooling.** The server opens one `SSHExecutor` per HTTP request.
   For `poll_slurm` (called every 5 s) this is inefficient.  A per-config
-  connection cache would help.
-- **Docker Compose wiring.** The `go-slurm-backend` binary is not yet
-  built into the Docker image or added to `docker-compose.yml`.
-- **Python unit tests** for the shim (mock HTTP server asserting correct
-  payloads) would complete the test coverage story.
-- **`cmd_prefix` plumbing in the shim.** `SshConfig.cmd_prefix` is passed
-  through to the Go backend but is not yet wired in `GoSlurmActivity`'s
-  SSH config dict.  Needs one-line fix before use on clusters that require a
-  wrapper (e.g. `docker exec slurmdbd`).
+  connection cache would reduce SSH handshake overhead.
 
 ---
 
-## 9. Files Changed vs Master
+## 10. Files Changed vs Master
 
 | File | Change |
 |------|--------|
 | `go_slurm_backend/` (15 files, ~1 750 lines) | new |
+| `deployment/Dockerfile.go-slurm-backend` | new |
+| `deployment/docker-compose.yml` | added `go-slurm-backend` service |
+| `deployment/.env.example` | added `GO_SLURM_HOST_PORT` |
 | `bwb/scheduling_service/executors/slurm_activities_go_shim.py` | new |
 | `bwb/scheduling_service/worker.py` | updated `get_slurm_worker` |
-| `bwb/scheduling_service/executors/slurm_activities.py` | unchanged |
-| `bwb/scheduling_service/executors/slurm_executor.py` | unchanged |
-| `bwb/scheduling_service/executors/slurm_poller.py` | unchanged |
-| `bwb/scheduling_service/bwb_workflow.py` | unchanged |
+| `bwb/scheduling_service/test_workflows/*_slurm_config.json` (×2) | added `go_backend_url` |
+| `tests/test_go_slurm_shim.py` | new (12 tests) |
+| `scripts/setup_local_slurm_host.sh` | added known_hosts refresh |
+| `scripts/local_slurm_test_env_up.sh` | added Go image build + port shift |
+| `scripts/run_local_docker_slurm_worker.sh` | added `GO_SLURM_BACKEND_URL` passthrough |
+| `bwb_scheduler/benchmark_harness.py` | added poll loop progress logging |
+| `pyproject.toml` | added `requests` dependency |
+| `poetry.lock` | regenerated |

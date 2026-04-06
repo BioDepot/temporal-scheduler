@@ -9,12 +9,24 @@ import (
 	"log"
 	"net/http"
 	"strings"
+	"time"
 
 	"go-slurm-backend/api"
 	"go-slurm-backend/polling"
 	"go-slurm-backend/rsyncfs"
 	"go-slurm-backend/sshutil"
 )
+
+// sshPool is the process-wide SSH connection pool.  Connections idle for
+// more than 60 s are reaped.  poll_slurm runs every 5 s so the connection
+// to the SLURM login node stays warm.
+var sshPool = sshutil.NewPool(60 * time.Second)
+
+// getSSH borrows a connection from the pool.  Callers must call
+// sshPool.Put(exec) when done (currently a no-op but keeps the contract).
+func getSSH(conf api.SshConfig) (*sshutil.SSHExecutor, error) {
+	return sshPool.Get(conf)
+}
 
 // New returns an http.Handler with all backend routes registered.
 func New() http.Handler {
@@ -45,12 +57,12 @@ func handleSetupVolumes(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exec, err := sshutil.NewSSHExecutor(req.SshConfig)
+	exec, err := getSSH(req.SshConfig)
 	if err != nil {
 		writeError(w, fmt.Sprintf("ssh connect: %v", err))
 		return
 	}
-	defer exec.Close()
+	defer sshPool.Put(exec)
 
 	runner := exec.Runner()
 	for _, dir := range req.Dirs {
@@ -87,12 +99,12 @@ func handleStartJob(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exec, err := sshutil.NewSSHExecutor(req.SshConfig)
+	exec, err := getSSH(req.SshConfig)
 	if err != nil {
 		writeError(w, fmt.Sprintf("ssh connect: %v", err))
 		return
 	}
-	defer exec.Close()
+	defer sshPool.Put(exec)
 
 	runner := exec.Runner()
 	for _, dir := range req.ExtraDirs {
@@ -120,12 +132,12 @@ func handlePollSlurm(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exec, err := sshutil.NewSSHExecutor(req.SshConfig)
+	exec, err := getSSH(req.SshConfig)
 	if err != nil {
 		writeError(w, fmt.Sprintf("ssh connect: %v", err))
 		return
 	}
-	defer exec.Close()
+	defer sshPool.Put(exec)
 
 	runner := exec.Runner()
 
@@ -152,12 +164,12 @@ func handleGetOutputs(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	exec, err := sshutil.NewSSHExecutor(req.SshConfig)
+	exec, err := getSSH(req.SshConfig)
 	if err != nil {
 		writeError(w, fmt.Sprintf("ssh connect: %v", err))
 		return
 	}
-	defer exec.Close()
+	defer sshPool.Put(exec)
 
 	runner := exec.Runner()
 	outputs := make([]api.CmdOutput, 0, len(req.Jobs))
