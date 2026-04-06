@@ -101,11 +101,21 @@ func GetOutputs(job api.SlurmJob, runCmd sshutil.CmdRunner) (api.CmdOutput, erro
 		OutputFiles: make([]string, 0),
 	}
 
-	if out.StdOut, err = readRemoteFile(job.OutPath, runCmd); err != nil {
-		return api.CmdOutput{}, fmt.Errorf("%s: %w", baseErr, err)
+	// Empty paths are allowed (e.g. caller only wants stderr for a failed job).
+	if job.OutPath != "" {
+		if out.StdOut, err = readRemoteFile(job.OutPath, runCmd); err != nil {
+			return api.CmdOutput{}, fmt.Errorf("%s: %w", baseErr, err)
+		}
 	}
-	if out.StdErr, err = readRemoteFile(job.ErrPath, runCmd); err != nil {
-		return api.CmdOutput{}, fmt.Errorf("%s: %w", baseErr, err)
+	if job.ErrPath != "" {
+		if out.StdErr, err = readRemoteFile(job.ErrPath, runCmd); err != nil {
+			return api.CmdOutput{}, fmt.Errorf("%s: %w", baseErr, err)
+		}
+	}
+
+	if job.TmpOutputHostPath == "" {
+		out.RawOutputs, out.OutputFiles = processRawCmdOutputs(nil, job.ExpOutFilePnames)
+		return out, nil
 	}
 
 	lsCmd := fmt.Sprintf("ls -1 %s", job.TmpOutputHostPath)

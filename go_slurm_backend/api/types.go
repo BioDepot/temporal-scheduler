@@ -50,6 +50,10 @@ type SlurmCmdTemplate struct {
 	Envs          map[string]string `json:"envs"`
 	OutFilePnames []string          `json:"out_file_pnames"`
 	ResourceReqs  ResourceVector    `json:"resource_reqs"`
+	// RawCmd, when non-empty, is written directly into the sbatch script instead
+	// of using FormSingularityCmd.  Used by the Python shim which builds the
+	// container command itself and passes the pre-built string here.
+	RawCmd string `json:"raw_cmd,omitempty"`
 }
 
 // SlurmJob tracks a submitted SLURM batch job.
@@ -105,6 +109,10 @@ type StartJobRequest struct {
 	Cmd       SlurmCmdTemplate  `json:"cmd"`
 	JobConfig SlurmJobConfig    `json:"job_config"`
 	Volumes   map[string]string `json:"volumes"`
+	// ExtraDirs lists additional directories that must be created (mkdir -p) on
+	// the login node before the sbatch file is uploaded.  Used by the Python
+	// shim to create per-job container output directories.
+	ExtraDirs []string `json:"extra_dirs,omitempty"`
 }
 
 type StartJobResponse struct {

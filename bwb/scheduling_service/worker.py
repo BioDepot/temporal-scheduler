@@ -22,6 +22,7 @@ from bwb.scheduling_service.scheduler_types import ResourceVector, WorkerResourc
 from bwb.scheduling_service.executors.local_activities import setup_volumes_on_worker, run_workflow_cmd, download_file_deps, \
     sync_dir
 from bwb.scheduling_service.executors.slurm_activities import SlurmActivity
+from bwb.scheduling_service.executors.slurm_activities_go_shim import GoSlurmActivity
 from bwb.scheduling_service.bwb_workflow import BwbWorkflow
 from bwb.scheduling_service.executors.slurm_poller import SlurmPoller
 from bwb.scheduling_service.executors.generic import get_scheduler_child_queue, get_worker_heartbeat_queue
@@ -176,44 +177,51 @@ async def get_scheduler_worker():
 
 
 async def get_slurm_worker(slurm_config):
-    if "ip_addr" not in slurm_config:
-        print(f"ERROR: No key ip_addr in slurm config")
-        exit(1)
-    if "user" not in slurm_config:
-        print(f"ERROR: No key user in slurm config")
-        exit(1)
-    if "storage_dir" not in slurm_config:
-        print(f"ERROR: No storage_dir in slurm config")
-        exit(1)
+    for required_key in ("ip_addr", "user", "storage_dir"):
+        if required_key not in slurm_config:
+            print(f"ERROR: No key {required_key!r} in slurm config")
+            exit(1)
 
-    # TODO: Add failure mode if key doesn't exist for user,
-    # remove password as an env key.
-    load_dotenv()
-    ssh_password = os.getenv("SSH_PASSWORD")
-    ssh_client = paramiko.SSHClient()
-    ssh_client.load_system_host_keys()
     ssh_port = int(slurm_config.get("port", 22))
-    ssh_client.connect(slurm_config["ip_addr"],
-                       port=ssh_port,
-                       username=slurm_config["user"],
-                       password=ssh_password)
-    transport = ssh_client.get_transport()
-    transport.set_keepalive(60)
-    xfer_addr = None
-    if "transfer_addr" in slurm_config:
-        xfer_addr = slurm_config["transfer_addr"]
+    slurm_queue = f"{slurm_config['user']}@{slurm_config['ip_addr']}:{ssh_port}"
 
-    slurm_activity = SlurmActivity(
-        ssh_client,
-        slurm_config["user"],
-        slurm_config["ip_addr"],
-        slurm_config["storage_dir"],
-        xfer_addr,
-        ssh_port=ssh_port,
-        xfer_port=int(slurm_config.get("transfer_port", ssh_port))
+    load_dotenv()
+
+    # Use the Go backend shim when a backend URL is configured or when the
+    # GO_SLURM_BACKEND_URL env var is set.  Fall back to Paramiko otherwise.
+    use_go_backend = (
+        "go_backend_url" in slurm_config
+        or os.getenv("GO_SLURM_BACKEND_URL") is not None
     )
 
-    slurm_queue = f"{slurm_config['user']}@{slurm_config['ip_addr']}:{ssh_port}"
+    if use_go_backend:
+        slurm_activity = GoSlurmActivity(slurm_config)
+        print(f"Using Go SLURM backend at "
+              f"{slurm_activity._backend_url} for queue {slurm_queue}")
+    else:
+        # Legacy Paramiko path.
+        ssh_password = os.getenv("SSH_PASSWORD")
+        ssh_client = paramiko.SSHClient()
+        ssh_client.load_system_host_keys()
+        ssh_client.connect(
+            slurm_config["ip_addr"],
+            port=ssh_port,
+            username=slurm_config["user"],
+            password=ssh_password,
+        )
+        ssh_client.get_transport().set_keepalive(60)
+        xfer_addr = slurm_config.get("transfer_addr")
+        slurm_activity = SlurmActivity(
+            ssh_client,
+            slurm_config["user"],
+            slurm_config["ip_addr"],
+            slurm_config["storage_dir"],
+            xfer_addr,
+            ssh_port=ssh_port,
+            xfer_port=int(slurm_config.get("transfer_port", ssh_port)),
+        )
+        print(f"Using Paramiko SLURM backend for queue {slurm_queue}")
+
     temporal_ept = os.getenv("TEMPORAL_ENDPOINT_URL")
     temporal_client = await Client.connect(temporal_ept)
     worker = Worker(
@@ -232,7 +240,7 @@ async def get_slurm_worker(slurm_config):
             slurm_activity.get_slurm_outputs,
             slurm_activity.setup_login_node_volumes,
             slurm_activity.upload_to_slurm_login_node,
-            slurm_activity.download_from_slurm_login_node
+            slurm_activity.download_from_slurm_login_node,
         ],
     )
 

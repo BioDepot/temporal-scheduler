@@ -62,10 +62,15 @@ func WriteSbatchFile(
 		}
 	}
 
-	localSifPath := filepath.Join(storageDir, "images", cmd.ImageName)
-	useGpu := jobConfig.Gpus != nil || cmd.ResourceReqs.Gpus > 0
-	cmdStr, envs := FormSingularityCmd(cmd, volumes, localSifPath, useGpu)
-	fmt.Fprintf(outStream, "%s %s", strings.Join(envs, " "), cmdStr)
+	if cmd.RawCmd != "" {
+		// Pre-built command supplied by caller (e.g. Python shim); write verbatim.
+		fmt.Fprintln(outStream, cmd.RawCmd)
+	} else {
+		localSifPath := filepath.Join(storageDir, "images", cmd.ImageName)
+		useGpu := jobConfig.Gpus != nil || cmd.ResourceReqs.Gpus > 0
+		cmdStr, envs := FormSingularityCmd(cmd, volumes, localSifPath, useGpu)
+		fmt.Fprintf(outStream, "%s %s", strings.Join(envs, " "), cmdStr)
+	}
 
 	return outPath, errPath, nil
 }

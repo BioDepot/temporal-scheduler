@@ -94,6 +94,16 @@ func handleStartJob(w http.ResponseWriter, r *http.Request) {
 	}
 	defer exec.Close()
 
+	runner := exec.Runner()
+	for _, dir := range req.ExtraDirs {
+		out, err := runner(fmt.Sprintf("mkdir -p %s", dir))
+		if err != nil || out.ExitCode != 0 {
+			writeError(w, fmt.Sprintf("mkdir -p %s failed (exit %d, stderr %s): %v",
+				dir, out.ExitCode, out.StdErr, err))
+			return
+		}
+	}
+
 	job, err := polling.StartJob(exec, req.SshConfig, req.Cmd, req.JobConfig, req.Volumes, req.SshConfig.StorageDir)
 	if err != nil {
 		writeError(w, err.Error())
