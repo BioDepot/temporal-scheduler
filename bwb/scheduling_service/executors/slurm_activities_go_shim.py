@@ -42,10 +42,11 @@ class GoSlurmActivity:
 
     def __init__(self, slurm_config: dict, backend_url: Optional[str] = None):
         load_dotenv()
+        # Env var overrides config so port-shifting in test harnesses works.
         self._backend_url = (
             backend_url
-            or slurm_config.get("go_backend_url")
             or os.getenv("GO_SLURM_BACKEND_URL")
+            or slurm_config.get("go_backend_url")
             or _DEFAULT_BACKEND_URL
         ).rstrip("/")
 
