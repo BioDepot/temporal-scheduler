@@ -1,0 +1,16 @@
+# Stage 1: build the Go binary
+FROM golang:1.22-alpine AS builder
+WORKDIR /build
+COPY go_slurm_backend/go.mod go_slurm_backend/go.sum ./
+RUN go mod download
+COPY go_slurm_backend/ .
+RUN CGO_ENABLED=0 GOOS=linux go build -o go-slurm-backend .
+
+# Stage 2: minimal runtime image
+FROM alpine:3.19
+# rsync and openssh-client are used at runtime by rsyncfs for file transfers.
+RUN apk add --no-cache rsync openssh-client
+COPY --from=builder /build/go-slurm-backend /usr/local/bin/go-slurm-backend
+EXPOSE 8765
+ENTRYPOINT ["go-slurm-backend"]
+CMD ["-addr", ":8765"]

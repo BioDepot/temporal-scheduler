@@ -14,6 +14,7 @@ mkdir -p "${SCHED_STORAGE_DIR}"
 
 bash "${SCRIPT_DIR}/setup_local_slurm_host.sh"
 docker build -t bwb-scheduler -f "${DEPLOY_DIR}/Dockerfile" "${REPO_ROOT}"
+docker build -t go-slurm-backend -f "${DEPLOY_DIR}/Dockerfile.go-slurm-backend" "${REPO_ROOT}"
 docker compose --env-file "${DEPLOY_DIR}/.env" -f "${DEPLOY_DIR}/docker-compose.yml" up -d
 bash "${SCRIPT_DIR}/run_local_docker_slurm_worker.sh" --detach
 

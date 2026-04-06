@@ -6,7 +6,8 @@
       "transfer_addr": "localhost",
       "transfer_port": 3022,
       "user": "root",
-      "storage_dir": "/data/temporal_scheduler"
+      "storage_dir": "/data/temporal_scheduler",
+      "go_backend_url": "http://localhost:8765"
     }
   },
   "configs": {

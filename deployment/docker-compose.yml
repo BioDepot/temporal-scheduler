@@ -152,6 +152,22 @@ services:
         networks:
             - temporal-network
 
+    # Go SLURM backend sidecar.  Exposes the six SLURM operations over a local
+    # JSON HTTP API so the Python SLURM worker can delegate to Go without
+    # Paramiko.  Port 8765 is published to the host so containers launched with
+    # --network host (i.e. the local SLURM worker) can reach it at
+    # http://localhost:8765.
+    go-slurm-backend:
+        image: go-slurm-backend
+        container_name: go-slurm-backend
+        restart: unless-stopped
+        ports:
+            - "8765:8765"
+        volumes:
+            - ${HOME}/.ssh:/root/.ssh:ro
+        networks:
+            - temporal-network
+
 
 volumes:
   minio-data:
