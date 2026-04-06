@@ -3,7 +3,6 @@
 package rsyncfs
 
 import (
-	"bytes"
 	"fmt"
 	"os/exec"
 
@@ -37,12 +36,9 @@ func Download(conf api.SshConfig, src, dst string) error {
 }
 
 // rsyncCmd wraps the rsync invocation as an exec.Cmd via sh -c.
+// Stdout/Stderr are intentionally left unset so callers can use CombinedOutput.
 func rsyncCmd(_ api.SshConfig, cmdStr string) *exec.Cmd {
-	var stdout, stderr bytes.Buffer
-	cmd := exec.Command("sh", "-c", cmdStr)
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	return cmd
+	return exec.Command("sh", "-c", cmdStr)
 }
 
 func transferAddr(conf api.SshConfig) string {

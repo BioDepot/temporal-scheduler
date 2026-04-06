@@ -12,6 +12,32 @@ fi
 SCHED_STORAGE_DIR="$(grep '^SCHED_STORAGE_DIR=' "${DEPLOY_DIR}/.env" | cut -d= -f2-)"
 mkdir -p "${SCHED_STORAGE_DIR}"
 
+# Auto-shift the Go SLURM backend host port if the default (8765) is in use.
+GO_SLURM_HOST_PORT=$(python3 - <<'PY'
+import socket, sys
+port = 8765
+while True:
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        if s.connect_ex(("127.0.0.1", port)) != 0:
+            print(port)
+            break
+    port += 1
+    if port > 8865:
+        sys.exit("No free port found in range 8765-8865")
+PY
+)
+export GO_SLURM_HOST_PORT
+# Persist in .env so run_local_docker_slurm_worker.sh picks it up.
+if grep -q '^GO_SLURM_HOST_PORT=' "${DEPLOY_DIR}/.env"; then
+  sed -i "s|^GO_SLURM_HOST_PORT=.*|GO_SLURM_HOST_PORT=${GO_SLURM_HOST_PORT}|" "${DEPLOY_DIR}/.env"
+else
+  echo "GO_SLURM_HOST_PORT=${GO_SLURM_HOST_PORT}" >> "${DEPLOY_DIR}/.env"
+fi
+if [ "${GO_SLURM_HOST_PORT}" != "8765" ]; then
+  echo "Port 8765 in use — go-slurm-backend will listen on host port ${GO_SLURM_HOST_PORT}"
+fi
+
 bash "${SCRIPT_DIR}/setup_local_slurm_host.sh"
 docker build -t bwb-scheduler -f "${DEPLOY_DIR}/Dockerfile" "${REPO_ROOT}"
 docker build -t go-slurm-backend -f "${DEPLOY_DIR}/Dockerfile.go-slurm-backend" "${REPO_ROOT}"

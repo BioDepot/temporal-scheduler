@@ -52,6 +52,8 @@ fi
 SCHED_STORAGE_DIR="$(grep '^SCHED_STORAGE_DIR=' "${DEPLOY_ENV}" | cut -d= -f2-)"
 MINIO_ACCESS_KEY="$(grep '^MINIO_ACCESS_KEY=' "${DEPLOY_ENV}" | cut -d= -f2-)"
 MINIO_SECRET_KEY="$(grep '^MINIO_SECRET_KEY=' "${DEPLOY_ENV}" | cut -d= -f2-)"
+GO_SLURM_HOST_PORT="$(grep '^GO_SLURM_HOST_PORT=' "${DEPLOY_ENV}" | cut -d= -f2-)"
+GO_SLURM_HOST_PORT="${GO_SLURM_HOST_PORT:-8765}"
 
 if [ -z "${SCHED_STORAGE_DIR}" ]; then
   echo "SCHED_STORAGE_DIR is not set in ${DEPLOY_ENV}" >&2
@@ -72,6 +74,7 @@ RUN_ARGS=(
   -e MINIO_SECRET_KEY="${MINIO_SECRET_KEY}"
   -e SCHED_STORAGE_DIR=/data/sched_storage
   -e TEMPORAL_ENDPOINT_URL=localhost:7233
+  -e "GO_SLURM_BACKEND_URL=http://localhost:${GO_SLURM_HOST_PORT}"
 )
 
 if [ "${DETACH}" = true ]; then

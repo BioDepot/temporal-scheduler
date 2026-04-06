@@ -161,12 +161,15 @@ services:
         image: go-slurm-backend
         container_name: go-slurm-backend
         restart: unless-stopped
-        ports:
-            - "8765:8765"
+        # Host networking is required so the Go sidecar can reach the SLURM
+        # login node at localhost:3022 the same way the Python worker does.
+        # With host networking, ports: is not used; the binary listens on
+        # GO_SLURM_HOST_PORT directly on the host interface.
+        network_mode: host
+        command: ["-addr", ":${GO_SLURM_HOST_PORT:-8765}"]
         volumes:
             - ${HOME}/.ssh:/root/.ssh:ro
-        networks:
-            - temporal-network
+            - ${SCHED_STORAGE_DIR}:/data/sched_storage
 
 
 volumes:
