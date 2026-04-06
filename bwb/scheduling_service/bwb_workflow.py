@@ -738,4 +738,6 @@ class BwbWorkflow:
     def child_workflow_started(self):
         if "local" in self.executors:
             return self.executors["local"].child_workflow_is_started()
-        raise ValueError("No `local` executor required by config.")
+        # SLURM executor doesn't use a local child workflow for resource allocation,
+        # so worker registration is not needed for SLURM-only workflows
+        return True
