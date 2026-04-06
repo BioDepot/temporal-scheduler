@@ -145,6 +145,10 @@ async def get_child_handle(workflow_id: str, handle: WorkflowHandle, client: Cli
 async def register_worker_with_workflow(workflow_id: str, handle: WorkflowHandle,
                                         client: Client, worker: WorkerResources) -> bool:
     try:
+        # SLURM-only workflows don't use a local WorkerPoller child workflow,
+        # so worker registration is a no-op for them.
+        if not await handle.query("needs_worker_registration"):
+            return True
         child_handle = await get_child_handle(workflow_id, handle, client)
     except temporalio.service.RPCError:
         return False

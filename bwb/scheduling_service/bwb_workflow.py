@@ -741,3 +741,8 @@ class BwbWorkflow:
         # SLURM executor doesn't use a local child workflow for resource allocation,
         # so worker registration is not needed for SLURM-only workflows
         return True
+
+    @workflow.query
+    def needs_worker_registration(self) -> bool:
+        """True if a local WorkerPoller child workflow is used and needs a worker."""
+        return "local" in self.executors

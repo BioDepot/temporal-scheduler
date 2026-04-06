@@ -85,7 +85,17 @@ def apply_conditions_to_workflow(scheme: dict[str, Any]) -> dict[str, Any]:
     conditioned_scheme = copy.deepcopy(scheme)
     conditions = conditioned_scheme.get("conditions", [])
     condition_context = conditioned_scheme.get("condition_context", {})
-    condition_results = evaluate_conditions(conditions, condition_context)
+
+    # Only evaluate conditions that are actually referenced by nodes or links.
+    # Unreferenced conditions may reference variables not present in
+    # condition_context (e.g. when the caller dropped the relevant nodes).
+    referenced_ids: set[str] = set()
+    for item in conditioned_scheme.get("nodes", []) + conditioned_scheme.get("links", []):
+        if "condition_ref" in item:
+            referenced_ids.add(item["condition_ref"])
+    referenced_conditions = [c for c in conditions if c.get("id") in referenced_ids]
+
+    condition_results = evaluate_conditions(referenced_conditions, condition_context)
 
     skipped_nodes: dict[int, dict[str, Any]] = {}
     active_nodes = []
