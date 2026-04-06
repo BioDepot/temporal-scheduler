@@ -203,10 +203,23 @@ def poll_until_terminal(
     poll_seconds: float,
 ) -> dict[str, Any]:
     deadline = time.monotonic() + timeout_seconds
+    poll_start = time.monotonic()
     last_status = None
     while time.monotonic() < deadline:
         last_status = get_workflow_status(api_base_url, workflow_id, run_id)
-        if last_status.get("workflow_status") in TERMINAL_WORKFLOW_STATUSES:
+        wf_status = last_status.get("workflow_status", "Unknown")
+        node_statuses = last_status.get("node_statuses", {})
+        completed = sum(
+            1 for ns in node_statuses.values()
+            if "Completed" in ns.get("status", "")
+        )
+        elapsed = int(time.monotonic() - poll_start)
+        print(
+            f"  [{elapsed:>4}s] {workflow_id[:8]}… status={wf_status}"
+            f"  nodes={completed}/{len(node_statuses)}",
+            flush=True,
+        )
+        if wf_status in TERMINAL_WORKFLOW_STATUSES:
             return last_status
         time.sleep(poll_seconds)
 
@@ -230,6 +243,7 @@ def run_single_benchmark_iteration(
     workflow_start = start_workflow(api_base_url, payload)
     workflow_id = workflow_start["workflow_id"]
     run_id = workflow_start.get("run_id")
+    print(f"  Submitted workflow {workflow_id} (run {run_id})", flush=True)
     if worker is not None:
         add_worker_to_workflow(api_base_url, workflow_id, worker)
 
