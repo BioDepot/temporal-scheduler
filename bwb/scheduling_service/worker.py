@@ -23,6 +23,8 @@ from bwb.scheduling_service.executors.local_activities import setup_volumes_on_w
     sync_dir
 from bwb.scheduling_service.executors.slurm_activities import SlurmActivity
 from bwb.scheduling_service.executors.slurm_activities_go_shim import GoSlurmActivity
+from bwb.scheduling_service.executors.ssh_docker_activity import SshDockerActivity, SshDockerConfig
+from bwb.scheduling_service.executors.ssh_docker_workflow import RemoteDockerWorkflow
 from bwb.scheduling_service.bwb_workflow import BwbWorkflow
 from bwb.scheduling_service.executors.slurm_poller import SlurmPoller
 from bwb.scheduling_service.executors.generic import get_scheduler_child_queue, get_worker_heartbeat_queue
@@ -241,10 +243,50 @@ async def get_slurm_worker(slurm_config):
             slurm_activity.setup_login_node_volumes,
             slurm_activity.upload_to_slurm_login_node,
             slurm_activity.download_from_slurm_login_node,
+            slurm_activity.validate_transfer_connectivity,
         ],
     )
 
     return slurm_queue, worker
+
+
+async def get_ssh_docker_worker(ssh_docker_config: dict):
+    """Create a Temporal worker for SSH+Docker remote execution (no SLURM)."""
+    for required_key in ("ip_addr", "user", "storage_dir"):
+        if required_key not in ssh_docker_config:
+            print(f"ERROR: No key {required_key!r} in ssh_docker config")
+            exit(1)
+
+    ssh_port = int(ssh_docker_config.get("port", 22))
+    queue = f"{ssh_docker_config['user']}@{ssh_docker_config['ip_addr']}:{ssh_port}"
+
+    config = SshDockerConfig(
+        ip_addr=ssh_docker_config["ip_addr"],
+        user=ssh_docker_config["user"],
+        storage_dir=ssh_docker_config["storage_dir"],
+        ssh_port=ssh_port,
+        gpu_device=ssh_docker_config.get("gpu_device", ""),
+    )
+    activity_instance = SshDockerActivity(config)
+    print(f"SSH+Docker worker for queue {queue}")
+
+    load_dotenv()
+    temporal_ept = os.getenv("TEMPORAL_ENDPOINT_URL")
+    temporal_client = await Client.connect(temporal_ept)
+    worker = Worker(
+        temporal_client,
+        task_queue=queue,
+        workflows=[RemoteDockerWorkflow],
+        activities=[
+            activity_instance.validate_connectivity,
+            activity_instance.setup_remote_volumes,
+            activity_instance.upload_inputs,
+            activity_instance.run_remote_docker,
+            activity_instance.download_outputs,
+            activity_instance.cleanup_remote,
+        ],
+    )
+    return queue, worker
 
 
 def parse_ram_to_mb(ram_str):
@@ -290,6 +332,10 @@ async def run_slurm_worker(config):
     slurm_queue, worker = await get_slurm_worker(config)
     await worker.run()
 
+async def run_ssh_docker_worker(config):
+    queue, worker = await get_ssh_docker_worker(config)
+    await worker.run()
+
 
 async def run_regular_worker(queue_name, ram, cpus, gpus):
     queue, heartbeat_worker, worker = await get_worker(queue_name, cpus, ram, gpus)
@@ -332,6 +378,16 @@ if __name__ == "__main__":
         help='Config file to slurm'
     )
 
+    parser_ssh_docker_worker = subparsers.add_parser(
+        "ssh-docker", help="Run SSH+Docker remote GPU worker."
+    )
+    parser_ssh_docker_worker.add_argument(
+        '--config',
+        type=str,
+        required=True,
+        help='Config file with ssh_docker executor section'
+    )
+
     args = parser.parse_args()
     if args.subcommand == "scheduler":
         verify_env()
@@ -346,3 +402,8 @@ if __name__ == "__main__":
             config = json.load(cf)
 
         asyncio.run(run_slurm_worker(config["executors"]["slurm"]))
+    elif args.subcommand == "ssh-docker":
+        with open(args.config, "r") as cf:
+            config = json.load(cf)
+
+        asyncio.run(run_ssh_docker_worker(config["executors"]["ssh_docker"]))

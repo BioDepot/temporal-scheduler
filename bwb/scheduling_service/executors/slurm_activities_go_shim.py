@@ -50,11 +50,13 @@ class GoSlurmActivity:
             or _DEFAULT_BACKEND_URL
         ).rstrip("/")
 
+        ssh_port = int(slurm_config.get("port", 22))
         self._ssh_config = {
             "ip_addr": slurm_config["ip_addr"],
-            "port": int(slurm_config.get("port", 22)),
+            "port": ssh_port,
             "user": slurm_config["user"],
             "transfer_addr": slurm_config.get("transfer_addr", ""),
+            "transfer_port": int(slurm_config.get("transfer_port", ssh_port)),
             "storage_dir": slurm_config["storage_dir"],
         }
         if "cmd_prefix" in slurm_config:
@@ -288,9 +290,22 @@ class GoSlurmActivity:
         )
 
     @activity.defn
+    async def validate_transfer_connectivity(self, remote_storage_dir: str) -> str:
+        """Pre-flight check via Go backend: verify SSH/rsync and remote storage."""
+        result = await self._post_async("/validate_transfer_connectivity", {
+            "ssh_config": self._ssh_config,
+            "remote_storage_dir": remote_storage_dir,
+        })
+        status = result.get("status", "ok")
+        print(f"Go backend pre-flight: {status}")
+        return status
+
+    @activity.defn
     async def upload_to_slurm_login_node(self, params: SlurmFileUploadParams):
         """rsync input files and the SIF image to the SLURM login node."""
         tasks = []
+        # Track file paths for error reporting.
+        task_labels: list[str] = []
 
         for key, file_list in params.cmd_files.input_files.items():
             if key in params.elideable_xfers:
@@ -303,6 +318,7 @@ class GoSlurmActivity:
                     "local_src_path": local_path,
                     "remote_dst_path": remote_path,
                 }))
+                task_labels.append(f"upload {local_path} -> {remote_path}")
 
         if params.sif_path is not None:
             load_dotenv()
@@ -316,14 +332,25 @@ class GoSlurmActivity:
                 "local_src_path": local_sif,
                 "remote_dst_path": remote_sif,
             }))
+            task_labels.append(f"upload SIF {local_sif} -> {remote_sif}")
 
         if tasks:
-            await asyncio.gather(*tasks)
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            errors = []
+            for label, result in zip(task_labels, results):
+                if isinstance(result, Exception):
+                    errors.append(f"  {label}: {result}")
+            if errors:
+                raise ApplicationError(
+                    f"upload failed for {len(errors)}/{len(tasks)} file(s):\n"
+                    + "\n".join(errors)
+                )
 
     @activity.defn
     async def download_from_slurm_login_node(self, params: SlurmFileDownloadParams):
         """rsync output files back from the SLURM login node."""
         tasks = []
+        task_labels: list[str] = []
 
         for key, file_list in params.output_files.items():
             if key in params.elideable_xfers:
@@ -337,6 +364,16 @@ class GoSlurmActivity:
                     "remote_src_path": remote_path,
                     "local_dst_path": local_path,
                 }))
+                task_labels.append(f"download {remote_path} -> {local_path}")
 
         if tasks:
-            await asyncio.gather(*tasks)
+            results = await asyncio.gather(*tasks, return_exceptions=True)
+            errors = []
+            for label, result in zip(task_labels, results):
+                if isinstance(result, Exception):
+                    errors.append(f"  {label}: {result}")
+            if errors:
+                raise ApplicationError(
+                    f"download failed for {len(errors)}/{len(tasks)} file(s):\n"
+                    + "\n".join(errors)
+                )

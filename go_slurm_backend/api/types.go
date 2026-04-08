@@ -9,9 +9,10 @@ package api
 // SshConfig holds SSH connection parameters for the SLURM login node.
 type SshConfig struct {
 	IpAddr       string  `json:"ip_addr"`
-	Port         int     `json:"port,omitempty"` // defaults to 22
+	Port         int     `json:"port,omitempty"`          // SSH login port, defaults to 22
 	User         string  `json:"user"`
 	TransferAddr string  `json:"transfer_addr"`
+	TransferPort int     `json:"transfer_port,omitempty"` // rsync transfer port; 0 = use Port
 	StorageDir   string  `json:"storage_dir"`
 	CmdPrefix    *string `json:"cmd_prefix,omitempty"`
 }
@@ -161,4 +162,18 @@ type FileDownloadRequest struct {
 
 type FileDownloadResponse struct {
 	Error string `json:"error,omitempty"`
+}
+
+// ValidateTransferConnectivityRequest checks SSH, rsync, and storage health
+// before any data transfers begin.
+type ValidateTransferConnectivityRequest struct {
+	SshConfig        SshConfig `json:"ssh_config"`
+	RemoteStorageDir string    `json:"remote_storage_dir"`
+}
+
+type ValidateTransferConnectivityResponse struct {
+	Status      string   `json:"status"`
+	Checks      []string `json:"checks,omitempty"`
+	DiskAvailGB int      `json:"disk_avail_gb,omitempty"`
+	Error       string   `json:"error,omitempty"`
 }

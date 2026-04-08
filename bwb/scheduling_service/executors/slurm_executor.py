@@ -139,6 +139,16 @@ class SlurmExecutor(AbstractExecutor):
     async def setup_volumes(self, params: SetupVolumesParams, queue_id: str):
         if not self.volumes_setup:
             print(f"Setting up volumes w/ queue_id {queue_id}")
+
+            # Pre-flight: validate SSH/rsync connectivity before any transfers.
+            await workflow.execute_activity(
+                SlurmActivity.validate_transfer_connectivity,
+                self.storage_dir,
+                task_queue=queue_id,
+                start_to_close_timeout=timedelta(seconds=60),
+                retry_policy=RetryPolicy(maximum_attempts=1),
+            )
+
             self.local_volumes = await workflow.execute_activity(
                 setup_volumes_on_worker,
                 params,

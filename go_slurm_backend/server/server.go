@@ -8,6 +8,8 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	osexec "os/exec"
+	"strconv"
 	"strings"
 	"time"
 
@@ -38,6 +40,7 @@ func New() http.Handler {
 	mux.HandleFunc("POST /poll_slurm", handlePollSlurm)
 	mux.HandleFunc("POST /get_slurm_outputs", handleGetOutputs)
 	mux.HandleFunc("POST /download_from_slurm_login_node", handleDownload)
+	mux.HandleFunc("POST /validate_transfer_connectivity", handleValidateTransferConnectivity)
 	return mux
 }
 
@@ -204,6 +207,109 @@ func handleDownload(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	writeJSON(w, api.FileDownloadResponse{})
+}
+
+// ---------- validate transfer connectivity ----------
+
+func handleValidateTransferConnectivity(w http.ResponseWriter, r *http.Request) {
+	var req api.ValidateTransferConnectivityRequest
+	if !decodeJSON(w, r, &req) {
+		return
+	}
+
+	sshExec, err := getSSH(req.SshConfig)
+	if err != nil {
+		writeError(w, fmt.Sprintf("ssh connect: %v", err))
+		return
+	}
+	defer sshPool.Put(sshExec)
+
+	runner := sshExec.Runner()
+	var checks []string
+
+	// 1. SSH echo check
+	out, err := runner("echo __ssh_ok__")
+	if err != nil || out.ExitCode != 0 || !strings.Contains(out.StdOut, "__ssh_ok__") {
+		errMsg := "unknown"
+		if err != nil {
+			errMsg = err.Error()
+		} else if out.StdErr != "" {
+			errMsg = out.StdErr
+		}
+		writeError(w, fmt.Sprintf("SSH check failed: %s", errMsg))
+		return
+	}
+	checks = append(checks, "ssh_login")
+
+	// 2. rsync reachability to transfer endpoint
+	addr := req.SshConfig.TransferAddr
+	if addr == "" {
+		addr = req.SshConfig.IpAddr
+	}
+	xferPort := rsyncfs.TransferPort(req.SshConfig)
+	rsyncProbe := fmt.Sprintf(
+		"rsync --dry-run -e 'ssh -p %d' %s@%s:/dev/null /dev/null",
+		xferPort, req.SshConfig.User, addr,
+	)
+	probeCmd := osexec.Command("sh", "-c", rsyncProbe)
+	probeOut, probeErr := probeCmd.CombinedOutput()
+	exitCode := 0
+	if probeErr != nil {
+		if exitErr, ok := probeErr.(*osexec.ExitError); ok {
+			exitCode = exitErr.ExitCode()
+		} else {
+			writeError(w, fmt.Sprintf("rsync probe exec failed: %v", probeErr))
+			return
+		}
+	}
+	// exit 23 = partial transfer is acceptable for a dry-run probe
+	if exitCode != 0 && exitCode != 23 {
+		writeError(w, fmt.Sprintf("rsync check failed to %s:%d: exit=%d output=%s",
+			addr, xferPort, exitCode, string(probeOut)))
+		return
+	}
+	checks = append(checks, "rsync_transfer_endpoint")
+
+	// 3. Remote storage writable
+	storageDir := req.RemoteStorageDir
+	if storageDir == "" {
+		storageDir = req.SshConfig.StorageDir
+	}
+	probe := storageDir + "/.scheduler_probe"
+	out, err = runner(fmt.Sprintf("mkdir -p %s && touch %s && rm -f %s && echo __write_ok__",
+		storageDir, probe, probe))
+	if err != nil || out.ExitCode != 0 || !strings.Contains(out.StdOut, "__write_ok__") {
+		errMsg := "unknown"
+		if err != nil {
+			errMsg = err.Error()
+		} else if out.StdErr != "" {
+			errMsg = out.StdErr
+		}
+		writeError(w, fmt.Sprintf("remote storage %s not writable: %s", storageDir, errMsg))
+		return
+	}
+	checks = append(checks, "remote_storage_writable")
+
+	// 4. Disk space
+	diskAvailGB := 0
+	out, err = runner(fmt.Sprintf("df -BG %s | tail -1 | awk '{print $4}'", storageDir))
+	if err == nil && out.ExitCode == 0 {
+		raw := strings.TrimSpace(strings.ReplaceAll(out.StdOut, "G", ""))
+		if n, parseErr := strconv.Atoi(raw); parseErr == nil {
+			diskAvailGB = n
+			if n < 10 {
+				log.Printf("WARNING: only %dGB free on %s", n, storageDir)
+			}
+			checks = append(checks, fmt.Sprintf("disk=%dGB", n))
+		}
+	}
+
+	status := fmt.Sprintf("pre-flight ok: %s", strings.Join(checks, ", "))
+	writeJSON(w, api.ValidateTransferConnectivityResponse{
+		Status:      status,
+		Checks:      checks,
+		DiskAvailGB: diskAvailGB,
+	})
 }
 
 // ---------- helpers ----------

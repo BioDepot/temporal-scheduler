@@ -13,7 +13,7 @@ import (
 func Upload(conf api.SshConfig, src, dst string) error {
 	cmd := rsyncCmd(conf, fmt.Sprintf(
 		"rsync --mkpath -av -e 'ssh -p %d' %s %s@%s:%s",
-		sshPort(conf), src, conf.User, transferAddr(conf), dst,
+		TransferPort(conf), src, conf.User, transferAddr(conf), dst,
 	))
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("rsync upload %s -> %s@%s:%s: %w\n%s",
@@ -26,7 +26,7 @@ func Upload(conf api.SshConfig, src, dst string) error {
 func Download(conf api.SshConfig, src, dst string) error {
 	cmd := rsyncCmd(conf, fmt.Sprintf(
 		"rsync --mkpath -av -e 'ssh -p %d' %s@%s:%s %s",
-		sshPort(conf), conf.User, transferAddr(conf), src, dst,
+		TransferPort(conf), conf.User, transferAddr(conf), src, dst,
 	))
 	if out, err := cmd.CombinedOutput(); err != nil {
 		return fmt.Errorf("rsync download %s@%s:%s -> %s: %w\n%s",
@@ -46,6 +46,15 @@ func transferAddr(conf api.SshConfig) string {
 		return conf.TransferAddr
 	}
 	return conf.IpAddr
+}
+
+// TransferPort returns the port for rsync/transfer connections.
+// Uses TransferPort if set, otherwise falls back to Port (or 22).
+func TransferPort(conf api.SshConfig) int {
+	if conf.TransferPort > 0 {
+		return conf.TransferPort
+	}
+	return sshPort(conf)
 }
 
 func sshPort(conf api.SshConfig) int {

@@ -1,0 +1,24 @@
+{
+    "executors": {
+        "ssh_docker": {
+            "ip_addr": "10.159.4.53",
+            "user": "lhhung",
+            "port": 22,
+            "storage_dir": "/home/lhhung/ucsf_remote_cellbender",
+            "gpu_device": ""
+        }
+    },
+    "configs": {
+        "cellbender_gpu": {
+            "executor": "ssh_docker",
+            "image": "biodepot/cellbender:0.3.2",
+            "use_gpu": true,
+            "gpu_device": "",
+            "timeout_seconds": 7200,
+            "cpu_cores": 8
+        }
+    },
+    "node_configs": {
+        "0": "cellbender_gpu"
+    }
+}

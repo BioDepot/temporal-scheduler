@@ -1,4 +1,5 @@
 import os
+import time
 import uuid
 import shlex
 import paramiko
@@ -12,6 +13,53 @@ from bwb.scheduling_service.executors.generic import (get_container_cmd, cmd_no_
                                                       is_time_format)
 from bwb.scheduling_service.scheduler_types import ResourceVector, CmdOutput, SlurmContainerCmdParams, \
     SlurmCmdObj, SlurmCmdResult, SlurmSetupVolumesParams, SlurmFileUploadParams, SlurmFileDownloadParams
+
+# rsync exit-code classification for diagnosable transfer errors.
+# See rsync(1) EXIT VALUES.
+RSYNC_EXIT_CODES = {
+    1: "syntax or usage error",
+    2: "protocol incompatibility",
+    3: "errors selecting input/output files or dirs",
+    4: "requested action not supported",
+    5: "error starting client-server protocol",
+    10: "error in socket I/O",
+    11: "error in file I/O",
+    12: "error in rsync protocol data stream",
+    13: "errors with program diagnostics",
+    14: "error in IPC code",
+    20: "received SIGUSR1 or SIGINT",
+    21: "waitpid() error",
+    22: "error allocating core memory buffers",
+    23: "partial transfer due to error",
+    24: "partial transfer due to vanished source files",
+    25: "the --max-delete limit stopped deletions",
+    30: "timeout in data send/receive",
+    35: "timeout waiting for daemon connection",
+    127: "rsync binary not found on PATH",
+    255: "SSH connection failed (unexplained error from remote shell)",
+}
+
+
+def classify_rsync_error(exit_code: int, stderr: str) -> str:
+    """Return a human-readable classification for an rsync failure."""
+    base = RSYNC_EXIT_CODES.get(exit_code, f"unknown rsync error (exit code {exit_code})")
+
+    # Augment with common stderr patterns when the exit code is generic.
+    stderr_lower = stderr.lower()
+    if "permission denied" in stderr_lower:
+        base += " [permission denied on remote]"
+    elif "no space left on device" in stderr_lower:
+        base += " [remote disk full]"
+    elif "connection refused" in stderr_lower:
+        base += " [SSH connection refused]"
+    elif "host key verification failed" in stderr_lower:
+        base += " [SSH host key verification failed]"
+    elif "connection timed out" in stderr_lower or "connection reset" in stderr_lower:
+        base += " [network connectivity issue]"
+    elif "no such file or directory" in stderr_lower:
+        base += " [source or destination path missing]"
+
+    return base
 
 
 class SlurmActivity:
@@ -199,7 +247,12 @@ class SlurmActivity:
         else:
             sbatch_str += f"#SBATCH --cpus-per-task={resource_req.cpus}\n"
 
-        # TODO: GPU support.
+        # GPU support: config "gpus" key takes precedence (e.g. "gpu:1"),
+        # otherwise fall back to resource_req.gpus count.
+        if "gpus" in config:
+            sbatch_str += f"#SBATCH --gres=gpu:{config['gpus']}\n"
+        elif resource_req.gpus > 0:
+            sbatch_str += f"#SBATCH --gres=gpu:{resource_req.gpus}\n"
 
         # Add #SBATCH --array if using job array
         # CMD should already include singularity handling.
@@ -424,23 +477,134 @@ class SlurmActivity:
     async def rsync(self, local_path, remote_path, upload):
         remote_path_full = f"{self.user}@{self.xfer_addr}:{remote_path}"
         ssh_cmd = self.ssh_transport_cmd()
+        direction = "upload" if upload else "download"
 
         if upload:
             if self.debug_mode:
                 self.sudo_exec_cmd(f"chown -R {self.user} {os.path.dirname(remote_path)}")
-            print(f"rsync -av -e '{ssh_cmd}' {local_path} {remote_path_full}")
             await self.exec_cmd(f"mkdir -p {os.path.dirname(remote_path)}")
-            out = await cmd_no_output(f"rsync -av -e '{ssh_cmd}' {local_path} {remote_path_full}")
+            rsync_cmd = f"rsync -av --stats -e '{ssh_cmd}' {local_path} {remote_path_full}"
         else:
             if self.debug_mode:
                 self.sudo_exec_cmd(f"chown -R {self.user} {remote_path}")
-            print(f"rsync -av -e '{ssh_cmd}' {remote_path_full} {local_path}")
             os.makedirs(os.path.dirname(local_path), exist_ok=True)
-            async with self.rsync_semaphore:
-                out = await cmd_no_output(f"rsync -av -e '{ssh_cmd}' {remote_path_full} {local_path}")
+            rsync_cmd = f"rsync -av --stats -e '{ssh_cmd}' {remote_path_full} {local_path}"
 
-        if out is None:
-            raise ApplicationError(f"rsync failed")
+        print(f"rsync {direction}: {rsync_cmd}")
+        t0 = time.monotonic()
+
+        async def _run_rsync():
+            process = await asyncio.create_subprocess_shell(
+                rsync_cmd,
+                stdout=asyncio.subprocess.PIPE,
+                stderr=asyncio.subprocess.PIPE,
+            )
+            stdout, stderr = await process.communicate()
+            return process.returncode, stdout.decode("utf-8"), stderr.decode("utf-8")
+
+        if upload:
+            returncode, stdout, stderr = await _run_rsync()
+        else:
+            async with self.rsync_semaphore:
+                returncode, stdout, stderr = await _run_rsync()
+
+        elapsed = time.monotonic() - t0
+
+        if returncode != 0:
+            classification = classify_rsync_error(returncode, stderr)
+            # Truncate stderr to last 500 chars for readability in logs.
+            stderr_tail = stderr[-500:] if len(stderr) > 500 else stderr
+            error_msg = (
+                f"rsync {direction} failed: {classification}\n"
+                f"  exit_code={returncode}\n"
+                f"  local_path={local_path}\n"
+                f"  remote_path={remote_path}\n"
+                f"  remote_host={self.xfer_addr}:{self.xfer_port}\n"
+                f"  elapsed={elapsed:.1f}s\n"
+                f"  stderr={stderr_tail.strip()}"
+            )
+            print(error_msg)
+            raise ApplicationError(
+                error_msg,
+                # Permission, disk-full, and SSH issues are non-retryable config problems.
+                non_retryable=(returncode in (1, 3, 5, 255)),
+            )
+
+        print(f"rsync {direction} ok: {local_path} elapsed={elapsed:.1f}s")
+
+    @activity.defn
+    async def validate_transfer_connectivity(self, remote_storage_dir: str) -> str:
+        """Pre-flight check: verify SSH connectivity and remote storage is usable.
+
+        Returns a short status string on success. Raises ApplicationError with
+        a diagnosable message on failure.
+        """
+        checks_passed = []
+
+        # 1. SSH connectivity to login node
+        ssh_out = await self.exec_cmd("echo __ssh_ok__")
+        if ssh_out is None or "__ssh_ok__" not in ssh_out:
+            raise ApplicationError(
+                f"SSH connectivity check failed: cannot execute commands on "
+                f"{self.user}@{self.ip_addr}:{self.ssh_port}",
+                non_retryable=True,
+            )
+        checks_passed.append("ssh_login")
+
+        # 2. rsync reachability to transfer endpoint (may differ from login)
+        ssh_cmd = self.ssh_transport_cmd()
+        rsync_test_cmd = (
+            f"rsync --dry-run -e '{ssh_cmd}' "
+            f"{self.user}@{self.xfer_addr}:/dev/null /dev/null"
+        )
+        process = await asyncio.create_subprocess_shell(
+            rsync_test_cmd,
+            stdout=asyncio.subprocess.PIPE,
+            stderr=asyncio.subprocess.PIPE,
+        )
+        _, stderr = await process.communicate()
+        if process.returncode not in (0, 23):
+            # exit 23 = partial transfer is acceptable for a dry-run probe
+            raise ApplicationError(
+                f"rsync connectivity check failed to transfer endpoint "
+                f"{self.xfer_addr}:{self.xfer_port}: "
+                f"exit_code={process.returncode} stderr={stderr.decode()[:300]}",
+                non_retryable=True,
+            )
+        checks_passed.append("rsync_transfer_endpoint")
+
+        # 3. Remote storage directory is writable
+        probe_path = os.path.join(remote_storage_dir, ".scheduler_probe")
+        write_check = await self.exec_cmd(
+            f"touch {probe_path} && rm -f {probe_path} && echo __write_ok__"
+        )
+        if write_check is None or "__write_ok__" not in write_check:
+            raise ApplicationError(
+                f"Remote storage dir {remote_storage_dir} is not writable by "
+                f"{self.user}@{self.ip_addr}",
+                non_retryable=True,
+            )
+        checks_passed.append("remote_storage_writable")
+
+        # 4. Check available disk space (warn if < 10 GB)
+        df_out = await self.exec_cmd(
+            f"df -BG {remote_storage_dir} | tail -1 | awk '{{print $4}}'"
+        )
+        if df_out is not None:
+            try:
+                avail_gb = int(df_out.replace("G", ""))
+                if avail_gb < 10:
+                    print(
+                        f"WARNING: Remote storage {remote_storage_dir} has only "
+                        f"{avail_gb}GB free — large transfers may fail"
+                    )
+                checks_passed.append(f"disk_space={avail_gb}GB")
+            except (ValueError, TypeError):
+                checks_passed.append("disk_space=unknown")
+
+        status = f"pre-flight ok: {', '.join(checks_passed)}"
+        print(status)
+        return status
 
     @activity.defn
     async def upload_to_slurm_login_node(self, params: SlurmFileUploadParams):
