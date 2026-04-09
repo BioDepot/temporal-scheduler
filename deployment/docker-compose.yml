@@ -105,6 +105,7 @@ services:
             - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
             - SCHED_STORAGE_DIR=/data/sched_storage
             - TEMPORAL_ENDPOINT_URL=temporal:7233
+            - BWB_SINGULARITY_EXTRA_BINDS=${BWB_SINGULARITY_EXTRA_BINDS:-}
         depends_on:
             - temporal
         command: bash -c "sleep 10 && poetry run python bwb/scheduling_service/worker.py scheduler"
@@ -125,6 +126,7 @@ services:
             - MINIO_SECRET_KEY=${MINIO_SECRET_KEY}
             - SCHED_STORAGE_DIR=/data/sched_storage
             - TEMPORAL_ENDPOINT_URL=temporal:7233
+            - BWB_SINGULARITY_EXTRA_BINDS=${BWB_SINGULARITY_EXTRA_BINDS:-}
         depends_on:
             - temporal
         command: bash -c "sleep 10 && poetry run python bwb/scheduling_service/worker.py regular --queue worker1 --ram ${WORKER_RAM} --cpu_cores ${WORKER_CPUS} --gpus ${WORKER_GPUS}"

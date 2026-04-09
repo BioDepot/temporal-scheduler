@@ -1,0 +1,16 @@
+services:
+  # Example override file for exposing extra host paths to Singularity jobs.
+  #
+  # Usage (from deployment/):
+  #   docker compose -f docker-compose.yml -f docker-compose.extra-binds.example.yml up -d
+  #
+  # Also set BWB_SINGULARITY_EXTRA_BINDS in deployment/.env to match.
+  bwb-sched-worker:
+    volumes:
+      - /storage:/storage:ro
+      # - /tmp/a375_5prime_fixture:/tmp/a375_5prime_fixture:ro
+
+  bwb-regular-worker:
+    volumes:
+      - /storage:/storage:ro
+      # - /tmp/a375_5prime_fixture:/tmp/a375_5prime_fixture:ro

@@ -17,6 +17,29 @@
     docker compose up
     ```
 
+## Extra host bind mounts for Singularity jobs (optional)
+
+By default, local executor jobs run Singularity with only the per-run workflow
+binds for:
+
+- `/tmp`
+- `/data`
+
+If your workflow command arguments reference other absolute paths (for example
+`/storage/...` genome indices), those paths must be visible **inside the worker
+container** and also passed through to Singularity.
+
+1. Set `BWB_SINGULARITY_EXTRA_BINDS` in `deployment/.env` (format:
+   `host_path:container_path[:ro]` entries separated by `;`).
+
+2. Mount the same host paths into the worker containers. A simple way is to use
+   an override file:
+
+```bash
+cd deployment
+docker compose -f docker-compose.yml -f docker-compose.extra-binds.example.yml up -d
+```
+
 ## Optional Setting 
 - running with minio instance
     ```bash

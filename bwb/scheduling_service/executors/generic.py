@@ -13,6 +13,7 @@ from dotenv import load_dotenv
 from typing import Dict
 from temporalio import activity
 
+from bwb.scheduling_service.executors.bind_mounts import singularity_extra_bind_cli_fragments
 from bwb.scheduling_service.scheduler_types import CmdFiles
 
 
@@ -368,6 +369,7 @@ def get_local_sif_path(sif_basename, image_dir):
 def get_container_cmd(image_name, cmd, volumes, use_singularity,
                       use_gpu=False, override_ept=False, show_cmd=False,
                       rm=True, name=None, image_dir=None):
+    extra_sing, extra_docker = singularity_extra_bind_cli_fragments()
     con_cmd = None
     if use_singularity:
         # TODO: This is horrible, generate cmds activity should just return envs as
@@ -389,7 +391,7 @@ def get_container_cmd(image_name, cmd, volumes, use_singularity,
         # This needs a more robust fix.
         con_cmd = (f"{singularity_envs} singularity exec {gpu_flag} -p -i --writable-tmpfs --pwd / --cleanenv "
                    f"-B {volumes['/tmp']}:/tmp "
-                   f"-B {volumes['/data']}:/data {local_sif_path} {singularity_cmd}")
+                   f"-B {volumes['/data']}:/data{extra_sing} {local_sif_path} {singularity_cmd}")
     else:
         con_cmd = "docker run "
         if rm:
@@ -401,7 +403,10 @@ def get_container_cmd(image_name, cmd, volumes, use_singularity,
         if use_gpu:
             con_cmd += "--gpus all "
 
-        con_cmd += f"-v {volumes['/tmp']}:/tmp -v {volumes['/data']}:/data {image_name} {cmd}"
+        con_cmd += (
+            f"-v {volumes['/tmp']}:/tmp -v {volumes['/data']}:/data"
+            f"{extra_docker} {image_name} {cmd}"
+        )
     return con_cmd
 
 
