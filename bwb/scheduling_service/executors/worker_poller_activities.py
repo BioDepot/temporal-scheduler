@@ -26,7 +26,7 @@ async def assign_workers(params: AssignWorkersParams) -> AssignWorkersResult:
             for cmd_id, request in requests_by_cmd_id.items():
                 if node_id in serviced_reqs and cmd_id in serviced_reqs[node_id]:
                     continue
-                if request.cpus <= remaining_cpu and request.mem_mb <= remaining_mem and request.gpus <= request.gpus:
+                if request.cpus <= remaining_cpu and request.mem_mb <= remaining_mem and request.gpus <= remaining_gpu:
                     serviced_reqs[node_id][cmd_id] = worker.queue_id
                     remaining_cpu -= request.cpus
                     remaining_gpu -= request.gpus

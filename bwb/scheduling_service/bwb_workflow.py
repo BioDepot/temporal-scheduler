@@ -662,6 +662,14 @@ class BwbWorkflow:
         if "slurm" in self.executors:
             await self.executors["slurm"].ensure_child_workflow_is_initiated()
 
+        # Start the local WorkerPoller before build_node_images so
+        # POST /add_worker_to_workflow can signal the child while images
+        # build. Otherwise child_workflow_started stays false until the first
+        # resource allocation after image build, and clients may time out or
+        # workers register too late for the first assign_workers iteration.
+        if "local" in self.executors:
+            await self.executors["local"].ensure_child_workflow_is_initiated()
+
         await self.build_node_images()
 
         start_node_id = self.graph_manager.get_start_node()
