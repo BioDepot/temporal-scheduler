@@ -16,10 +16,15 @@ async def build_sif_locally(docker_img, volumes, local_image_dir, sif_path, ept_
     tar_base = str(uuid.uuid4())
     san_img_name = docker_img.replace("/", ".")
     tar_path = os.path.join(local_image_dir, tar_base + ".tar")
+    # Prefer pulling so the host daemon has the requested image, but tolerate
+    # registries where tags are not published (common for local/dev images).
+    # If pull fails, proceed only when the image is already present locally.
     if await cmd_no_output(f"docker pull {docker_img}") is None:
-        return {
-            "success": False
-        }
+        if await cmd_no_output(f"docker image inspect {docker_img}") is None:
+            return {
+                "success": False
+            }
+        print(f"WARNING: docker pull failed for {docker_img}; using existing local image")
 
     copy_success = await copy_docker_dir(docker_img, volumes, "/root")
     if not copy_success:
