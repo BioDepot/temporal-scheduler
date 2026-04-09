@@ -196,6 +196,12 @@ class GraphManager:
 
     def add_node(self, node) -> None:
         node_id = node["id"]
+        # Ensure isolated/source-only nodes appear in the topo sort.
+        # ``toposort_flatten(self.predecessors)`` only includes keys present in
+        # the dependency dict, so we must create empty predecessor/successor
+        # entries even when the node has no links.
+        _ = self.predecessors[node_id]
+        _ = self.successors[node_id]
         params = node["parameters"]
         self.parameters[node_id] = params
         self.arg_types[node_id] = node["arg_types"]
