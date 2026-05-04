@@ -1,0 +1,35 @@
+{
+  "schema": "biodepot.resolved_workflow/v1",
+  "resolved_workflow": {
+    "run_id": "resolved-0000",
+    "use_local_storage": true,
+    "nodes": [
+      {
+        "id": 0,
+        "title": "ResolvedEmit",
+        "description": "Resolved single-node workflow for internal SLURM harness tests",
+        "image_name": "python:3.11-slim",
+        "launch": {
+          "command": [
+            "python -c \"import os, pathlib; pathlib.Path('/tmp/output').mkdir(parents=True, exist_ok=True); pathlib.Path('/tmp/output/result.txt').write_text(os.environ.get('MESSAGE', 'missing'))\""
+          ],
+          "env": {
+            "MESSAGE": "resolved-hello"
+          }
+        },
+        "resources": {
+          "cores": 2,
+          "mem_mb": 1024,
+          "gpus": 0
+        },
+        "scheduler_controls": {
+          "useScheduler": true,
+          "useGpu": false,
+          "nWorkers": 1,
+          "slots": 1
+        }
+      }
+    ],
+    "links": []
+  }
+}
