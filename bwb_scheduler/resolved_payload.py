@@ -45,6 +45,23 @@ def _lower_resolved_node(node: dict[str, Any]) -> dict[str, Any]:
     if any(not isinstance(part, str) or not part.strip() for part in command):
         raise ValueError("resolved workflow launch.command entries must be non-empty strings")
 
+    # Under the 2026-06-06 v1 correction, launch.command is an array of
+    # shell command strings the executor joins with ' && ' inside a single
+    # shell invocation. The existing Python scheduler / executor expects a
+    # single shell command line, so emit a ["bash", "-c", "<joined>"] argv
+    # at the v0 boundary. Each v1 entry is already a complete shell
+    # command, so this is a join — not a render.
+    command_v0 = ["bash", "-c", " && ".join(command)]
+
+    # Image: v1 splits image_name / image_tag; v0 (the existing scheduler
+    # path) carries the combined "name:tag" string. Re-glue here.
+    image_name = node["image_name"]
+    image_tag = node.get("image_tag")
+    if image_tag:
+        image_v0 = f"{image_name}:{image_tag}"
+    else:
+        image_v0 = image_name
+
     use_scheduler = bool(scheduler_controls.get("useScheduler", True))
     use_gpu = bool(scheduler_controls.get("useGpu", resources.get("gpus", 0) > 0))
     iterate = bool(scheduler_controls.get("iterate", False))
@@ -54,8 +71,8 @@ def _lower_resolved_node(node: dict[str, Any]) -> dict[str, Any]:
         "id": int(node["id"]),
         "title": node.get("title", f"node-{node['id']}"),
         "description": node.get("description", node.get("title", f"node-{node['id']}")),
-        "image_name": node["image_name"],
-        "command": command,
+        "image_name": image_v0,
+        "command": command_v0,
         # Transitional compatibility path: no BWB arg rendering required.
         "arg_types": {},
         "parameters": _default_parameters(
@@ -115,18 +132,23 @@ def _lower_link(link: dict[str, Any]) -> dict[str, Any]:
 
 
 def lower_resolved_workflow_to_workflow_def(resolved_workflow: dict[str, Any]) -> dict[str, Any]:
+    # Under the 2026-06-06 v1 correction, nodes is an object keyed by the
+    # decimal-string node id; iterate values in ascending-id order so the
+    # lowered v0 list is stable / reproducible.
     nodes = resolved_workflow.get("nodes")
-    if not isinstance(nodes, list) or not nodes:
-        raise ValueError("resolved_workflow must contain a non-empty `nodes` list")
+    if not isinstance(nodes, dict) or not nodes:
+        raise ValueError("resolved_workflow must contain a non-empty `nodes` object keyed by node id")
 
     links = resolved_workflow.get("links") or []
     if not isinstance(links, list):
         raise ValueError("resolved_workflow `links` must be a list when provided")
 
+    nodes_in_order = [nodes[k] for k in sorted(nodes, key=lambda s: int(s))]
+
     return {
         "run_id": resolved_workflow["run_id"],
         "use_local_storage": bool(resolved_workflow.get("use_local_storage", True)),
-        "nodes": [_lower_resolved_node(node) for node in nodes],
+        "nodes": [_lower_resolved_node(node) for node in nodes_in_order],
         "links": [_lower_link(link) for link in links],
     }
 

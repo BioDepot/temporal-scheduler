@@ -17,17 +17,21 @@ SALMON_RESOLVED_FIXTURE = Path(
 
 
 def _resolved_payload():
+    # 2026-06-06 v1 correction shape: nodes is a dict keyed by string id;
+    # image_name and image_tag are separate; launch.command is an array of
+    # shell command strings.
     return {
         "schema": RESOLVED_WORKFLOW_SCHEMA_ID,
         "resolved_workflow": {
             "run_id": "resolved-0000",
             "use_local_storage": True,
-            "nodes": [
-                {
+            "nodes": {
+                "0": {
                     "id": 0,
                     "title": "ResolvedEmit",
                     "description": "resolved smoke",
-                    "image_name": "python:3.11-slim",
+                    "image_name": "python",
+                    "image_tag": "3.11-slim",
                     "launch": {
                         "command": ["python -c \"print('hello')\""],
                         "env": {"MESSAGE": "resolved-hello"},
@@ -40,7 +44,7 @@ def _resolved_payload():
                         "slots": 1,
                     },
                 }
-            ],
+            },
             "links": [],
         },
     }
@@ -58,7 +62,13 @@ def test_lowers_resolved_node_to_stub_free_workflow_def():
     assert len(workflow_def["nodes"]) == 1
 
     node = workflow_def["nodes"][0]
-    assert node["command"] == ["python -c \"print('hello')\""]
+    # Per the 2026-06-06 v1 correction, launch.command is an array of shell
+    # command strings; the bridge joins with ' && ' inside a bash -c wrap
+    # for the existing v0 executor's single-argv expectation.
+    assert node["command"] == ["bash", "-c", "python -c \"print('hello')\""]
+    # image_name and image_tag are glued back to "name:tag" at the v0
+    # boundary because the existing v0 executor carries the combined form.
+    assert node["image_name"] == "python:3.11-slim"
     assert node["arg_types"] == {}
     assert node["required_parameters"] == []
     assert node["options_checked"] == {}
@@ -108,15 +118,14 @@ def test_link_names_lowered_to_v0_channel_names():
     lower to a v0 link with source_channel / sink_channel and no
     leftover v1 keys."""
     payload = _resolved_payload()
-    payload["resolved_workflow"]["nodes"].append(
-        {
-            "id": 1,
-            "title": "Sink",
-            "image_name": "python:3.11-slim",
-            "launch": {"command": ["true"]},
-            "resources": {"cores": 1, "mem_mb": 512, "gpus": 0},
-        }
-    )
+    payload["resolved_workflow"]["nodes"]["1"] = {
+        "id": 1,
+        "title": "Sink",
+        "image_name": "python",
+        "image_tag": "3.11-slim",
+        "launch": {"command": ["true"]},
+        "resources": {"cores": 1, "mem_mb": 512, "gpus": 0},
+    }
     payload["resolved_workflow"]["links"].append(
         {
             "source": 0,
@@ -185,22 +194,24 @@ def test_link_lowering_preserves_unrelated_keys():
     workflow = {
         "run_id": "test-link-keys",
         "use_local_storage": True,
-        "nodes": [
-            {
+        "nodes": {
+            "0": {
                 "id": 0,
                 "title": "A",
-                "image_name": "alpine:latest",
+                "image_name": "alpine",
+                "image_tag": "latest",
                 "launch": {"command": ["true"]},
                 "resources": {"cores": 1, "mem_mb": 512, "gpus": 0},
             },
-            {
+            "1": {
                 "id": 1,
                 "title": "B",
-                "image_name": "alpine:latest",
+                "image_name": "alpine",
+                "image_tag": "latest",
                 "launch": {"command": ["true"]},
                 "resources": {"cores": 1, "mem_mb": 512, "gpus": 0},
             },
-        ],
+        },
         "links": [
             {
                 "source": 0,
