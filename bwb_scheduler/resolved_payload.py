@@ -1,10 +1,25 @@
 from __future__ import annotations
 
+import warnings
 from copy import deepcopy
 from typing import Any
 
 
 RESOLVED_WORKFLOW_SCHEMA_ID = "biodepot.resolved_workflow/v1"
+
+
+class ResolvedWorkflowAsyncWarning(UserWarning):
+    """Raised when a v1 payload sets node-level `async` / `barrier_for`.
+
+    These fields are lowered to the v0 `graph_manager` async-barrier
+    implementation, which is an independent runtime-async engine — its
+    behavior is NOT guaranteed to match another v1 scheduler's async
+    (e.g. Patrick's Go scheduler). Per the 2026-06-07 deferred-expansion
+    design note, v1's portable path is static pre-expansion; node-level
+    async in v1 is a transitional accommodation, not the end state. The
+    warning makes that boundary explicit at the lowering point rather
+    than letting two divergent async engines silently disagree.
+    """
 
 
 def is_resolved_workflow_payload(payload: dict[str, Any]) -> bool:
@@ -144,6 +159,32 @@ def lower_resolved_workflow_to_workflow_def(resolved_workflow: dict[str, Any]) -
         raise ValueError("resolved_workflow `links` must be a list when provided")
 
     nodes_in_order = [nodes[k] for k in sorted(nodes, key=lambda s: int(s))]
+
+    # Flag node-level async / barrier_for. The bridge still passes these
+    # through to the v0 graph_manager (which implements async-barrier
+    # scatter-gather), so async v1 payloads continue to run on the Python
+    # path — but the behavior is the v0 engine's, not a portable static
+    # contract, and is not guaranteed to match another v1 scheduler. We
+    # warn rather than reject so existing v0 async capability is not
+    # broken; see the 2026-06-07 deferred-expansion design note.
+    async_node_ids = sorted(
+        int(n["id"])
+        for n in nodes_in_order
+        if n.get("async") or n.get("barrier_for") is not None
+    )
+    if async_node_ids:
+        warnings.warn(
+            "resolved_workflow/v1 payload sets node-level async/barrier_for on "
+            f"node id(s) {async_node_ids}. These are lowered to the v0 "
+            "graph_manager async-barrier engine, whose runtime-async semantics "
+            "are NOT guaranteed to match another v1 scheduler (e.g. the Go "
+            "scheduler). Per the 2026-06-07 deferred-expansion design note, the "
+            "portable v1 path is static pre-expansion; node-level async in v1 is "
+            "transitional. Pre-expand the fan-out into concrete nodes for "
+            "scheduler-independent behavior.",
+            ResolvedWorkflowAsyncWarning,
+            stacklevel=2,
+        )
 
     return {
         "run_id": resolved_workflow["run_id"],

@@ -3,8 +3,11 @@ from pathlib import Path
 
 import pytest
 
+import warnings
+
 from bwb_scheduler.resolved_payload import (
     RESOLVED_WORKFLOW_SCHEMA_ID,
+    ResolvedWorkflowAsyncWarning,
     is_resolved_workflow_payload,
     lower_resolved_workflow_to_workflow_def,
     normalize_start_workflow_payload,
@@ -228,3 +231,58 @@ def test_link_lowering_preserves_unrelated_keys():
     assert link["extra_metadata"] == "preserve_me", (
         "lowering shim discarded an unrelated key during link rewrite"
     )
+
+
+# ── async / barrier_for transitional warning ─────────────────────────────
+#
+# The bridge passes node-level async / barrier_for through to the v0
+# graph_manager (which implements async-barrier scatter-gather), so async
+# v1 payloads still run on the Python path. But the behavior is the v0
+# engine's — not a portable static contract — so the bridge warns. Per the
+# 2026-06-07 deferred-expansion design note, the portable v1 path is static
+# pre-expansion; node-level async in v1 is transitional. We warn rather than
+# reject so existing v0 async capability is not broken.
+
+
+def test_async_node_emits_transitional_warning():
+    payload = _resolved_payload()
+    payload["resolved_workflow"]["nodes"]["0"]["async"] = True
+    with pytest.warns(ResolvedWorkflowAsyncWarning):
+        lower_resolved_workflow_to_workflow_def(payload["resolved_workflow"])
+
+
+def test_barrier_for_node_emits_transitional_warning():
+    payload = _resolved_payload()
+    # add a second node that gathers for node 0
+    payload["resolved_workflow"]["nodes"]["1"] = {
+        "id": 1,
+        "title": "Gather",
+        "image_name": "alpine",
+        "image_tag": "latest",
+        "launch": {"command": ["true"]},
+        "resources": {"cores": 1, "mem_mb": 512, "gpus": 0},
+        "barrier_for": 0,
+    }
+    with pytest.warns(ResolvedWorkflowAsyncWarning):
+        lower_resolved_workflow_to_workflow_def(payload["resolved_workflow"])
+
+
+def test_async_payload_still_lowers_and_passes_field_through():
+    """Warn, don't reject: the v0 graph_manager implements async, so the
+    field must still reach the lowered v0 node."""
+    payload = _resolved_payload()
+    payload["resolved_workflow"]["nodes"]["0"]["async"] = True
+    with pytest.warns(ResolvedWorkflowAsyncWarning):
+        wd = lower_resolved_workflow_to_workflow_def(payload["resolved_workflow"])
+    assert wd["nodes"][0]["async"] is True, (
+        "async must still pass through to v0 — the bridge warns, it does not "
+        "strip the field (the v0 graph_manager consumes it)."
+    )
+
+
+def test_static_payload_does_not_warn():
+    """A pre-expanded (no async / barrier_for) payload must lower silently."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", ResolvedWorkflowAsyncWarning)
+        # Should not raise: the default _resolved_payload sets no async.
+        lower_resolved_workflow_to_workflow_def(_resolved_payload()["resolved_workflow"])
