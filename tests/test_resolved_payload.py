@@ -233,6 +233,38 @@ def test_link_lowering_preserves_unrelated_keys():
     )
 
 
+def test_control_link_metadata_survives_v1_to_v0_lowering():
+    payload = _resolved_payload()
+    payload["resolved_workflow"]["nodes"]["1"] = {
+        "id": 1,
+        "title": "ControlSink",
+        "image_name": "python",
+        "image_tag": "3.11-slim",
+        "launch": {"command": ["true"]},
+        "resources": {"cores": 1, "mem_mb": 512, "gpus": 0},
+    }
+    payload["resolved_workflow"]["links"].append(
+        {
+            "source": 0,
+            "sink": 1,
+            "source_output": "__bwb_trigger_out",
+            "sink_input": "__bwb_trigger_in",
+            "edge_kind": "control",
+            "payload_semantics": "none",
+            "control_only": True,
+        }
+    )
+
+    workflow_def = lower_resolved_workflow_to_workflow_def(payload["resolved_workflow"])
+    link = workflow_def["links"][0]
+
+    assert link["source_channel"] == "__bwb_trigger_out"
+    assert link["sink_channel"] == "__bwb_trigger_in"
+    assert link["edge_kind"] == "control"
+    assert link["payload_semantics"] == "none"
+    assert link["control_only"] is True
+
+
 # ── async / barrier_for transitional warning ─────────────────────────────
 #
 # The bridge passes node-level async / barrier_for through to the v0

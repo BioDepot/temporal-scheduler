@@ -9,6 +9,14 @@ from bwb.scheduling_service.cmd_queue import CmdSet, CmdQueue
 from bwb.scheduling_service.scheduler_types import WorkerResourceAlloc, CmdOutput, CmdQueueId, CmdObj
 
 
+def link_is_control_only(link: Dict) -> bool:
+    return (
+        bool(link.get("control_only"))
+        or link.get("edge_kind") == "control"
+        or link.get("payload_semantics") == "none"
+    )
+
+
 def compute_reachability(successors, predecessors):
     def dfs(node, links, reach):
         if node in reach:
@@ -95,9 +103,12 @@ class GraphManager:
         for link in links:
             src = link["source"]
             dst = link["sink"]
-            inp = link["source_channel"]
-            out = link["sink_channel"]
-            self.add_link(src, dst, inp, out)
+            if link_is_control_only(link):
+                self.add_control_link(src, dst)
+            else:
+                inp = link["source_channel"]
+                out = link["sink_channel"]
+                self.add_link(src, dst, inp, out)
 
         self.top_sort = toposort_flatten(self.predecessors)
         ancestors, descendants = compute_reachability(self.successors, self.predecessors)
@@ -151,6 +162,10 @@ class GraphManager:
         self.channels[dst][src].append((inp, out))
         self.receiving_nodes[src][inp].add(dst)
         self.sending_nodes[dst][out].add(src)
+
+    def add_control_link(self, src: int, dst: int) -> None:
+        self.successors[src].add(dst)
+        self.predecessors[dst].add(src)
 
     def add_dummy_link(self, src: int, dst: int) -> None:
         """
