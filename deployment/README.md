@@ -25,6 +25,23 @@ The script creates `deployment/.env.local` from
 inside the worker containers; the local worker uses the host Docker socket, so
 job container bind paths must resolve on the host.
 
+To add an SSH Docker executor worker to the local Temporal stack, start the
+stack above and then run:
+
+```bash
+SSH_DOCKER_HOST=10.159.4.53 \
+SSH_DOCKER_USER=lhhung \
+SSH_DOCKER_STORAGE_DIR=/tmp/morphic-scheduler-ssh \
+bash scripts/local_scheduler_ssh_docker_worker_up.sh
+```
+
+The worker listens on `SSH_DOCKER_USER@SSH_DOCKER_HOST:SSH_DOCKER_PORT` and
+uses the host SSH keys from `${HOME}/.ssh` by default. Stop it with:
+
+```bash
+bash scripts/local_scheduler_ssh_docker_worker_down.sh
+```
+
 ## How to start
 1. Copy `deployment/.env.example` to `deployment/.env`, then update the keys `WORKER_RAM`, `WORKER_CPUS`, and `WORKER_GPUS` if needed.
     ```

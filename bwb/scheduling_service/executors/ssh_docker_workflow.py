@@ -5,7 +5,6 @@ started via the Temporal client.  Works for any Docker image that reads
 inputs from a work directory and writes outputs to a subdirectory.
 """
 
-import uuid
 from dataclasses import dataclass
 from datetime import timedelta
 from typing import Dict, List, Optional
@@ -13,10 +12,11 @@ from typing import Dict, List, Optional
 from temporalio import workflow
 from temporalio.common import RetryPolicy
 
-from bwb.scheduling_service.executors.ssh_docker_activity import (
-    SshDockerActivity,
-    SshDockerRunParams,
-)
+with workflow.unsafe.imports_passed_through():
+    from bwb.scheduling_service.executors.ssh_docker_activity import (
+        SshDockerActivity,
+        SshDockerRunParams,
+    )
 
 
 @dataclass
@@ -50,12 +50,17 @@ class RemoteDockerWorkflow:
 
     @workflow.run
     async def run(self, params: RemoteDockerJobParams) -> RemoteDockerJobResult:
-        job_id = f"rdjob_{uuid.uuid4().hex[:8]}"
+        workflow_id = workflow.info().workflow_id
+        safe_workflow_id = "".join(ch if ch.isalnum() else "_" for ch in workflow_id)
+        job_id = f"rdjob_{safe_workflow_id[-48:]}"
 
         # 1. Pre-flight validation
         await workflow.execute_activity(
             SshDockerActivity.validate_connectivity,
-            "",  # uses the activity instance's config.storage_dir
+            {
+                "remote_storage_dir": "",  # uses the activity instance's config.storage_dir
+                "use_gpu": params.use_gpu,
+            },
             start_to_close_timeout=timedelta(seconds=60),
             retry_policy=RetryPolicy(maximum_attempts=1),
         )
@@ -72,8 +77,8 @@ class RemoteDockerWorkflow:
         # 3. Upload inputs — remap local paths to remote work dir
         remote_file_map = {}
         for local_path, rel_path in params.input_files.items():
-            import os
-            remote_file_map[local_path] = os.path.join(work_dir, rel_path)
+            clean_rel_path = str(rel_path or "").strip("/")
+            remote_file_map[local_path] = work_dir.rstrip("/") if clean_rel_path in {"", "."} else f"{work_dir.rstrip('/')}/{clean_rel_path}"
 
         if remote_file_map:
             await workflow.execute_activity(

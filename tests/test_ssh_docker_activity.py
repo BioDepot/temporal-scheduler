@@ -234,6 +234,40 @@ class TestValidateConnectivity:
         assert "docker" in result
         assert "gpu" in result
 
+    def test_cpu_job_skips_gpu_check(self, monkeypatch):
+        act = _make_activity()
+        call_log = []
+
+        async def fake_exec_ssh(cmd, timeout=30):
+            call_log.append(cmd)
+            if "echo __ssh_ok__" in cmd:
+                return (0, "__ssh_ok__", "")
+            if "docker info" in cmd:
+                return (0, "abc123", "")
+            if "touch" in cmd:
+                return (0, "", "")
+            if "df -BG" in cmd:
+                return (0, "100G", "")
+            return (0, "", "")
+
+        async def fake_subprocess_shell(cmd, **kwargs):
+            mock_proc = MagicMock()
+            mock_proc.returncode = 0
+
+            async def communicate():
+                return (b"", b"")
+
+            mock_proc.communicate = communicate
+            return mock_proc
+
+        monkeypatch.setattr(act, "_exec_ssh", fake_exec_ssh)
+        monkeypatch.setattr(asyncio, "create_subprocess_shell", fake_subprocess_shell)
+
+        result = asyncio.run(act.validate_connectivity({"remote_storage_dir": "/remote/staging", "use_gpu": False}))
+
+        assert "gpu=skipped" in result
+        assert not any("nvidia-smi" in cmd for cmd in call_log)
+
     def test_ssh_failure(self, monkeypatch):
         act = _make_activity()
 
@@ -374,10 +408,34 @@ class TestRunRemoteDocker:
         assert "docker" in cmd
         assert "run" in cmd
         assert "--rm" in cmd
-        assert '--gpus "device=0"' in cmd
+        assert "--gpus device=0" in cmd
         assert "biodepot/cellbender:0.3.2" in cmd
         assert "cellbender" in cmd
         assert "remove-background" in cmd
+
+    def test_quotes_shell_command_args(self, monkeypatch):
+        act = _make_activity()
+        captured_cmds = []
+
+        async def fake_exec_ssh(cmd, timeout=30):
+            captured_cmds.append(cmd)
+            return (0, "ok\n", "")
+
+        monkeypatch.setattr(act, "_exec_ssh", fake_exec_ssh)
+
+        params = SshDockerRunParams(
+            image="alpine:3.20",
+            cmd=["sh", "-lc", "set -e; mkdir -p output; cat input.txt > output/result.txt"],
+            work_dir="/remote/staging/job/work",
+            input_files={},
+            output_dir="/remote/staging/job/work/output",
+            local_output_dir="/local/output",
+            use_gpu=False,
+        )
+        asyncio.run(act.run_remote_docker(params))
+
+        cmd = captured_cmds[0]
+        assert "alpine:3.20 sh -lc 'set -e; mkdir -p output; cat input.txt > output/result.txt'" in cmd
 
     def test_gpu_all_when_no_device(self, monkeypatch):
         act = _make_activity()

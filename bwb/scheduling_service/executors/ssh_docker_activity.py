@@ -18,9 +18,10 @@ long-running paramiko connection is needed.
 
 import asyncio
 import os
+import shlex
 import time
 from dataclasses import dataclass
-from typing import Dict, List, Optional
+from typing import Any, Dict, List, Optional
 
 from temporalio import activity
 from temporalio.exceptions import ApplicationError
@@ -160,9 +161,13 @@ class SshDockerActivity:
     # ------------------------------------------------------------------
 
     @activity.defn
-    async def validate_connectivity(self, remote_storage_dir: str) -> str:
+    async def validate_connectivity(self, remote_storage_dir: str | Dict[str, Any]) -> str:
         """Pre-flight: check SSH, rsync, Docker, GPU availability."""
-        remote_storage_dir = remote_storage_dir or self.config.storage_dir
+        use_gpu = True
+        if isinstance(remote_storage_dir, dict):
+            use_gpu = bool(remote_storage_dir.get("use_gpu", True))
+            remote_storage_dir = str(remote_storage_dir.get("remote_storage_dir") or "")
+        remote_storage_dir = str(remote_storage_dir or self.config.storage_dir)
         checks = []
 
         # 1. SSH
@@ -205,19 +210,22 @@ class SshDockerActivity:
         checks.append("docker")
 
         # 4. NVIDIA runtime / GPU
-        rc, out, err = await self._exec_ssh(
-            "docker run --rm --gpus all nvidia/cuda:12.0.0-base-ubuntu22.04 nvidia-smi "
-            "--query-gpu=name,memory.total --format=csv,noheader 2>/dev/null "
-            "|| nvidia-smi --query-gpu=name,memory.total --format=csv,noheader",
-            timeout=60,
-        )
-        if rc != 0:
-            raise ApplicationError(
-                f"GPU check failed on remote: {err[:300]}",
-                non_retryable=True,
+        if use_gpu:
+            rc, out, err = await self._exec_ssh(
+                "docker run --rm --gpus all nvidia/cuda:12.0.0-base-ubuntu22.04 nvidia-smi "
+                "--query-gpu=name,memory.total --format=csv,noheader 2>/dev/null "
+                "|| nvidia-smi --query-gpu=name,memory.total --format=csv,noheader",
+                timeout=60,
             )
-        gpu_info = out.strip()
-        checks.append(f"gpu=[{gpu_info}]")
+            if rc != 0:
+                raise ApplicationError(
+                    f"GPU check failed on remote: {err[:300]}",
+                    non_retryable=True,
+                )
+            gpu_info = out.strip()
+            checks.append(f"gpu=[{gpu_info}]")
+        else:
+            checks.append("gpu=skipped")
 
         # 5. Remote storage writable
         probe = os.path.join(remote_storage_dir, ".scheduler_probe")
@@ -297,7 +305,7 @@ class SshDockerActivity:
         Raises ApplicationError on failure with diagnosable context.
         """
         docker_args = ["run", "--rm"]
-        docker_args.extend(["--user", '"$(id -u):$(id -g)"'])
+        docker_args.extend(["--user", "$(id -u):$(id -g)"])
         docker_args.extend(["-v", f"{params.work_dir}:{params.work_dir}"])
         docker_args.extend(["-w", params.work_dir])
 
@@ -305,7 +313,7 @@ class SshDockerActivity:
         gpu_device = params.gpu_device or self.config.gpu_device
         if params.use_gpu:
             if gpu_device:
-                docker_args.extend(["--gpus", f'"device={gpu_device}"'])
+                docker_args.extend(["--gpus", f"device={gpu_device}"])
             else:
                 docker_args.extend(["--gpus", "all"])
 
@@ -323,7 +331,7 @@ class SshDockerActivity:
         docker_args.append(params.image)
         docker_args.extend(params.cmd)
 
-        full_docker_cmd = "docker " + " ".join(docker_args)
+        full_docker_cmd = "docker " + " ".join(_quote_docker_arg(arg) for arg in docker_args)
         print(f"ssh-docker run: {full_docker_cmd}")
 
         t0 = time.monotonic()
@@ -385,3 +393,10 @@ class SshDockerActivity:
         rc, _, err = await self._exec_ssh(f"rm -rf {remote_dir}")
         if rc != 0:
             print(f"WARNING: cleanup of {remote_dir} failed: {err[:200]}")
+
+
+def _quote_docker_arg(value: str) -> str:
+    text = str(value)
+    if text == "$(id -u):$(id -g)":
+        return '"$(id -u):$(id -g)"'
+    return shlex.quote(text)
