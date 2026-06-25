@@ -91,6 +91,15 @@ def test_normalize_wraps_resolved_workflow_as_start_payload():
     assert payload["workflow_def"]["nodes"][0]["static_env"]["MESSAGE"] == "resolved-hello"
 
 
+def test_normalize_preserves_resolved_payload_runtime_flag():
+    payload = _resolved_payload()
+    payload["use_singularity"] = False
+
+    normalized = normalize_start_workflow_payload(payload)
+
+    assert normalized["use_singularity"] is False
+
+
 def test_normalize_preserves_existing_config_and_supports_override():
     payload = _resolved_payload()
     payload["config"] = {"executors": {"slurm": {"storage_dir": "/tmp/a"}}}

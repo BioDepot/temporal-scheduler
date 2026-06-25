@@ -164,6 +164,14 @@ async def get_scheduler_worker():
     temporal_ept = os.getenv("TEMPORAL_ENDPOINT_URL")
 
     client = await Client.connect(temporal_ept)
+    workflow_supplier = FixedSizeSlotSupplier(num_slots=20)
+    activity_supplier = FixedSizeSlotSupplier(num_slots=100)
+    local_activity_supplier = FixedSizeSlotSupplier(num_slots=100)
+    tuner = WorkerTuner.create_composite(
+        workflow_supplier=workflow_supplier,
+        activity_supplier=activity_supplier,
+        local_activity_supplier=local_activity_supplier,
+    )
     worker = Worker(
         client,
         task_queue="scheduler-queue",
@@ -172,7 +180,8 @@ async def get_scheduler_worker():
             assign_workers,
             generate_node_cmds,
             build_node_img
-        ]
+        ],
+        tuner=tuner,
     )
     print("Listening on `scheduler-queue`")
     return "scheduler-queue", worker

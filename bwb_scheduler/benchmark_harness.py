@@ -11,8 +11,16 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any
 
+from bwb_scheduler.resolved_payload import normalize_start_workflow_payload
 
-TERMINAL_WORKFLOW_STATUSES = {"Finished", "Failed"}
+
+TERMINAL_WORKFLOW_STATUSES = {
+    "Finished",
+    "Failed",
+    "Canceled",
+    "Terminated",
+    "TimedOut",
+}
 
 
 @dataclass(frozen=True)
@@ -36,13 +44,8 @@ def load_start_workflow_payload(
     config_path: str | Path | None = None,
 ) -> dict[str, Any]:
     payload = load_json(workflow_path)
-    if "workflow_def" not in payload:
-        payload = {"workflow_def": payload}
-
-    if config_path is not None:
-        payload["config"] = load_json(config_path)
-
-    return payload
+    config_override = load_json(config_path) if config_path is not None else None
+    return normalize_start_workflow_payload(payload, config_override=config_override)
 
 
 def load_manifest(path: str | Path) -> dict[str, Any]:

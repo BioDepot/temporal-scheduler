@@ -1,5 +1,30 @@
 # BWB-Schedule docker-compose files
 
+## Local scheduler stack
+
+For the first local-execution tranche, use the lightweight local stack. It
+starts Temporal, the scheduler API, the scheduler worker, and one regular local
+Docker worker. It does not start the local Slurm host, Go Slurm sidecar, or
+MinIO container.
+
+```bash
+bash scripts/local_scheduler_stack_up.sh
+python3 -m bwb_scheduler.benchmark_harness benchmarks/local_echo_manifest.json --wait-for-api-seconds 120 --poll-seconds 2 --timeout-seconds 300
+bash scripts/local_scheduler_stack_down.sh
+```
+
+Or run the startup plus smoke workflow in one command:
+
+```bash
+bash scripts/run_local_scheduler_smoke.sh
+```
+
+The script creates `deployment/.env.local` from
+`deployment/.env.local.example` if needed. Keep
+`SCHED_STORAGE_DIR` as an absolute host path that is mounted at the same path
+inside the worker containers; the local worker uses the host Docker socket, so
+job container bind paths must resolve on the host.
+
 ## How to start
 1. Copy `deployment/.env.example` to `deployment/.env`, then update the keys `WORKER_RAM`, `WORKER_CPUS`, and `WORKER_GPUS` if needed.
     ```

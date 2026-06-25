@@ -1,0 +1,16 @@
+{
+  "api_base_url": "http://localhost:8000",
+  "default_worker": {
+    "queue": "worker1",
+    "cpus": 2,
+    "mem_mb": 4096,
+    "gpus": 0
+  },
+  "benchmarks": [
+    {
+      "name": "local-echo-smoke",
+      "request_path": "../bwb/scheduling_service/test_workflows/local_echo_req.json",
+      "iterations": 1
+    }
+  ]
+}

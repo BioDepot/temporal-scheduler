@@ -88,6 +88,25 @@ of container runs identified by node / CMD set ID pairs. `status` shows how many
   unique to a particular worker. This request will allow the identified workflow to begin scheduling commands to that worker.
   (The motivations for this approach, as opposed to the standard temporal publish-subscribe model, will be described in my thesis.)
 
+For a minimal local-Docker scheduler bring-up, use:
+
+```bash
+bash scripts/local_scheduler_stack_up.sh
+python3 -m bwb_scheduler.benchmark_harness benchmarks/local_echo_manifest.json --wait-for-api-seconds 120 --poll-seconds 2 --timeout-seconds 300
+bash scripts/local_scheduler_stack_down.sh
+```
+
+The one-shot form is:
+
+```bash
+bash scripts/run_local_scheduler_smoke.sh
+```
+
+This path starts Temporal, the scheduler API, the scheduler worker, and one
+regular local worker. It submits `local_echo_req.json` with
+`use_singularity: false`, so the worker uses Docker for a small `alpine`
+workflow rather than the historical Singularity default.
+
 ```commandline
 curl -H "Content-Type: application/json" --data @bwb/scheduling_service/test_workflows/test_scheme_req.json http://localhost:8000/start_workflow && echo
 ```

@@ -5,8 +5,10 @@ import fastapi
 from fastapi import Request
 from fastapi.responses import JSONResponse
 from temporalio.client import Client
+from temporalio.service import RPCError
 from dotenv import load_dotenv
 
+from bwb_scheduler.resolved_payload import normalize_start_workflow_payload
 from bwb.scheduling_service.bwb_workflow import BwbWorkflow
 from bwb.scheduling_service.run_bwb_workflow import start_scheme
 from bwb.scheduling_service.worker import register_worker_with_workflow
@@ -21,9 +23,28 @@ if TEMPORAL_EPT is None:
 app = fastapi.FastAPI()
 
 
+def _workflow_status_from_description(description) -> dict:
+    raw_status = description.status.name if description.status is not None else "UNKNOWN"
+    status_map = {
+        "RUNNING": "Running",
+        "COMPLETED": "Finished",
+        "FAILED": "Failed",
+        "CANCELED": "Canceled",
+        "TERMINATED": "Terminated",
+        "CONTINUED_AS_NEW": "ContinuedAsNew",
+        "TIMED_OUT": "TimedOut",
+    }
+    return {
+        "workflow_status": status_map.get(raw_status, raw_status.title()),
+        "node_statuses": {},
+        "condition_results": {},
+        "status_source": "describe",
+    }
+
+
 @app.post("/start_workflow")
 async def start_workflow(req: Request):
-    data = await req.json()
+    data = normalize_start_workflow_payload(await req.json())
     client = await Client.connect(TEMPORAL_EPT)
 
     if "workflow_def" not in data:
@@ -39,7 +60,14 @@ async def start_workflow(req: Request):
     if "config" in data:
         config = data["config"]
 
-    workflow_id, run_id = await start_scheme(workflow_def, config, client, "scheduler-queue")
+    use_singularity = bool(data.get("use_singularity", True))
+    workflow_id, run_id = await start_scheme(
+        workflow_def,
+        config,
+        client,
+        "scheduler-queue",
+        use_singularity=use_singularity,
+    )
 
     return JSONResponse(
         status_code=200,
@@ -152,5 +180,12 @@ async def workflow_status(req: Request):
             }
         )
 
-    status = await handle.query(BwbWorkflow.get_status)
-    return status
+    try:
+        status = await handle.query(BwbWorkflow.get_status)
+        status["status_source"] = "query"
+        return status
+    except RPCError as exc:
+        description = await handle.describe()
+        status = _workflow_status_from_description(description)
+        status["query_error"] = str(exc)
+        return status

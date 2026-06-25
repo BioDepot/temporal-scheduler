@@ -1,0 +1,55 @@
+{
+  "use_singularity": false,
+  "workflow_def": {
+    "run_id": "local-echo-smoke",
+    "use_local_storage": true,
+    "nodes": [
+      {
+        "id": 0,
+        "title": "Local Echo",
+        "description": "Minimal local Docker scheduler smoke",
+        "image_name": "alpine:3.19",
+        "command": [
+          "sh -c 'echo local-scheduler-ok > /tmp/output/result.txt && cat /tmp/output/result.txt'"
+        ],
+        "arg_types": {},
+        "parameters": {
+          "useScheduler": true,
+          "useGpu": false,
+          "iterate": false,
+          "nWorkers": 1,
+          "runMode": 2,
+          "repeat": false,
+          "exportGraphics": false,
+          "controlAreaVisible": true,
+          "__version__": 1,
+          "inputConnectionsStore": {},
+          "triggerReady": {},
+          "runTriggers": [],
+          "iterateSettings": {
+            "iterableAttrs": [],
+            "nWorkers": 1
+          },
+          "optionsChecked": {}
+        },
+        "required_parameters": [],
+        "options_checked": {},
+        "cores": 1,
+        "mem_mb": 128,
+        "gpus": 0,
+        "slots": 1,
+        "async": false,
+        "barrier_for": null,
+        "iterate": false,
+        "iterate_settings": {
+          "iterableAttrs": [],
+          "nWorkers": 1
+        },
+        "static_env": {},
+        "port_mappings": [],
+        "port_vars": null
+      }
+    ],
+    "links": []
+  }
+}

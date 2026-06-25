@@ -161,5 +161,6 @@ cython_debug/
 .vscode/
 .specstory/
 *.swp
+deployment/.env.local
 benchmarks/generated/
 benchmarks/results/

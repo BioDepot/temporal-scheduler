@@ -32,6 +32,19 @@ def test_load_start_workflow_payload_preserves_request_payload_and_adds_config()
     assert payload["config"]["executors"]["slurm"]["storage_dir"] == "/srv/slurm_mnt"
 
 
+def test_load_start_workflow_payload_lowers_resolved_workflow_and_adds_config():
+    payload = load_start_workflow_payload(
+        REPO_ROOT / "bwb" / "scheduling_service" / "test_workflows" / "test_scheme_resolved.json",
+        config_path=REPO_ROOT / "bwb" / "scheduling_service" / "test_workflows" / "test_scheme_slurm_config.json",
+    )
+
+    assert "workflow_def" in payload
+    assert payload["workflow_def"]["run_id"] == "resolved-0000"
+    assert payload["workflow_def"]["nodes"][0]["arg_types"] == {}
+    assert payload["workflow_def"]["nodes"][0]["static_env"]["MESSAGE"] == "resolved-hello"
+    assert payload["config"]["executors"]["slurm"]["storage_dir"] == "/home/lysander/slurm_shared"
+
+
 def test_parse_worker_spec_reads_required_fields():
     worker = parse_worker_spec(
         {
@@ -57,6 +70,21 @@ def test_resolve_benchmark_payload_supports_request_path():
 
     assert "workflow_def" in payload
     assert payload["workflow_def"]["run_id"] == "0000"
+
+
+def test_resolve_benchmark_payload_supports_local_echo_smoke_request():
+    manifest_path = REPO_ROOT / "benchmarks" / "local_echo_manifest.json"
+    payload = resolve_benchmark_payload(
+        manifest_path,
+        {
+            "name": "local-echo-smoke",
+            "request_path": "../bwb/scheduling_service/test_workflows/local_echo_req.json",
+        },
+    )
+
+    assert payload["use_singularity"] is False
+    assert payload["workflow_def"]["run_id"] == "local-echo-smoke"
+    assert payload["workflow_def"]["nodes"][0]["image_name"] == "alpine:3.19"
 
 
 def test_resolve_benchmark_payload_supports_workflow_and_config_paths():
@@ -99,3 +127,19 @@ def test_resolve_benchmark_payload_supports_local_docker_slurm_config():
 
     assert payload["config"]["executors"]["slurm"]["port"] == 3022
     assert payload["config"]["executors"]["slurm"]["user"] == "root"
+
+
+def test_resolve_benchmark_payload_supports_resolved_workflow_and_config_paths():
+    manifest_path = REPO_ROOT / "benchmarks" / "test_scheme_resolved_slurm_manifest.json"
+    payload = resolve_benchmark_payload(
+        manifest_path,
+        {
+            "name": "test-scheme-resolved-slurm",
+            "workflow_path": "../bwb/scheduling_service/test_workflows/test_scheme_resolved.json",
+            "config_path": "../bwb/scheduling_service/test_workflows/test_scheme_slurm_config.json",
+        },
+    )
+
+    assert payload["workflow_def"]["run_id"] == "resolved-0000"
+    assert payload["workflow_def"]["nodes"][0]["static_env"]["MESSAGE"] == "resolved-hello"
+    assert payload["config"]["executors"]["slurm"]["storage_dir"] == "/home/lysander/slurm_shared"

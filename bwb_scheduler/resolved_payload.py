@@ -208,6 +208,8 @@ def normalize_start_workflow_payload(
         normalized = {"workflow_def": lower_resolved_workflow_to_workflow_def(resolved_workflow)}
         if "config" in payload:
             normalized["config"] = deepcopy(payload["config"])
+        if "use_singularity" in payload:
+            normalized["use_singularity"] = bool(payload["use_singularity"])
     elif "workflow_def" not in normalized:
         normalized = {"workflow_def": normalized}
 

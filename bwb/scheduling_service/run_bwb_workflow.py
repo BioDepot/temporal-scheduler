@@ -18,10 +18,10 @@ from bwb.scheduling_service.scheduler_types import BwbWorkflowParams
 # "scheme" is dictionary representing scheme graph in format generated
 # by BWB client. See "test_scheme.json" for example. Returns
 # workflow id and run ID.
-async def start_scheme(scheme, config, client, task_queue):
+async def start_scheme(scheme, config, client, task_queue, use_singularity=True):
     load_dotenv()
 
-    params = BwbWorkflowParams(scheme, config, True)
+    params = BwbWorkflowParams(scheme, config, use_singularity)
     handle = await client.start_workflow(
         BwbWorkflow.run,
         params,
