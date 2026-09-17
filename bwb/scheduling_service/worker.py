@@ -25,6 +25,8 @@ from bwb.scheduling_service.executors.slurm_activities import SlurmActivity
 from bwb.scheduling_service.executors.slurm_activities_go_shim import GoSlurmActivity
 from bwb.scheduling_service.executors.ssh_docker_activity import SshDockerActivity, SshDockerConfig
 from bwb.scheduling_service.executors.ssh_docker_workflow import RemoteDockerWorkflow
+from bwb.scheduling_service.executors.globus_activity import GlobusActivity
+from bwb.scheduling_service.executors.staged_slurm_gpu_workflow import StagedSlurmGpuWorkflow
 from bwb.scheduling_service.bwb_workflow import BwbWorkflow
 from bwb.scheduling_service.executors.slurm_poller import SlurmPoller
 from bwb.scheduling_service.executors.generic import get_scheduler_child_queue, get_worker_heartbeat_queue
@@ -247,6 +249,7 @@ async def get_slurm_worker(slurm_config):
             run_workflow_cmd,
             sync_dir,
             slurm_activity.start_slurm_job,
+            slurm_activity.start_slurm_script_job,
             slurm_activity.poll_slurm,
             slurm_activity.get_slurm_outputs,
             slurm_activity.setup_login_node_volumes,
@@ -298,6 +301,32 @@ async def get_ssh_docker_worker(ssh_docker_config: dict):
     return queue, worker
 
 
+async def get_staged_pipeline_worker(config: dict):
+    """Create the control-plane worker for Globus -> Slurm -> GPU workflows."""
+    pipeline_config = config.get("pipeline") or {}
+    executors = config.get("executors") or {}
+    globus_config = executors.get("globus") or {}
+    queue = str(pipeline_config.get("task_queue") or "staged-slurm-gpu")
+    globus_activity = GlobusActivity(
+        cli_path=str(globus_config.get("cli_path") or "globus"),
+        allowed_endpoint_ids=[str(value) for value in globus_config.get("allowed_endpoint_ids") or []],
+    )
+
+    load_dotenv()
+    temporal_ept = os.getenv("TEMPORAL_ENDPOINT_URL")
+    temporal_client = await Client.connect(temporal_ept)
+    worker = Worker(
+        temporal_client,
+        task_queue=queue,
+        workflows=[StagedSlurmGpuWorkflow],
+        activities=[
+            globus_activity.submit_transfer,
+            globus_activity.get_task_status,
+        ],
+    )
+    return queue, worker
+
+
 def parse_ram_to_mb(ram_str):
     match = re.match(r'^(\d+)\s*(GB|MB|KB)$', ram_str, re.IGNORECASE)
     if not match:
@@ -343,6 +372,12 @@ async def run_slurm_worker(config):
 
 async def run_ssh_docker_worker(config):
     queue, worker = await get_ssh_docker_worker(config)
+    await worker.run()
+
+
+async def run_staged_pipeline_worker(config):
+    queue, worker = await get_staged_pipeline_worker(config)
+    print(f"Staged pipeline worker listening on {queue}")
     await worker.run()
 
 
@@ -397,6 +432,16 @@ if __name__ == "__main__":
         help='Config file with ssh_docker executor section'
     )
 
+    parser_staged_pipeline_worker = subparsers.add_parser(
+        "staged-pipeline", help="Run Globus/Slurm/GPU orchestration worker."
+    )
+    parser_staged_pipeline_worker.add_argument(
+        '--config',
+        type=str,
+        required=True,
+        help='Config file with pipeline and Globus executor sections'
+    )
+
     args = parser.parse_args()
     if args.subcommand == "scheduler":
         verify_env()
@@ -416,3 +461,8 @@ if __name__ == "__main__":
             config = json.load(cf)
 
         asyncio.run(run_ssh_docker_worker(config["executors"]["ssh_docker"]))
+    elif args.subcommand == "staged-pipeline":
+        with open(args.config, "r") as cf:
+            config = json.load(cf)
+
+        asyncio.run(run_staged_pipeline_worker(config))

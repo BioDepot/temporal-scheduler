@@ -1,11 +1,14 @@
 import asyncio
+import os
 
 from bwb.scheduling_service.executors.slurm_activities import SlurmActivity
 from bwb.scheduling_service.scheduler_types import (
     CmdFiles,
     SlurmCmdObj,
+    ResourceVector,
     SlurmFileDownloadParams,
     SlurmFileUploadParams,
+    SlurmScriptJobParams,
 )
 
 
@@ -127,3 +130,41 @@ def test_poll_slurm_ignores_nonterminal_step_records(monkeypatch):
 
     assert 7 in results
     assert results[7].status == "COMPLETED"
+
+
+def test_start_slurm_script_job_writes_and_submits_raw_script(monkeypatch):
+    activity = _make_activity()
+    commands = []
+    written = {}
+
+    async def fake_exec_cmd(cmd):
+        commands.append(cmd)
+        if cmd.startswith("sbatch --parsable"):
+            return "31415;cluster"
+        return ""
+
+    async def fake_write_file(path, contents):
+        written[path] = contents
+
+    monkeypatch.setattr(activity, "exec_cmd", fake_exec_cmd)
+    monkeypatch.setattr(activity, "write_file", fake_write_file)
+
+    result = asyncio.run(
+        activity.start_slurm_script_job(
+            SlurmScriptJobParams(
+                script="set -euo pipefail\necho cardiac-pilot",
+                resource_req=ResourceVector(cpus=32, gpus=0, mem_mb=16384),
+                config={"partition": "RM-shared", "time": "00:30:00"},
+                name="cardiac pilot",
+            )
+        )
+    )
+
+    assert result.job_id == 31415
+    assert os.path.basename(result.tmp_dir).startswith("cardiac_pilot-")
+    assert any(cmd.startswith("mkdir -p ") for cmd in commands)
+    assert any(cmd.startswith("sbatch --parsable ") for cmd in commands)
+    sbatch = next(iter(written.values()))
+    assert "#SBATCH --partition=RM-shared" in sbatch
+    assert "#SBATCH --cpus-per-task=32" in sbatch
+    assert "echo cardiac-pilot" in sbatch

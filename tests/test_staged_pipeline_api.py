@@ -1,0 +1,52 @@
+from bwb.scheduling_service.main import _staged_slurm_gpu_params
+
+
+def test_staged_pipeline_payload_builds_typed_parameters():
+    data = {
+        "task_queue": "cardiac-control",
+        "stage_in": {
+            "source_endpoint_id": "pikachu",
+            "destination_endpoint_id": "bridges",
+            "items": [
+                {
+                    "source_path": "/mnt/pikachu/input.fastq.gz",
+                    "destination_path": "/ocean/run/input.fastq.gz",
+                }
+            ],
+            "label": "stage-in",
+            "submission_id": "submission-1",
+        },
+        "slurm": {
+            "task_queue": "lhung2@bridges2.psc.edu:22",
+            "job": {
+                "name": "cardiac-pilot",
+                "script": "echo STAR",
+                "resources": {"cpus": 32, "gpus": 0, "mem_mb": 16000},
+                "config": {"partition": "RM-shared", "time": "00:30:00"},
+            },
+        },
+        "gpu": {
+            "task_queue": "lhhung@localhost:22",
+            "job": {
+                "image": "biodepot/cellbender:0.3.2",
+                "cmd": ["cellbender", "remove-background", "--cuda"],
+                "input_files": {"/tmp/input.h5ad": "input.h5ad"},
+                "use_gpu": True,
+                "gpu_device": "0",
+                "min_gpu_free_mb": 6000,
+                "gpu_wait_timeout_seconds": 3600,
+                "local_output_dir": "/tmp/cellbender-output",
+            },
+        },
+    }
+
+    params = _staged_slurm_gpu_params(data)
+
+    assert params.globus_task_queue == "cardiac-control"
+    assert params.stage_in.items[0].source_path.endswith("input.fastq.gz")
+    assert params.slurm.job.resource_req.cpus == 32
+    assert params.slurm.job.config["partition"] == "RM-shared"
+    assert params.gpu.job.use_gpu is True
+    assert params.gpu.job.min_gpu_free_mb == 6000
+    assert params.gpu.job.gpu_wait_timeout_seconds == 3600
+    assert "--cuda" in params.gpu.job.cmd

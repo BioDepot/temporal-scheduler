@@ -31,6 +31,8 @@ class RemoteDockerJobParams:
     timeout_seconds: int = 7200
     local_output_dir: str = ""              # Where to put results locally
     cleanup: bool = True                    # Remove remote staging after
+    min_gpu_free_mb: int = 0                # Fail preflight if no GPU meets this
+    gpu_wait_timeout_seconds: int = 7200    # Retry a busy GPU until this deadline
 
 
 @dataclass
@@ -60,9 +62,16 @@ class RemoteDockerWorkflow:
             {
                 "remote_storage_dir": "",  # uses the activity instance's config.storage_dir
                 "use_gpu": params.use_gpu,
+                "gpu_device": params.gpu_device,
+                "min_gpu_free_mb": params.min_gpu_free_mb,
             },
             start_to_close_timeout=timedelta(seconds=60),
-            retry_policy=RetryPolicy(maximum_attempts=1),
+            schedule_to_close_timeout=timedelta(seconds=params.gpu_wait_timeout_seconds),
+            retry_policy=RetryPolicy(
+                initial_interval=timedelta(seconds=15),
+                maximum_interval=timedelta(seconds=60),
+                maximum_attempts=0,
+            ),
         )
 
         # 2. Create remote staging dirs

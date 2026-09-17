@@ -12,7 +12,8 @@ from typing import List, Dict, Optional
 from bwb.scheduling_service.executors.generic import (get_container_cmd, cmd_no_output, container_to_host_path,
                                                       is_time_format)
 from bwb.scheduling_service.scheduler_types import ResourceVector, CmdOutput, SlurmContainerCmdParams, \
-    SlurmCmdObj, SlurmCmdResult, SlurmSetupVolumesParams, SlurmFileUploadParams, SlurmFileDownloadParams
+    SlurmCmdObj, SlurmCmdResult, SlurmSetupVolumesParams, SlurmFileUploadParams, SlurmFileDownloadParams, \
+    SlurmScriptJobParams
 
 # rsync exit-code classification for diagnosable transfer errors.
 # See rsync(1) EXIT VALUES.
@@ -312,6 +313,34 @@ class SlurmActivity:
         job_id = int(raw_sbatch_out.split(";")[0])
         #print(f"Command {cmd} has job ID: {job_id}")
         return SlurmCmdObj(job_id, out_path, err_path, volumes["/tmp"])
+
+    @activity.defn
+    async def start_slurm_script_job(self, params: SlurmScriptJobParams) -> SlurmCmdObj:
+        """Submit a raw shell body through the same audited Slurm transport."""
+        safe_name = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in params.name)
+        safe_name = safe_name[:64] or "slurm-script"
+        job_name = f"{safe_name}-{uuid.uuid4()}"
+        output_dir = os.path.join(self.work_dir, "tmp", job_name, "output")
+        slurm_dir = os.path.join(self.work_dir, "slurm")
+        if await self.exec_cmd(
+            f"mkdir -p {shlex.quote(output_dir)} {shlex.quote(slurm_dir)}"
+        ) is None:
+            raise ApplicationError("Failed creating raw Slurm output directory", non_retryable=True)
+
+        write_result = await self.write_sbatch_file(
+            params.script,
+            params.config,
+            params.resource_req,
+            job_name,
+        )
+        if write_result is None:
+            raise ApplicationError("Writing raw Slurm batch file failed", non_retryable=True)
+        out_path, err_path, sbatch_path = write_result
+        raw_sbatch_out = await self.exec_cmd(f"sbatch --parsable {shlex.quote(sbatch_path)}")
+        if raw_sbatch_out is None:
+            raise ApplicationError("`sbatch` failed for raw Slurm script", non_retryable=True)
+        job_id = int(raw_sbatch_out.split(";")[0])
+        return SlurmCmdObj(job_id, out_path, err_path, os.path.dirname(output_dir))
 
     async def run_sacct(self, outstanding_jobs: List[str]):
         jobs_str = ",".join(map(str, outstanding_jobs))

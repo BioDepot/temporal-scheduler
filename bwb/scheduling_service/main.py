@@ -14,9 +14,20 @@ from dotenv import load_dotenv
 from bwb_scheduler.resolved_payload import normalize_start_workflow_payload
 from bwb.scheduling_service.bwb_workflow import BwbWorkflow
 from bwb.scheduling_service.executors.ssh_docker_workflow import RemoteDockerJobParams, RemoteDockerWorkflow
+from bwb.scheduling_service.executors.globus_activity import GlobusTransferItem, GlobusTransferParams
+from bwb.scheduling_service.executors.staged_slurm_gpu_workflow import (
+    GpuDockerStage,
+    SlurmScriptStage,
+    StagedSlurmGpuParams,
+    StagedSlurmGpuWorkflow,
+)
 from bwb.scheduling_service.run_bwb_workflow import start_scheme
 from bwb.scheduling_service.worker import register_worker_with_workflow
-from bwb.scheduling_service.scheduler_types import ResourceVector, WorkerResources
+from bwb.scheduling_service.scheduler_types import (
+    ResourceVector,
+    SlurmScriptJobParams,
+    WorkerResources,
+)
 
 load_dotenv()
 TEMPORAL_EPT = os.getenv("TEMPORAL_ENDPOINT_URL")
@@ -79,6 +90,8 @@ def _remote_docker_job_params(data: dict) -> RemoteDockerJobParams:
             timeout_seconds=int(job.get("timeout_seconds") or 7200),
             local_output_dir=str(job.get("local_output_dir") or ""),
             cleanup=bool(job.get("cleanup", True)),
+            min_gpu_free_mb=int(job.get("min_gpu_free_mb") or 0),
+            gpu_wait_timeout_seconds=int(job.get("gpu_wait_timeout_seconds") or 7200),
         )
     except KeyError as exc:
         raise ValueError(f"Missing remote Docker job key `{exc.args[0]}`") from exc
@@ -90,6 +103,63 @@ def _jsonable_result(value):
     if isinstance(value, dict):
         return value
     return value
+
+
+def _globus_transfer_params(data: dict | None) -> GlobusTransferParams | None:
+    if data is None:
+        return None
+    items = [
+        GlobusTransferItem(
+            source_path=str(item["source_path"]),
+            destination_path=str(item["destination_path"]),
+            recursive=bool(item.get("recursive", False)),
+        )
+        for item in data.get("items") or []
+    ]
+    return GlobusTransferParams(
+        source_endpoint_id=str(data["source_endpoint_id"]),
+        destination_endpoint_id=str(data["destination_endpoint_id"]),
+        items=items,
+        label=str(data["label"]),
+        submission_id=str(data["submission_id"]),
+        sync_level=str(data.get("sync_level") or "checksum"),
+        verify_checksum=bool(data.get("verify_checksum", True)),
+        preserve_timestamp=bool(data.get("preserve_timestamp", True)),
+        timeout_seconds=int(data.get("timeout_seconds") or 86400),
+        poll_interval_seconds=int(data.get("poll_interval_seconds") or 15),
+    )
+
+
+def _staged_slurm_gpu_params(data: dict) -> StagedSlurmGpuParams:
+    slurm = data["slurm"]
+    slurm_job = slurm["job"]
+    resources = slurm_job.get("resources") or {}
+    gpu = data["gpu"]
+    return StagedSlurmGpuParams(
+        globus_task_queue=str(data.get("globus_task_queue") or data.get("task_queue") or "staged-slurm-gpu"),
+        stage_in=_globus_transfer_params(data.get("stage_in")),
+        slurm=SlurmScriptStage(
+            task_queue=str(slurm["task_queue"]),
+            job=SlurmScriptJobParams(
+                script=str(slurm_job["script"]),
+                resource_req=ResourceVector(
+                    cpus=int(resources.get("cpus") or 1),
+                    gpus=int(resources.get("gpus") or 0),
+                    mem_mb=int(resources.get("mem_mb") or 1024),
+                ),
+                config=dict(slurm_job.get("config") or {}),
+                name=str(slurm_job.get("name") or "slurm-script"),
+            ),
+            poll_interval_seconds=int(slurm.get("poll_interval_seconds") or 15),
+            timeout_seconds=int(slurm.get("timeout_seconds") or 86400),
+        ),
+        stage_back=_globus_transfer_params(data.get("stage_back")),
+        gpu=GpuDockerStage(
+            task_queue=str(gpu["task_queue"]),
+            job=_remote_docker_job_params(gpu),
+        ),
+        publish=_globus_transfer_params(data.get("publish")),
+    )
 
 
 @app.post("/start_workflow")
@@ -141,6 +211,32 @@ async def start_ssh_docker_workflow(req: Request):
     workflow_id = str(data.get("workflow_id") or f"ssh-docker-{uuid.uuid4().hex}")
     handle = await client.start_workflow(
         RemoteDockerWorkflow.run,
+        params,
+        task_queue=task_queue,
+        id=workflow_id,
+    )
+    return JSONResponse(
+        status_code=200,
+        content={
+            "workflow_id": handle.id,
+            "run_id": handle.first_execution_run_id,
+            "task_queue": task_queue,
+        },
+    )
+
+
+@app.post("/start_staged_slurm_gpu_workflow")
+async def start_staged_slurm_gpu_workflow(req: Request):
+    data = await req.json()
+    client = await Client.connect(TEMPORAL_EPT)
+    try:
+        params = _staged_slurm_gpu_params(data)
+    except (KeyError, TypeError, ValueError) as exc:
+        return JSONResponse(status_code=400, content={"message": f"Invalid staged workflow payload: {exc}"})
+    task_queue = str(data.get("task_queue") or "staged-slurm-gpu")
+    workflow_id = str(data.get("workflow_id") or f"staged-slurm-gpu-{uuid.uuid4().hex}")
+    handle = await client.start_workflow(
+        StagedSlurmGpuWorkflow.run,
         params,
         task_queue=task_queue,
         id=workflow_id,
@@ -286,4 +382,23 @@ async def ssh_docker_workflow_status(req: Request):
     if status["workflow_status"] == "Finished":
         result = await handle.result()
         status["result"] = _jsonable_result(result)
+    return status
+
+
+@app.post("/staged_slurm_gpu_workflow_status")
+async def staged_slurm_gpu_workflow_status(req: Request):
+    client = await Client.connect(TEMPORAL_EPT)
+    data = await req.json()
+    if "workflow_id" not in data:
+        return JSONResponse(status_code=400, content={"message": "Missing required key workflow_id."})
+    workflow_id = data["workflow_id"]
+    run_id = data.get("run_id")
+    handle = client.get_workflow_handle(workflow_id, run_id=run_id)
+    description = await handle.describe()
+    status = _workflow_status_from_description(description)
+    status.update({"workflow_id": workflow_id, "run_id": run_id, "workflow_type": "StagedSlurmGpuWorkflow"})
+    if status["workflow_status"] == "Running":
+        status.update(await handle.query(StagedSlurmGpuWorkflow.get_status))
+    elif status["workflow_status"] == "Finished":
+        status["result"] = _jsonable_result(await handle.result())
     return status

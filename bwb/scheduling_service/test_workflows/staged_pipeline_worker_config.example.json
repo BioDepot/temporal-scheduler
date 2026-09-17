@@ -1,0 +1,14 @@
+{
+  "pipeline": {
+    "task_queue": "staged-slurm-gpu"
+  },
+  "executors": {
+    "globus": {
+      "cli_path": "/path/to/globus",
+      "allowed_endpoint_ids": [
+        "LOCAL-ENDPOINT-ID",
+        "HPC-ENDPOINT-ID"
+      ]
+    }
+  }
+}

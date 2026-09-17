@@ -208,7 +208,7 @@ class TestValidateConnectivity:
             if "docker info" in cmd:
                 return (0, "abc123", "")
             if "nvidia-smi" in cmd:
-                return (0, "RTX 6000, 49140 MiB", "")
+                return (0, "0, RTX 6000, 49140, 40000", "")
             if "touch" in cmd:
                 return (0, "", "")
             if "df -BG" in cmd:
@@ -233,6 +233,86 @@ class TestValidateConnectivity:
         assert "ssh" in result
         assert "docker" in result
         assert "gpu" in result
+
+    def test_gpu_device_and_free_memory_pass(self, monkeypatch):
+        act = _make_activity(gpu_device="0")
+
+        async def fake_exec_ssh(cmd, timeout=30):
+            if "echo __ssh_ok__" in cmd:
+                return (0, "__ssh_ok__", "")
+            if "docker info" in cmd:
+                return (0, "abc123", "")
+            if "nvidia-smi" in cmd:
+                return (0, "0, RTX 4060, 8188, 7823", "")
+            if "df -BG" in cmd:
+                return (0, "100G", "")
+            return (0, "", "")
+
+        async def fake_subprocess_shell(cmd, **kwargs):
+            mock_proc = MagicMock()
+            mock_proc.returncode = 0
+
+            async def communicate():
+                return (b"", b"")
+
+            mock_proc.communicate = communicate
+            return mock_proc
+
+        monkeypatch.setattr(act, "_exec_ssh", fake_exec_ssh)
+        monkeypatch.setattr(asyncio, "create_subprocess_shell", fake_subprocess_shell)
+
+        result = asyncio.run(
+            act.validate_connectivity(
+                {
+                    "remote_storage_dir": "/remote/staging",
+                    "use_gpu": True,
+                    "gpu_device": "0",
+                    "min_gpu_free_mb": 6000,
+                }
+            )
+        )
+
+        assert "RTX 4060" in result
+        assert "free=7823MB/8188MB" in result
+
+    def test_gpu_free_memory_failure_is_retryable(self, monkeypatch):
+        act = _make_activity(gpu_device="0")
+
+        async def fake_exec_ssh(cmd, timeout=30):
+            if "echo __ssh_ok__" in cmd:
+                return (0, "__ssh_ok__", "")
+            if "docker info" in cmd:
+                return (0, "abc123", "")
+            if "nvidia-smi" in cmd:
+                return (0, "0, RTX 4060, 8188, 1024", "")
+            return (0, "", "")
+
+        async def fake_subprocess_shell(cmd, **kwargs):
+            mock_proc = MagicMock()
+            mock_proc.returncode = 0
+
+            async def communicate():
+                return (b"", b"")
+
+            mock_proc.communicate = communicate
+            return mock_proc
+
+        monkeypatch.setattr(act, "_exec_ssh", fake_exec_ssh)
+        monkeypatch.setattr(asyncio, "create_subprocess_shell", fake_subprocess_shell)
+
+        with pytest.raises(ApplicationError, match="required=6000MB") as exc_info:
+            asyncio.run(
+                act.validate_connectivity(
+                    {
+                        "remote_storage_dir": "/remote/staging",
+                        "use_gpu": True,
+                        "gpu_device": "0",
+                        "min_gpu_free_mb": 6000,
+                    }
+                )
+            )
+
+        assert exc_info.value.non_retryable is False
 
     def test_cpu_job_skips_gpu_check(self, monkeypatch):
         act = _make_activity()

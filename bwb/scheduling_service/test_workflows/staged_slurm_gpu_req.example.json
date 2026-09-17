@@ -1,0 +1,88 @@
+{
+  "workflow_id": "example-staged-slurm-gpu",
+  "task_queue": "staged-slurm-gpu",
+  "stage_in": {
+    "source_endpoint_id": "LOCAL-ENDPOINT-ID",
+    "destination_endpoint_id": "HPC-ENDPOINT-ID",
+    "items": [
+      {
+        "source_path": "/local/input/",
+        "destination_path": "/hpc/run/input/",
+        "recursive": true
+      }
+    ],
+    "label": "example-stage-in",
+    "submission_id": "CALLER-GENERATED-GLOBUS-SUBMISSION-ID"
+  },
+  "slurm": {
+    "task_queue": "user@hpc.example.org:22",
+    "poll_interval_seconds": 15,
+    "timeout_seconds": 86400,
+    "job": {
+      "name": "example-analysis",
+      "script": "set -euo pipefail\nmkdir -p /hpc/run/results\nanalysis-command > /hpc/run/results/stdout.txt",
+      "resources": {
+        "cpus": 32,
+        "gpus": 0,
+        "mem_mb": 65536
+      },
+      "config": {
+        "partition": "cpu",
+        "time": "04:00:00",
+        "nodes": 1,
+        "ntasks": 1,
+        "cpus_per_task": 32,
+        "mem": "64G"
+      }
+    }
+  },
+  "stage_back": {
+    "source_endpoint_id": "HPC-ENDPOINT-ID",
+    "destination_endpoint_id": "LOCAL-ENDPOINT-ID",
+    "items": [
+      {
+        "source_path": "/hpc/run/results/",
+        "destination_path": "/local/run/slurm/",
+        "recursive": true
+      }
+    ],
+    "label": "example-stage-back",
+    "submission_id": "CALLER-GENERATED-GLOBUS-SUBMISSION-ID"
+  },
+  "gpu": {
+    "task_queue": "user@gpu.example.org:22",
+    "job": {
+      "image": "example/image:tag",
+      "cmd": [
+        "gpu-command",
+        "--input",
+        "/remote/work/input",
+        "--output",
+        "/remote/work/output/result"
+      ],
+      "input_files": {
+        "/local/run/slurm/input": "input"
+      },
+      "use_gpu": true,
+      "gpu_device": "0",
+      "min_gpu_free_mb": 6000,
+      "gpu_wait_timeout_seconds": 7200,
+      "timeout_seconds": 7200,
+      "local_output_dir": "/local/run/gpu",
+      "cleanup": true
+    }
+  },
+  "publish": {
+    "source_endpoint_id": "LOCAL-ENDPOINT-ID",
+    "destination_endpoint_id": "HPC-ENDPOINT-ID",
+    "items": [
+      {
+        "source_path": "/local/run/gpu/",
+        "destination_path": "/hpc/run/published/",
+        "recursive": true
+      }
+    ],
+    "label": "example-publish",
+    "submission_id": "CALLER-GENERATED-GLOBUS-SUBMISSION-ID"
+  }
+}
