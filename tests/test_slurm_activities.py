@@ -1,6 +1,9 @@
 import asyncio
 import os
 
+import pytest
+from temporalio.exceptions import ApplicationError
+
 from bwb.scheduling_service.executors.slurm_activities import SlurmActivity
 from bwb.scheduling_service.scheduler_types import (
     CmdFiles,
@@ -75,6 +78,32 @@ def test_write_file_streams_over_ssh_without_rsync(monkeypatch):
         "flushed": True,
         "shutdown": True,
     }
+
+
+def test_exec_cmd_checked_preserves_remote_stderr():
+    activity = _make_activity()
+
+    class Channel:
+        def recv_exit_status(self):
+            return 1
+
+    class Stream:
+        channel = Channel()
+
+        def __init__(self, contents=b""):
+            self.contents = contents
+
+        def read(self):
+            return self.contents
+
+    class SshClient:
+        def exec_command(self, command):
+            return Stream(), Stream(), Stream(b"memory-per-core exceeds site limit")
+
+    activity.client = SshClient()
+
+    with pytest.raises(ApplicationError, match="memory-per-core exceeds site limit"):
+        asyncio.run(activity.exec_cmd_checked("sbatch --parsable pilot.slurm"))
 
 
 def test_upload_to_slurm_login_node_uses_upload_direction(monkeypatch):
@@ -192,14 +221,17 @@ def test_start_slurm_script_job_writes_and_submits_raw_script(monkeypatch):
 
     async def fake_exec_cmd(cmd):
         commands.append(cmd)
-        if cmd.startswith("sbatch --parsable"):
-            return "31415;cluster"
         return ""
+
+    async def fake_exec_cmd_checked(cmd):
+        commands.append(cmd)
+        return "31415;cluster"
 
     async def fake_write_file(path, contents):
         written[path] = contents
 
     monkeypatch.setattr(activity, "exec_cmd", fake_exec_cmd)
+    monkeypatch.setattr(activity, "exec_cmd_checked", fake_exec_cmd_checked)
     monkeypatch.setattr(activity, "write_file", fake_write_file)
 
     result = asyncio.run(

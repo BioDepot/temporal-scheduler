@@ -90,7 +90,7 @@ class SlurmActivity:
             return "ssh"
         return f"ssh -p {self.xfer_port}"
 
-    async def exec_cmd(self, cmd):
+    async def _exec_cmd_result(self, cmd):
         async with self.semaphore:
             if self.debug_mode:
                 print(f"docker exec slurmdbd bash -c {shlex.quote(cmd)}")
@@ -100,18 +100,33 @@ class SlurmActivity:
                 stdin, stdout, stderr = await asyncio.to_thread(self.client.exec_command, cmd)
 
             exit_status = await asyncio.to_thread(stdout.channel.recv_exit_status)
-            output = await asyncio.to_thread(stdout.read)
-            error = await asyncio.to_thread(stderr.read)
+            output = (await asyncio.to_thread(stdout.read)).decode().strip()
+            error = (await asyncio.to_thread(stderr.read)).decode().strip()
 
-            if exit_status != 0:
-                error_str = error.decode().strip()
-                print(
-                    f"Command '{cmd}' failed with exit status {exit_status}.\n"
-                    f"Error output: {error_str or 'No error message provided.'}"
-                )
-                return None
+            return exit_status, output, error
 
-            return output.decode().strip()
+    async def exec_cmd(self, cmd):
+        exit_status, output, error = await self._exec_cmd_result(cmd)
+
+        if exit_status != 0:
+            print(
+                f"Command '{cmd}' failed with exit status {exit_status}.\n"
+                f"Error output: {error or 'No error message provided.'}"
+            )
+            return None
+
+        return output
+
+    async def exec_cmd_checked(self, cmd):
+        """Run a remote command and retain its diagnostics on failure."""
+        exit_status, output, error = await self._exec_cmd_result(cmd)
+        if exit_status != 0:
+            raise ApplicationError(
+                f"Remote command failed with exit status {exit_status}: {cmd}\n"
+                f"stderr: {error or 'No error message provided.'}",
+                non_retryable=True,
+            )
+        return output
 
     def sudo_exec_cmd(self, cmd):
         """
@@ -312,10 +327,7 @@ class SlurmActivity:
             raise ApplicationError(f"Writing sbatch file failed")
 
         out_path, err_path, sbatch_path = write_sbatch_out
-        raw_sbatch_out = await self.exec_cmd(f"sbatch --parsable {sbatch_path}")
-        if raw_sbatch_out is None:
-            print("Sbatch failed")
-            raise ApplicationError("`sbatch` failed", non_retryable=True)
+        raw_sbatch_out = await self.exec_cmd_checked(f"sbatch --parsable {sbatch_path}")
 
         job_id = int(raw_sbatch_out.split(";")[0])
         #print(f"Command {cmd} has job ID: {job_id}")
@@ -343,9 +355,9 @@ class SlurmActivity:
         if write_result is None:
             raise ApplicationError("Writing raw Slurm batch file failed", non_retryable=True)
         out_path, err_path, sbatch_path = write_result
-        raw_sbatch_out = await self.exec_cmd(f"sbatch --parsable {shlex.quote(sbatch_path)}")
-        if raw_sbatch_out is None:
-            raise ApplicationError("`sbatch` failed for raw Slurm script", non_retryable=True)
+        raw_sbatch_out = await self.exec_cmd_checked(
+            f"sbatch --parsable {shlex.quote(sbatch_path)}"
+        )
         job_id = int(raw_sbatch_out.split(";")[0])
         return SlurmCmdObj(job_id, out_path, err_path, os.path.dirname(output_dir))
 
