@@ -24,6 +24,52 @@ def _make_activity() -> SlurmActivity:
     )
 
 
+def test_write_file_uses_sftp_without_remote_rsync(monkeypatch):
+    activity = _make_activity()
+    written = {}
+
+    class RemoteFile:
+        def __enter__(self):
+            return self
+
+        def __exit__(self, exc_type, exc, traceback):
+            return False
+
+        def write(self, contents):
+            written["contents"] = contents
+
+        def flush(self):
+            written["flushed"] = True
+
+    class SftpClient:
+        def open(self, path, mode):
+            written.update(path=path, mode=mode)
+            return RemoteFile()
+
+        def close(self):
+            written["closed"] = True
+
+    class SshClient:
+        def open_sftp(self):
+            return SftpClient()
+
+    async def fail_rsync(*args, **kwargs):
+        raise AssertionError("write_file must not require rsync")
+
+    activity.client = SshClient()
+    monkeypatch.setattr(activity, "rsync", fail_rsync)
+
+    asyncio.run(activity.write_file("/remote/job.slurm", "#!/bin/bash\necho ok\n"))
+
+    assert written == {
+        "path": "/remote/job.slurm",
+        "mode": "w",
+        "contents": "#!/bin/bash\necho ok\n",
+        "flushed": True,
+        "closed": True,
+    }
+
+
 def test_upload_to_slurm_login_node_uses_upload_direction(monkeypatch):
     activity = _make_activity()
     calls = []

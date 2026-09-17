@@ -142,20 +142,23 @@ class SlurmActivity:
 
     async def write_file(self, file_path, contents):
         print(f"Writing to {file_path}")
-        uuid_str = str(uuid.uuid4())
-        local_path = os.path.join("/tmp", uuid_str)
-        with open(local_path, "w+") as f:
-            f.write(contents)
-        await self.rsync(local_path, file_path, True)
-        os.remove(local_path)
-        #sftp_client = self.client.open_sftp()
-        #try:
-        #    with sftp_client.open(file_path, 'w') as f:
-        #        f.write(contents)
-        #finally:
-        #    sftp_client.close()
-        #echo_cmd = f"echo {shlex.quote(contents)} > {file_path}"
-        #return self.exec_cmd(f"bash -c \"{shlex.quote(echo_cmd)}\"")
+
+        def write_with_sftp():
+            sftp_client = self.client.open_sftp()
+            try:
+                with sftp_client.open(file_path, "w") as remote_file:
+                    remote_file.write(contents)
+                    remote_file.flush()
+            finally:
+                sftp_client.close()
+
+        try:
+            await asyncio.to_thread(write_with_sftp)
+        except Exception as exc:
+            raise ApplicationError(
+                f"SFTP write failed for {file_path}: {exc}",
+                non_retryable=False,
+            ) from exc
 
     async def read_file(self, file_path):
         return await self.exec_cmd(f"cat {file_path}")
