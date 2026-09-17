@@ -131,14 +131,13 @@ def _globus_transfer_params(data: dict | None) -> GlobusTransferParams | None:
 
 
 def _staged_slurm_gpu_params(data: dict) -> StagedSlurmGpuParams:
-    slurm = data["slurm"]
-    slurm_job = slurm["job"]
-    resources = slurm_job.get("resources") or {}
+    slurm = data.get("slurm")
     gpu = data["gpu"]
-    return StagedSlurmGpuParams(
-        globus_task_queue=str(data.get("globus_task_queue") or data.get("task_queue") or "staged-slurm-gpu"),
-        stage_in=_globus_transfer_params(data.get("stage_in")),
-        slurm=SlurmScriptStage(
+    slurm_stage = None
+    if slurm is not None:
+        slurm_job = slurm["job"]
+        resources = slurm_job.get("resources") or {}
+        slurm_stage = SlurmScriptStage(
             task_queue=str(slurm["task_queue"]),
             job=SlurmScriptJobParams(
                 script=str(slurm_job["script"]),
@@ -152,7 +151,11 @@ def _staged_slurm_gpu_params(data: dict) -> StagedSlurmGpuParams:
             ),
             poll_interval_seconds=int(slurm.get("poll_interval_seconds") or 15),
             timeout_seconds=int(slurm.get("timeout_seconds") or 86400),
-        ),
+        )
+    return StagedSlurmGpuParams(
+        globus_task_queue=str(data.get("globus_task_queue") or data.get("task_queue") or "staged-slurm-gpu"),
+        stage_in=_globus_transfer_params(data.get("stage_in")),
+        slurm=slurm_stage,
         stage_back=_globus_transfer_params(data.get("stage_back")),
         gpu=GpuDockerStage(
             task_queue=str(gpu["task_queue"]),

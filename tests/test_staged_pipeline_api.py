@@ -50,3 +50,40 @@ def test_staged_pipeline_payload_builds_typed_parameters():
     assert params.gpu.job.min_gpu_free_mb == 6000
     assert params.gpu.job.gpu_wait_timeout_seconds == 3600
     assert "--cuda" in params.gpu.job.cmd
+
+
+def test_staged_pipeline_payload_supports_gpu_publish_resume_without_slurm():
+    data = {
+        "task_queue": "cardiac-control",
+        "gpu": {
+            "task_queue": "lhhung@localhost:22",
+            "job": {
+                "image": "biodepot/cellbender:0.3.2",
+                "cmd": ["cellbender", "remove-background", "--cuda"],
+                "input_files": {"/tmp/raw_mex": "raw_feature_bc_matrix"},
+                "use_gpu": True,
+                "local_output_dir": "/tmp/cellbender-output",
+            },
+        },
+        "publish": {
+            "source_endpoint_id": "pikachu",
+            "destination_endpoint_id": "bridges",
+            "items": [
+                {
+                    "source_path": "/tmp/cellbender-output/",
+                    "destination_path": "/ocean/run/published/",
+                    "recursive": True,
+                }
+            ],
+            "label": "resume-publish",
+            "submission_id": "submission-resume",
+        },
+    }
+
+    params = _staged_slurm_gpu_params(data)
+
+    assert params.slurm is None
+    assert params.stage_in is None
+    assert params.stage_back is None
+    assert params.gpu.job.use_gpu is True
+    assert params.publish.label == "resume-publish"

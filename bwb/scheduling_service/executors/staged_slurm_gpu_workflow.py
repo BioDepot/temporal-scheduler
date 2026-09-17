@@ -44,8 +44,8 @@ class GpuDockerStage:
 @dataclass
 class StagedSlurmGpuParams:
     globus_task_queue: str
-    slurm: SlurmScriptStage
     gpu: GpuDockerStage
+    slurm: Optional[SlurmScriptStage] = None
     stage_in: Optional[GlobusTransferParams] = None
     stage_back: Optional[GlobusTransferParams] = None
     publish: Optional[GlobusTransferParams] = None
@@ -55,7 +55,7 @@ class StagedSlurmGpuParams:
 class StagedSlurmGpuResult:
     success: bool
     transfer_task_ids: Dict[str, str]
-    slurm_job_id: int
+    slurm_job_id: Optional[int]
     slurm_status: str
     gpu_result: RemoteDockerJobResult
 
@@ -181,7 +181,11 @@ class StagedSlurmGpuWorkflow:
             status = await self._run_globus("stage_in", params.stage_in, params.globus_task_queue)
             transfer_ids["stage_in"] = status.task_id
 
-        slurm_result, _ = await self._run_slurm(params.slurm)
+        slurm_result = None
+        if params.slurm is not None:
+            slurm_result, _ = await self._run_slurm(params.slurm)
+        else:
+            self.status["stages"]["slurm"] = {"state": "SKIPPED"}
 
         if params.stage_back is not None:
             status = await self._run_globus("stage_back", params.stage_back, params.globus_task_queue)
@@ -213,7 +217,7 @@ class StagedSlurmGpuWorkflow:
         return StagedSlurmGpuResult(
             success=True,
             transfer_task_ids=transfer_ids,
-            slurm_job_id=slurm_result.job_id,
-            slurm_status=slurm_result.status,
+            slurm_job_id=slurm_result.job_id if slurm_result is not None else None,
+            slurm_status=slurm_result.status if slurm_result is not None else "SKIPPED",
             gpu_result=gpu_result,
         )

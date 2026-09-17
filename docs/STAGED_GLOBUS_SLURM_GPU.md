@@ -4,7 +4,7 @@
 independently routed stages:
 
 1. optional Globus stage-in;
-2. a raw Slurm batch script;
+2. an optional raw Slurm batch script;
 3. optional Globus stage-back;
 4. an SSH/Docker job, with optional CUDA and GPU free-memory gating;
 5. optional Globus publication of the GPU outputs.
@@ -24,6 +24,10 @@ routes the Slurm activities to the configured HPC queue and starts the existing
   modification-time preservation.
 - Raw Slurm submission is attempted once because `sbatch` is not naturally
   idempotent. Subsequent polling and output retrieval are retried.
+- Omitting `slurm` is an explicit recovery mode for resuming GPU and publish
+  stages from already validated local inputs. Record the preceding Slurm job
+  and stage-back task in the scientific provenance; the result reports the
+  Slurm stage as `SKIPPED`.
 - A CUDA job can set `min_gpu_free_mb`. A busy GPU is a retryable preflight
   condition until `gpu_wait_timeout_seconds`; absent SSH, Docker, or CUDA
   support fails without retry.

@@ -156,6 +156,43 @@ class TestRsync:
         assert "/local/input.h5ad" in cmd
         assert "testuser@10.159.4.53:/remote/work/input.h5ad" in cmd
 
+    def test_upload_directory_syncs_contents_to_mapped_path(self, monkeypatch, tmp_path):
+        act = _make_activity()
+        captured_rsync = []
+        captured_ssh = []
+        input_dir = tmp_path / "raw_feature_bc_matrix"
+        input_dir.mkdir()
+
+        async def fake_exec_ssh(cmd, timeout=30):
+            captured_ssh.append(cmd)
+            return (0, "", "")
+
+        async def fake_subprocess_shell(cmd, **kwargs):
+            captured_rsync.append(cmd)
+            mock_proc = MagicMock()
+            mock_proc.returncode = 0
+
+            async def communicate():
+                return (b"", b"")
+
+            mock_proc.communicate = communicate
+            return mock_proc
+
+        monkeypatch.setattr(act, "_exec_ssh", fake_exec_ssh)
+        monkeypatch.setattr(asyncio, "create_subprocess_shell", fake_subprocess_shell)
+
+        asyncio.run(
+            act._rsync(
+                str(input_dir),
+                "/remote/work/raw_feature_bc_matrix",
+                upload=True,
+            )
+        )
+
+        assert captured_ssh == ["mkdir -p /remote/work/raw_feature_bc_matrix"]
+        assert f"{input_dir}/" in captured_rsync[0]
+        assert "testuser@10.159.4.53:/remote/work/raw_feature_bc_matrix/" in captured_rsync[0]
+
     def test_download_constructs_correct_cmd(self, monkeypatch, tmp_path):
         act = _make_activity()
         captured = []

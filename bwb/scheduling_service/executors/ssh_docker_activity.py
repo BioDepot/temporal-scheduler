@@ -108,13 +108,29 @@ class SshDockerActivity:
         direction = "upload" if upload else "download"
 
         if upload:
-            # Ensure remote parent dir exists
-            remote_parent = os.path.dirname(remote_path)
-            await self._exec_ssh(f"mkdir -p {remote_parent}")
-            rsync_cmd = f"rsync -az --stats -e '{ssh_flag}' {local_path} {remote_full}"
+            if os.path.isdir(local_path):
+                # A local directory mapped to a remote relative path means
+                # "put this directory's contents at that path". Without the
+                # trailing slashes rsync creates destination/basename(source),
+                # which breaks tools expecting the mapped path itself to be
+                # the input directory.
+                await self._exec_ssh(f"mkdir -p {shlex.quote(remote_path)}")
+                local_source = local_path.rstrip("/") + "/"
+                remote_full = remote_full.rstrip("/") + "/"
+            else:
+                remote_parent = os.path.dirname(remote_path)
+                await self._exec_ssh(f"mkdir -p {shlex.quote(remote_parent)}")
+                local_source = local_path
+            rsync_cmd = (
+                f"rsync -az --stats -e {shlex.quote(ssh_flag)} "
+                f"{shlex.quote(local_source)} {shlex.quote(remote_full)}"
+            )
         else:
             os.makedirs(os.path.dirname(local_path) or ".", exist_ok=True)
-            rsync_cmd = f"rsync -az --stats -e '{ssh_flag}' {remote_full} {local_path}"
+            rsync_cmd = (
+                f"rsync -az --stats -e {shlex.quote(ssh_flag)} "
+                f"{shlex.quote(remote_full)} {shlex.quote(local_path)}"
+            )
 
         print(f"ssh-docker rsync {direction}: {rsync_cmd}")
         t0 = time.monotonic()
