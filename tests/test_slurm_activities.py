@@ -24,16 +24,15 @@ def _make_activity() -> SlurmActivity:
     )
 
 
-def test_write_file_uses_sftp_without_remote_rsync(monkeypatch):
+def test_write_file_streams_over_ssh_without_rsync(monkeypatch):
     activity = _make_activity()
     written = {}
 
-    class RemoteFile:
-        def __enter__(self):
-            return self
+    class Stdin:
+        channel = None
 
-        def __exit__(self, exc_type, exc, traceback):
-            return False
+        def __init__(self):
+            self.channel = self
 
         def write(self, contents):
             written["contents"] = contents
@@ -41,17 +40,26 @@ def test_write_file_uses_sftp_without_remote_rsync(monkeypatch):
         def flush(self):
             written["flushed"] = True
 
-    class SftpClient:
-        def open(self, path, mode):
-            written.update(path=path, mode=mode)
-            return RemoteFile()
+        def shutdown_write(self):
+            written["shutdown"] = True
 
-        def close(self):
-            written["closed"] = True
+    class Stdout:
+        channel = None
+
+        def __init__(self):
+            self.channel = self
+
+        def recv_exit_status(self):
+            return 0
+
+    class Stderr:
+        def read(self):
+            return b""
 
     class SshClient:
-        def open_sftp(self):
-            return SftpClient()
+        def exec_command(self, command):
+            written["command"] = command
+            return Stdin(), Stdout(), Stderr()
 
     async def fail_rsync(*args, **kwargs):
         raise AssertionError("write_file must not require rsync")
@@ -62,11 +70,10 @@ def test_write_file_uses_sftp_without_remote_rsync(monkeypatch):
     asyncio.run(activity.write_file("/remote/job.slurm", "#!/bin/bash\necho ok\n"))
 
     assert written == {
-        "path": "/remote/job.slurm",
-        "mode": "w",
+        "command": "cat > /remote/job.slurm",
         "contents": "#!/bin/bash\necho ok\n",
         "flushed": True,
-        "closed": True,
+        "shutdown": True,
     }
 
 
