@@ -44,7 +44,7 @@ class GpuDockerStage:
 @dataclass
 class StagedSlurmGpuParams:
     globus_task_queue: str
-    gpu: GpuDockerStage
+    gpu: Optional[GpuDockerStage] = None
     slurm: Optional[SlurmScriptStage] = None
     stage_in: Optional[GlobusTransferParams] = None
     stage_back: Optional[GlobusTransferParams] = None
@@ -57,7 +57,7 @@ class StagedSlurmGpuResult:
     transfer_task_ids: Dict[str, str]
     slurm_job_id: Optional[int]
     slurm_status: str
-    gpu_result: RemoteDockerJobResult
+    gpu_result: Optional[RemoteDockerJobResult]
 
 
 @workflow.defn(sandboxed=False)
@@ -191,22 +191,26 @@ class StagedSlurmGpuWorkflow:
             status = await self._run_globus("stage_back", params.stage_back, params.globus_task_queue)
             transfer_ids["stage_back"] = status.task_id
 
-        self._set_stage("gpu", "RUNNING", task_queue=params.gpu.task_queue)
-        child_id = f"{workflow.info().workflow_id}-gpu"
-        gpu_result = await workflow.execute_child_workflow(
-            RemoteDockerWorkflow.run,
-            params.gpu.job,
-            id=child_id,
-            task_queue=params.gpu.task_queue,
-            parent_close_policy=ParentClosePolicy.TERMINATE,
-        )
-        self._set_stage(
-            "gpu",
-            "SUCCEEDED",
-            job_id=gpu_result.job_id,
-            output_item_count=gpu_result.output_item_count,
-            local_output_dir=gpu_result.local_output_dir,
-        )
+        gpu_result = None
+        if params.gpu is not None:
+            self._set_stage("gpu", "RUNNING", task_queue=params.gpu.task_queue)
+            child_id = f"{workflow.info().workflow_id}-gpu"
+            gpu_result = await workflow.execute_child_workflow(
+                RemoteDockerWorkflow.run,
+                params.gpu.job,
+                id=child_id,
+                task_queue=params.gpu.task_queue,
+                parent_close_policy=ParentClosePolicy.TERMINATE,
+            )
+            self._set_stage(
+                "gpu",
+                "SUCCEEDED",
+                job_id=gpu_result.job_id,
+                output_item_count=gpu_result.output_item_count,
+                local_output_dir=gpu_result.local_output_dir,
+            )
+        else:
+            self.status["stages"]["gpu"] = {"state": "SKIPPED"}
 
         if params.publish is not None:
             status = await self._run_globus("publish", params.publish, params.globus_task_queue)

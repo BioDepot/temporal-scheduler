@@ -87,3 +87,22 @@ def test_staged_pipeline_payload_supports_gpu_publish_resume_without_slurm():
     assert params.stage_back is None
     assert params.gpu.job.use_gpu is True
     assert params.publish.label == "resume-publish"
+
+
+def test_staged_pipeline_payload_supports_slurm_without_gpu():
+    params = _staged_slurm_gpu_params({
+        "task_queue": "cardiac-control",
+        "slurm": {
+            "task_queue": "lhung2@bridges2.psc.edu:22",
+            "job": {
+                "name": "nfcore-pilot",
+                "script": "nextflow run nf-core/rnaseq",
+                "resources": {"cpus": 32, "gpus": 0, "mem_mb": 16000},
+                "config": {"partition": "RM-shared", "time": "00:30:00"},
+            },
+        },
+    })
+
+    assert params.slurm is not None
+    assert params.slurm.job.name == "nfcore-pilot"
+    assert params.gpu is None

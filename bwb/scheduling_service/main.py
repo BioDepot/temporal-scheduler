@@ -132,7 +132,7 @@ def _globus_transfer_params(data: dict | None) -> GlobusTransferParams | None:
 
 def _staged_slurm_gpu_params(data: dict) -> StagedSlurmGpuParams:
     slurm = data.get("slurm")
-    gpu = data["gpu"]
+    gpu = data.get("gpu")
     slurm_stage = None
     if slurm is not None:
         slurm_job = slurm["job"]
@@ -157,9 +157,13 @@ def _staged_slurm_gpu_params(data: dict) -> StagedSlurmGpuParams:
         stage_in=_globus_transfer_params(data.get("stage_in")),
         slurm=slurm_stage,
         stage_back=_globus_transfer_params(data.get("stage_back")),
-        gpu=GpuDockerStage(
-            task_queue=str(gpu["task_queue"]),
-            job=_remote_docker_job_params(gpu),
+        gpu=(
+            GpuDockerStage(
+                task_queue=str(gpu["task_queue"]),
+                job=_remote_docker_job_params(gpu),
+            )
+            if gpu is not None
+            else None
         ),
         publish=_globus_transfer_params(data.get("publish")),
     )

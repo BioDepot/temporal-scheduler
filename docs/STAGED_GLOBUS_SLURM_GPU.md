@@ -6,7 +6,7 @@ independently routed stages:
 1. optional Globus stage-in;
 2. an optional raw Slurm batch script;
 3. optional Globus stage-back;
-4. an SSH/Docker job, with optional CUDA and GPU free-memory gating;
+4. an optional SSH/Docker job, with optional CUDA and GPU free-memory gating;
 5. optional Globus publication of the GPU outputs.
 
 The orchestration worker does not execute Slurm or GPU work itself. Temporal
@@ -28,6 +28,9 @@ routes the Slurm activities to the configured HPC queue and starts the existing
   stages from already validated local inputs. Record the preceding Slurm job
   and stage-back task in the scientific provenance; the result reports the
   Slurm stage as `SKIPPED`.
+- Omitting `gpu` supports CPU-only staged workflows such as an nf-core launch
+  on Slurm. The result reports the GPU stage as `SKIPPED` and publication can
+  proceed after stage-back.
 - A CUDA job can set `min_gpu_free_mb`. A busy GPU is a retryable preflight
   condition until `gpu_wait_timeout_seconds`; absent SSH, Docker, or CUDA
   support fails without retry.
