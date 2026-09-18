@@ -12,7 +12,8 @@ from typing import List, Dict, Optional
 from bwb.scheduling_service.executors.generic import (get_container_cmd, cmd_no_output, container_to_host_path,
                                                       is_time_format)
 from bwb.scheduling_service.scheduler_types import ResourceVector, CmdOutput, SlurmContainerCmdParams, \
-    SlurmCmdObj, SlurmCmdResult, SlurmSetupVolumesParams, SlurmFileUploadParams, SlurmFileDownloadParams
+    SlurmCmdObj, SlurmCmdResult, SlurmSetupVolumesParams, SlurmFileUploadParams, SlurmFileDownloadParams, \
+    SlurmScriptJobParams
 
 # rsync exit-code classification for diagnosable transfer errors.
 # See rsync(1) EXIT VALUES.
@@ -89,7 +90,7 @@ class SlurmActivity:
             return "ssh"
         return f"ssh -p {self.xfer_port}"
 
-    async def exec_cmd(self, cmd):
+    async def _exec_cmd_result(self, cmd):
         async with self.semaphore:
             if self.debug_mode:
                 print(f"docker exec slurmdbd bash -c {shlex.quote(cmd)}")
@@ -99,18 +100,33 @@ class SlurmActivity:
                 stdin, stdout, stderr = await asyncio.to_thread(self.client.exec_command, cmd)
 
             exit_status = await asyncio.to_thread(stdout.channel.recv_exit_status)
-            output = await asyncio.to_thread(stdout.read)
-            error = await asyncio.to_thread(stderr.read)
+            output = (await asyncio.to_thread(stdout.read)).decode().strip()
+            error = (await asyncio.to_thread(stderr.read)).decode().strip()
 
-            if exit_status != 0:
-                error_str = error.decode().strip()
-                print(
-                    f"Command '{cmd}' failed with exit status {exit_status}.\n"
-                    f"Error output: {error_str or 'No error message provided.'}"
-                )
-                return None
+            return exit_status, output, error
 
-            return output.decode().strip()
+    async def exec_cmd(self, cmd):
+        exit_status, output, error = await self._exec_cmd_result(cmd)
+
+        if exit_status != 0:
+            print(
+                f"Command '{cmd}' failed with exit status {exit_status}.\n"
+                f"Error output: {error or 'No error message provided.'}"
+            )
+            return None
+
+        return output
+
+    async def exec_cmd_checked(self, cmd):
+        """Run a remote command and retain its diagnostics on failure."""
+        exit_status, output, error = await self._exec_cmd_result(cmd)
+        if exit_status != 0:
+            raise ApplicationError(
+                f"Remote command failed with exit status {exit_status}: {cmd}\n"
+                f"stderr: {error or 'No error message provided.'}",
+                non_retryable=True,
+            )
+        return output
 
     def sudo_exec_cmd(self, cmd):
         """
@@ -141,20 +157,27 @@ class SlurmActivity:
 
     async def write_file(self, file_path, contents):
         print(f"Writing to {file_path}")
-        uuid_str = str(uuid.uuid4())
-        local_path = os.path.join("/tmp", uuid_str)
-        with open(local_path, "w+") as f:
-            f.write(contents)
-        await self.rsync(local_path, file_path, True)
-        os.remove(local_path)
-        #sftp_client = self.client.open_sftp()
-        #try:
-        #    with sftp_client.open(file_path, 'w') as f:
-        #        f.write(contents)
-        #finally:
-        #    sftp_client.close()
-        #echo_cmd = f"echo {shlex.quote(contents)} > {file_path}"
-        #return self.exec_cmd(f"bash -c \"{shlex.quote(echo_cmd)}\"")
+
+        def write_over_ssh_stdin():
+            command = f"cat > {shlex.quote(file_path)}"
+            stdin, stdout, stderr = self.client.exec_command(command)
+            stdin.write(contents)
+            stdin.flush()
+            stdin.channel.shutdown_write()
+            exit_status = stdout.channel.recv_exit_status()
+            error = stderr.read().decode().strip()
+            if exit_status != 0:
+                raise RuntimeError(
+                    f"remote command exited {exit_status}: {error or 'no error output'}"
+                )
+
+        try:
+            await asyncio.to_thread(write_over_ssh_stdin)
+        except Exception as exc:
+            raise ApplicationError(
+                f"SSH stdin write failed for {file_path}: {exc}",
+                non_retryable=False,
+            ) from exc
 
     async def read_file(self, file_path):
         return await self.exec_cmd(f"cat {file_path}")
@@ -304,14 +327,39 @@ class SlurmActivity:
             raise ApplicationError(f"Writing sbatch file failed")
 
         out_path, err_path, sbatch_path = write_sbatch_out
-        raw_sbatch_out = await self.exec_cmd(f"sbatch --parsable {sbatch_path}")
-        if raw_sbatch_out is None:
-            print("Sbatch failed")
-            raise ApplicationError("`sbatch` failed", non_retryable=True)
+        raw_sbatch_out = await self.exec_cmd_checked(f"sbatch --parsable {sbatch_path}")
 
         job_id = int(raw_sbatch_out.split(";")[0])
         #print(f"Command {cmd} has job ID: {job_id}")
         return SlurmCmdObj(job_id, out_path, err_path, volumes["/tmp"])
+
+    @activity.defn
+    async def start_slurm_script_job(self, params: SlurmScriptJobParams) -> SlurmCmdObj:
+        """Submit a raw shell body through the same audited Slurm transport."""
+        safe_name = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in params.name)
+        safe_name = safe_name[:64] or "slurm-script"
+        job_name = f"{safe_name}-{uuid.uuid4()}"
+        output_dir = os.path.join(self.work_dir, "tmp", job_name, "output")
+        slurm_dir = os.path.join(self.work_dir, "slurm")
+        if await self.exec_cmd(
+            f"mkdir -p {shlex.quote(output_dir)} {shlex.quote(slurm_dir)}"
+        ) is None:
+            raise ApplicationError("Failed creating raw Slurm output directory", non_retryable=True)
+
+        write_result = await self.write_sbatch_file(
+            params.script,
+            params.config,
+            params.resource_req,
+            job_name,
+        )
+        if write_result is None:
+            raise ApplicationError("Writing raw Slurm batch file failed", non_retryable=True)
+        out_path, err_path, sbatch_path = write_result
+        raw_sbatch_out = await self.exec_cmd_checked(
+            f"sbatch --parsable {shlex.quote(sbatch_path)}"
+        )
+        job_id = int(raw_sbatch_out.split(";")[0])
+        return SlurmCmdObj(job_id, out_path, err_path, os.path.dirname(output_dir))
 
     async def run_sacct(self, outstanding_jobs: List[str]):
         jobs_str = ",".join(map(str, outstanding_jobs))

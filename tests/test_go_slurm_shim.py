@@ -6,6 +6,7 @@ Go backend is required.
 
 import asyncio
 import json
+import os
 from unittest.mock import MagicMock, patch
 
 import pytest
@@ -20,6 +21,7 @@ from bwb.scheduling_service.scheduler_types import (
     SlurmFileDownloadParams,
     SlurmFileUploadParams,
     SlurmSetupVolumesParams,
+    SlurmScriptJobParams,
 )
 
 _SLURM_CONFIG = {
@@ -129,6 +131,33 @@ def test_start_slurm_job_sends_raw_cmd_and_extra_dirs():
     assert result.err_path == "/s/slurm/abc.err"
     # tmp_dir must be the Python-managed path (not Go's TmpOutputHostPath).
     assert "singularity_tmp" in result.tmp_dir
+
+
+def test_start_slurm_script_job_sends_raw_script():
+    activity = _make_activity()
+    fake_job = {
+        "job_id": "2718",
+        "out_path": "/s/slurm/cardiac.out",
+        "err_path": "/s/slurm/cardiac.err",
+    }
+    with _mock_post({"job": fake_job}) as mock_post:
+        result = asyncio.run(
+            activity.start_slurm_script_job(
+                SlurmScriptJobParams(
+                    script="set -euo pipefail\necho cardiac-pilot",
+                    resource_req=ResourceVector(cpus=32, gpus=0, mem_mb=16384),
+                    config={"partition": "RM-shared", "time": "00:30:00"},
+                    name="cardiac-pilot",
+                )
+            )
+        )
+
+    payload = mock_post.call_args[1]["json"]
+    assert payload["cmd"]["raw_cmd"].endswith("echo cardiac-pilot")
+    assert payload["job_config"]["partition"] == "RM-shared"
+    assert payload["cmd"]["resource_reqs"]["cpus"] == 32
+    assert result.job_id == 2718
+    assert os.path.basename(result.tmp_dir).startswith("cardiac-pilot-")
 
 
 # ---------------------------------------------------------------------------

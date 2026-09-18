@@ -144,6 +144,12 @@ Workers for SLURM require special treatment, since these must manage an SSH conn
 python bwb/scheduling_service/worker.py slurm --config [CONFIG_PATH]
 ```
 
+For durable workflows that join Globus stage-in, a raw Slurm batch script,
+Globus stage-back, and an SSH/Docker GPU job, see
+[`docs/STAGED_GLOBUS_SLURM_GPU.md`](docs/STAGED_GLOBUS_SLURM_GPU.md). This
+path uses a dedicated orchestration worker plus the existing Slurm and
+SSH/Docker workers.
+
 The SLURM config may also include optional `port` and `transfer_port` keys if the SSH endpoint is not on port 22.
 
 For a same-machine local Slurm test target, use:

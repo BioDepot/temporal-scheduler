@@ -32,6 +32,7 @@ from bwb.scheduling_service.scheduler_types import (
     SlurmFileDownloadParams,
     SlurmFileUploadParams,
     SlurmSetupVolumesParams,
+    SlurmScriptJobParams,
 )
 
 _DEFAULT_BACKEND_URL = "http://localhost:8765"
@@ -180,6 +181,51 @@ class GoSlurmActivity:
             err_path=job["err_path"],
             # Store the Python-managed tmp dir so get_slurm_outputs can find outputs.
             tmp_dir=volumes["/tmp"],
+        )
+
+    @activity.defn
+    async def start_slurm_script_job(self, params: SlurmScriptJobParams) -> SlurmCmdObj:
+        """Submit a raw shell body through the Go Slurm backend."""
+        safe_name = "".join(ch if ch.isalnum() or ch in "-_" else "_" for ch in params.name)
+        safe_name = safe_name[:64] or "slurm-script"
+        job_token = f"{safe_name}-{uuid.uuid4()}"
+        tmp_dir = os.path.join(self._storage_dir, "tmp", job_token)
+        output_dir = os.path.join(tmp_dir, "output")
+
+        job_config = {
+            key: params.config[key]
+            for key in ("partition", "time", "ntasks", "nodes", "mem",
+                        "cpus_per_task", "gpus", "modules")
+            if key in params.config
+        }
+        cmd_template = {
+            "id": 0,
+            "image_name": "",
+            "base_cmd": [],
+            "flags": [],
+            "args": [],
+            "envs": {},
+            "out_file_pnames": [],
+            "resource_reqs": {
+                "cpus": params.resource_req.cpus,
+                "gpus": params.resource_req.gpus,
+                "mem_mb": params.resource_req.mem_mb,
+            },
+            "raw_cmd": params.script,
+        }
+        result = await self._post_async("/start_slurm_job", {
+            "ssh_config": self._ssh_config,
+            "cmd": cmd_template,
+            "job_config": job_config,
+            "volumes": {"/tmp": tmp_dir, "/data": self._storage_dir},
+            "extra_dirs": [output_dir],
+        })
+        job = result["job"]
+        return SlurmCmdObj(
+            job_id=int(job["job_id"]),
+            out_path=job["out_path"],
+            err_path=job["err_path"],
+            tmp_dir=tmp_dir,
         )
 
     @activity.defn

@@ -108,13 +108,29 @@ class SshDockerActivity:
         direction = "upload" if upload else "download"
 
         if upload:
-            # Ensure remote parent dir exists
-            remote_parent = os.path.dirname(remote_path)
-            await self._exec_ssh(f"mkdir -p {remote_parent}")
-            rsync_cmd = f"rsync -az --stats -e '{ssh_flag}' {local_path} {remote_full}"
+            if os.path.isdir(local_path):
+                # A local directory mapped to a remote relative path means
+                # "put this directory's contents at that path". Without the
+                # trailing slashes rsync creates destination/basename(source),
+                # which breaks tools expecting the mapped path itself to be
+                # the input directory.
+                await self._exec_ssh(f"mkdir -p {shlex.quote(remote_path)}")
+                local_source = local_path.rstrip("/") + "/"
+                remote_full = remote_full.rstrip("/") + "/"
+            else:
+                remote_parent = os.path.dirname(remote_path)
+                await self._exec_ssh(f"mkdir -p {shlex.quote(remote_parent)}")
+                local_source = local_path
+            rsync_cmd = (
+                f"rsync -az --stats -e {shlex.quote(ssh_flag)} "
+                f"{shlex.quote(local_source)} {shlex.quote(remote_full)}"
+            )
         else:
             os.makedirs(os.path.dirname(local_path) or ".", exist_ok=True)
-            rsync_cmd = f"rsync -az --stats -e '{ssh_flag}' {remote_full} {local_path}"
+            rsync_cmd = (
+                f"rsync -az --stats -e {shlex.quote(ssh_flag)} "
+                f"{shlex.quote(remote_full)} {shlex.quote(local_path)}"
+            )
 
         print(f"ssh-docker rsync {direction}: {rsync_cmd}")
         t0 = time.monotonic()
@@ -164,8 +180,12 @@ class SshDockerActivity:
     async def validate_connectivity(self, remote_storage_dir: str | Dict[str, Any]) -> str:
         """Pre-flight: check SSH, rsync, Docker, GPU availability."""
         use_gpu = True
+        gpu_device = ""
+        min_gpu_free_mb = 0
         if isinstance(remote_storage_dir, dict):
             use_gpu = bool(remote_storage_dir.get("use_gpu", True))
+            gpu_device = str(remote_storage_dir.get("gpu_device") or self.config.gpu_device or "")
+            min_gpu_free_mb = int(remote_storage_dir.get("min_gpu_free_mb") or 0)
             remote_storage_dir = str(remote_storage_dir.get("remote_storage_dir") or "")
         remote_storage_dir = str(remote_storage_dir or self.config.storage_dir)
         checks = []
@@ -213,8 +233,8 @@ class SshDockerActivity:
         if use_gpu:
             rc, out, err = await self._exec_ssh(
                 "docker run --rm --gpus all nvidia/cuda:12.0.0-base-ubuntu22.04 nvidia-smi "
-                "--query-gpu=name,memory.total --format=csv,noheader 2>/dev/null "
-                "|| nvidia-smi --query-gpu=name,memory.total --format=csv,noheader",
+                "--query-gpu=index,name,memory.total,memory.free --format=csv,noheader,nounits 2>/dev/null "
+                "|| nvidia-smi --query-gpu=index,name,memory.total,memory.free --format=csv,noheader,nounits",
                 timeout=60,
             )
             if rc != 0:
@@ -222,7 +242,45 @@ class SshDockerActivity:
                     f"GPU check failed on remote: {err[:300]}",
                     non_retryable=True,
                 )
-            gpu_info = out.strip()
+            gpu_rows = []
+            for line in out.splitlines():
+                fields = [field.strip() for field in line.split(",")]
+                if len(fields) != 4:
+                    continue
+                try:
+                    gpu_rows.append({
+                        "index": fields[0],
+                        "name": fields[1],
+                        "total_mb": int(fields[2]),
+                        "free_mb": int(fields[3]),
+                    })
+                except ValueError:
+                    continue
+            if not gpu_rows:
+                raise ApplicationError(
+                    f"GPU check returned no parseable devices: {out[:300]}",
+                    non_retryable=True,
+                )
+            eligible_rows = gpu_rows
+            if gpu_device:
+                requested = {item.strip() for item in gpu_device.split(",") if item.strip()}
+                eligible_rows = [row for row in gpu_rows if row["index"] in requested]
+                if not eligible_rows:
+                    raise ApplicationError(
+                        f"Requested GPU device(s) {gpu_device} not present: {gpu_rows}",
+                        non_retryable=True,
+                    )
+            max_free_mb = max(row["free_mb"] for row in eligible_rows)
+            if min_gpu_free_mb and max_free_mb < min_gpu_free_mb:
+                raise ApplicationError(
+                    f"GPU free-memory check failed: required={min_gpu_free_mb}MB "
+                    f"maximum_available={max_free_mb}MB devices={eligible_rows}",
+                    non_retryable=False,
+                )
+            gpu_info = "; ".join(
+                f"{row['index']}:{row['name']} free={row['free_mb']}MB/{row['total_mb']}MB"
+                for row in eligible_rows
+            )
             checks.append(f"gpu=[{gpu_info}]")
         else:
             checks.append("gpu=skipped")

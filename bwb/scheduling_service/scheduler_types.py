@@ -123,6 +123,16 @@ class SlurmContainerCmdParams:
 
 
 @dataclass
+class SlurmScriptJobParams:
+    """A scheduler-owned raw batch script submitted without a container wrapper."""
+
+    script: str
+    resource_req: ResourceVector
+    config: dict
+    name: str = "slurm-script"
+
+
+@dataclass
 class SlurmCmdObj:
     job_id: int
     out_path: str

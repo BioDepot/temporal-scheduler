@@ -1,11 +1,17 @@
 import asyncio
+import os
+
+import pytest
+from temporalio.exceptions import ApplicationError
 
 from bwb.scheduling_service.executors.slurm_activities import SlurmActivity
 from bwb.scheduling_service.scheduler_types import (
     CmdFiles,
     SlurmCmdObj,
+    ResourceVector,
     SlurmFileDownloadParams,
     SlurmFileUploadParams,
+    SlurmScriptJobParams,
 )
 
 
@@ -19,6 +25,85 @@ def _make_activity() -> SlurmActivity:
         ssh_port=3022,
         xfer_port=3022,
     )
+
+
+def test_write_file_streams_over_ssh_without_rsync(monkeypatch):
+    activity = _make_activity()
+    written = {}
+
+    class Stdin:
+        channel = None
+
+        def __init__(self):
+            self.channel = self
+
+        def write(self, contents):
+            written["contents"] = contents
+
+        def flush(self):
+            written["flushed"] = True
+
+        def shutdown_write(self):
+            written["shutdown"] = True
+
+    class Stdout:
+        channel = None
+
+        def __init__(self):
+            self.channel = self
+
+        def recv_exit_status(self):
+            return 0
+
+    class Stderr:
+        def read(self):
+            return b""
+
+    class SshClient:
+        def exec_command(self, command):
+            written["command"] = command
+            return Stdin(), Stdout(), Stderr()
+
+    async def fail_rsync(*args, **kwargs):
+        raise AssertionError("write_file must not require rsync")
+
+    activity.client = SshClient()
+    monkeypatch.setattr(activity, "rsync", fail_rsync)
+
+    asyncio.run(activity.write_file("/remote/job.slurm", "#!/bin/bash\necho ok\n"))
+
+    assert written == {
+        "command": "cat > /remote/job.slurm",
+        "contents": "#!/bin/bash\necho ok\n",
+        "flushed": True,
+        "shutdown": True,
+    }
+
+
+def test_exec_cmd_checked_preserves_remote_stderr():
+    activity = _make_activity()
+
+    class Channel:
+        def recv_exit_status(self):
+            return 1
+
+    class Stream:
+        channel = Channel()
+
+        def __init__(self, contents=b""):
+            self.contents = contents
+
+        def read(self):
+            return self.contents
+
+    class SshClient:
+        def exec_command(self, command):
+            return Stream(), Stream(), Stream(b"memory-per-core exceeds site limit")
+
+    activity.client = SshClient()
+
+    with pytest.raises(ApplicationError, match="memory-per-core exceeds site limit"):
+        asyncio.run(activity.exec_cmd_checked("sbatch --parsable pilot.slurm"))
 
 
 def test_upload_to_slurm_login_node_uses_upload_direction(monkeypatch):
@@ -127,3 +212,44 @@ def test_poll_slurm_ignores_nonterminal_step_records(monkeypatch):
 
     assert 7 in results
     assert results[7].status == "COMPLETED"
+
+
+def test_start_slurm_script_job_writes_and_submits_raw_script(monkeypatch):
+    activity = _make_activity()
+    commands = []
+    written = {}
+
+    async def fake_exec_cmd(cmd):
+        commands.append(cmd)
+        return ""
+
+    async def fake_exec_cmd_checked(cmd):
+        commands.append(cmd)
+        return "31415;cluster"
+
+    async def fake_write_file(path, contents):
+        written[path] = contents
+
+    monkeypatch.setattr(activity, "exec_cmd", fake_exec_cmd)
+    monkeypatch.setattr(activity, "exec_cmd_checked", fake_exec_cmd_checked)
+    monkeypatch.setattr(activity, "write_file", fake_write_file)
+
+    result = asyncio.run(
+        activity.start_slurm_script_job(
+            SlurmScriptJobParams(
+                script="set -euo pipefail\necho cardiac-pilot",
+                resource_req=ResourceVector(cpus=32, gpus=0, mem_mb=16384),
+                config={"partition": "RM-shared", "time": "00:30:00"},
+                name="cardiac pilot",
+            )
+        )
+    )
+
+    assert result.job_id == 31415
+    assert os.path.basename(result.tmp_dir).startswith("cardiac_pilot-")
+    assert any(cmd.startswith("mkdir -p ") for cmd in commands)
+    assert any(cmd.startswith("sbatch --parsable ") for cmd in commands)
+    sbatch = next(iter(written.values()))
+    assert "#SBATCH --partition=RM-shared" in sbatch
+    assert "#SBATCH --cpus-per-task=32" in sbatch
+    assert "echo cardiac-pilot" in sbatch
